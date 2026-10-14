@@ -79,7 +79,7 @@ export function buildProjects(
     (r) => !r.mine && !r.fork && !r.archived && !r.private && r.commits > 0 && r.description !== null && r.description.trim() !== "",
   );
   earned.sort(
-    (a, b) => b.commits - a.commits || b.prs - a.prs || b.stars - a.stars || a.full.localeCompare(b.full),
+    (a, b) => b.commits - a.commits || b.stars - a.stars || a.full.localeCompare(b.full),
   );
   const qualified = earned.filter((r) => r.commits >= profile.tuning.minCommits && r.stars >= profile.tuning.minStars);
   let upstreamStars = 0;
