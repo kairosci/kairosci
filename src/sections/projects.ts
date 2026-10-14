@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
-import { DESKTOP, PHONE, esc, f1, wrap } from "../console.ts";
+import { DESKTOP, PHONE, esc } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
-import { need } from "../defined.ts";
-import { projectSchema } from "../schemas.ts";
+import { geoSchema, projectSchema } from "../schemas.ts";
 import { themeVars } from "../templates.ts";
+
+import { cardLayout, clampText, fitText, fontMetrics, textWidth } from "../layout.ts";
 
 export const CARD_H = 200;
 
@@ -23,185 +24,67 @@ export async function logoHref(p: z.infer<typeof projectSchema>): Promise<string
   return `data:image/png;base64,${png.toString("base64")}`;
 }
 
-const cols = (width: number, size: number): number => Math.floor(width / (size * 0.6) + 1e-9);
-
-function ellipsis(s: string, n: number): string {
-  const raw = s.length < n ? s : s.slice(0, n - 1);
-  const sp = raw.lastIndexOf(" ");
-  const kept = raw !== s && sp >= n * 0.6 ? raw.slice(0, sp) : raw;
-  return `${kept.replace(/[\s.,:;!?\-–—]+$/u, "")}…`;
-}
-const fit = (s: string, n: number): string => (s.length <= n ? s : ellipsis(s, n));
-
-function clamp(s: string, n: number, max: number): string[] {
-  const pattern = new RegExp(`.{1,${n}}`, "g");
-  const lines = wrap(s, n).flatMap((l) => (l.length <= n ? [l] : need(l.match(pattern), "wrapped line")));
-  if (lines.length <= max) return lines;
-  return [...lines.slice(0, max - 1), ellipsis(lines.slice(max - 1).join(" "), n)];
-}
-
 export class ProjectsSection {
   private ctx: RenderContext;
 
-  constructor(ctx: RenderContext) {
-    this.ctx = ctx;
+  constructor(ctx: RenderContext) { this.ctx = ctx; }
+
+  card(p: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
+    return this.renderCard(p, DESKTOP, side, delay);
   }
 
-  async card(p: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
-    const { engine, theme } = this.ctx;
-    const slices = this.ctx.slices;
-    const x0 = side === "L" ? 52 : 10;
-    const cw = 378;
-    const y0 = 12;
-    const ch = 176;
-    const pad = 18;
-    const cut = 16;
-    const tx = x0 + pad;
-    const box =
-      side === "L"
-        ? `M${x0} ${y0}H${x0 + cw - cut}L${x0 + cw} ${y0 + cut}V${y0 + ch}H${x0 + cut}L${x0} ${y0 + ch - cut}Z`
-        : `M${x0 + cut} ${y0}H${x0 + cw}V${y0 + ch - cut}L${x0 + cw - cut} ${y0 + ch}H${x0}V${y0 + cut}Z`;
-    const cutLine =
-      side === "L"
-        ? `M${x0 + cw - cut} ${y0}L${x0 + cw} ${y0 + cut}`
-        : `M${x0} ${y0 + cut}L${x0 + cut} ${y0}`;
-    const lines = wrap(p.description, 43).slice(0, 3);
-    const logo = await logoHref(p);
-    const nx = logo === null ? tx : tx + 28;
-    const sx = x0 + cw - pad;
-    const nameBlock = p.stars.length * 7.2 + 20 + 8;
-    const nameMax = Math.floor((sx - nameBlock - nx) / 10.2);
-    const name = fit(p.name, Math.max(nameMax, 1));
-    const titleW = name.length * 10.2;
-    const fullTag = p.tagline === "" ? p.kind : `${p.kind} · ${p.tagline}`;
-    const starBlock = p.stars.length * 7.2 + 16 + 8;
-    const tagMax = Math.floor((sx - tx - starBlock - 12) / 7.6);
-    const tag = fit(fullTag, Math.max(tagMax, 1));
-    const tagc = /cli$/i.test(p.kind) ? theme.ok : theme.accent2;
-    const tagW = tag.length * 7.6 + 16;
-    const desc = lines.map((l, i) => engine.render("cards/card-desc", { tx, y: 100 + i * 20, text: esc(l) })).join("\n");
-    const logoImg = logo === null ? "" : engine.render("cards/logo-img", { href: logo });
-    const body = engine.render("cards/card", {
-      ...themeVars(theme),
-      box,
-      cutLine,
-      y0,
-      logoX: tx,
-      logoY: y0 + 18,
-      logoImg,
-      tx,
-      nameY: y0 + 34,
-      nx,
-      name: esc(name),
-      arrowX: f1(nx + titleW + 11),
-      arrowY: y0 + 31,
-      arrowX2: f1(nx + titleW + 13),
-      arrowY2: y0 + 23,
-      tagY: y0 + 46,
-      tagW: f1(tagW),
-      tagTX: tx + 8,
-      tagTY: y0 + 59,
-      tagc,
-      tag: esc(tag),
-      desc,
-      instY: y0 + 158,
-      install: esc(p.install),
-      starX: f1(sx - p.stars.length * 7.2 - 20),
-      sx,
-      stars: esc(p.stars),
-      delay: delay.toFixed(2),
-    });
-    return slices.halfSliceG(DESKTOP, CARD_H, side, body, {
-      title: p.name,
-      desc: `${p.name}: ${p.description} Install: ${p.install}. ${p.stars} stars.`,
-      text: name + tag + p.description + `$ ${p.install}` + p.stars,
-    });
+  phoneCard(p: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
+    return this.renderCard(p, PHONE, side, delay);
   }
 
-  async phoneCard(p: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
-    const { engine, theme } = this.ctx;
-    const slices = this.ctx.slices;
-    const g = PHONE;
-    const gut = 12;
-    const cw = (g.R - g.X - gut) / 2;
-    const y0 = 6;
-    const ch = CARD_H - 12;
-    const pad = 10;
-    const cut = 12;
-    const left = side === "L" ? g.X : gut / 2;
-    const tx = left + pad;
-    const sx = left + cw - pad;
+  private async renderCard(p: z.infer<typeof projectSchema>, g: z.infer<typeof geoSchema>, side: "L" | "R", delay: number): Promise<string> {
+    const { engine, theme, slices } = this.ctx;
+    const card = cardLayout(g, side === "L" ? 0 : 1, 2, CARD_H);
+    const tx = card.left;
+    const sx = card.right;
     const inner = sx - tx;
-    const box =
-      side === "L"
-        ? `M${left} ${y0}H${left + cw - cut}L${left + cw} ${y0 + cut}V${y0 + ch}H${left + cut}L${left} ${y0 + ch - cut}Z`
-        : `M${left + cut} ${y0}H${left + cw}V${y0 + ch - cut}L${left + cw - cut} ${y0 + ch}H${left}V${y0 + cut}Z`;
-    const cutLine =
-      side === "L"
-        ? `M${left + cw - cut} ${y0}L${left + cw} ${y0 + cut}`
-        : `M${left} ${y0 + cut}L${left + cut} ${y0}`;
-
+    const nameSize = g.narrow ? 15 : 17;
+    const bodySize = 12;
+    const leading = bodySize * 1.5;
     const logo = await logoHref(p);
-    const nx = logo === null ? tx : tx + 25;
-    const name = fit(p.name, cols(sx - nx - 20, 15));
-    const nameW = name.length * 9;
-
-    const stars = p.stars;
-    const starW = stars.length * 7.2 + 16;
-    const kind = p.kind;
-    const tagc = /cli$/i.test(kind) ? theme.ok : theme.accent2;
-    const tag = fit(kind, Math.floor((inner - starW - 8 - 12) / 7.6));
-    const tagW = tag.length * 7.6 + 12;
-
-    const lineCols = cols(inner, 12);
-    const desc = clamp(p.description, lineCols, 4);
-    const cmd = clamp(p.install, lineCols - 2, 2);
-    const yb = y0 + ch - 14;
-    const yc = yb - (cmd.length - 1) * 17;
-    const install = cmd
-      .map((l, i) => {
-        if (i === 0) return engine.render("cards/pcard-inst0", { tx, y: yc, cmd: esc(l) });
-        return engine.render("cards/pcard-inst1", { tx: f1(tx + 14.4), y: yc + i * 17, cmd: esc(l) });
-      })
-      .join("\n");
-
-    const logoImg = logo === null ? "" : engine.render("cards/logo-img", { href: logo });
-    const body = engine.render("cards/phone-card", {
-      ...themeVars(theme),
-      box,
-      cutLine,
-      y0,
-      logoX: tx,
-      logoY: y0 + 14,
-      logoImg,
-      tx,
-      nameY: y0 + 28,
-      nx,
-      name: esc(name),
-      arrowX: f1(nx + nameW + 8),
-      arrowY: y0 + 26,
-      arrowX2: f1(nx + nameW + 10),
-      arrowY2: y0 + 19,
-      tagY: y0 + 40,
-      tagW: f1(tagW),
-      tagTX: tx + 6,
-      tagTY: y0 + 52,
-      tagc,
-      tag: esc(tag),
-      starX: f1(sx - stars.length * 7.2 - 16),
-      starY: y0 + 41,
-      sx,
-      stars: esc(stars),
-      desc: desc.map((l, i) => engine.render("cards/pcard-desc", { tx, y: y0 + 74 + i * 17, text: esc(l) })).join("\n"),
+    const logoSize = 18;
+    const nx = tx + (logo === null ? 0 : logoSize + card.padding / 2);
+    const nameY = card.top + nameSize * fontMetrics.capitals;
+    const name = fitText(p.name, sx - nx - logoSize, nameSize);
+    const nameWidth = textWidth(name, nameSize);
+    const tagY = nameY + card.padding;
+    const tagTY = tagY + 12;
+    const stars = fitText(p.stars, inner / 3, bodySize);
+    const starWidth = textWidth(stars, bodySize) + logoSize;
+    const tagPadding = card.padding / 2;
+    const fullTag = g.narrow || p.tagline === "" ? p.kind : `${p.kind} · ${p.tagline}`;
+    const tag = fitText(fullTag, inner - starWidth - card.padding - tagPadding * 2, 11, 1);
+    const tagW = textWidth(tag, 11, 1) + tagPadding * 2;
+    const cmdRows = Math.max(1, Math.floor((card.height / 4) / leading));
+    const cmd = clampText(p.install, inner - textWidth("$ ", bodySize), bodySize, cmdRows);
+    const installY = card.bottom - bodySize * fontMetrics.descent - (cmd.length - 1) * leading;
+    const descY = tagY + 16 + card.padding + bodySize * fontMetrics.capitals;
+    const descRows = Math.max(0, Math.floor((installY - leading - descY) / leading) + 1);
+    const desc = clampText(p.description, inner, bodySize, descRows);
+    const install = cmd.map((text, i) => engine.render(i === 0 ? "cards/pcard-inst0" : "cards/pcard-inst1", {
+      tx: i === 0 ? tx : tx + textWidth("$ ", bodySize), y: installY + i * leading, cmd: esc(text),
+    })).join("\n");
+    const content = engine.render("cards/project", {
+      ...themeVars(theme), tx, sx, nx, nameSize, nameY, name: esc(name),
+      logoX: tx, logoY: card.top, logoImg: logo === null ? "" : engine.render("cards/logo-img", { href: logo }),
+      arrowX: nx + nameWidth + card.padding / 3, arrowY: nameY - 2,
+      arrowX2: nx + nameWidth + card.padding / 3 + 2, arrowY2: nameY - 9,
+      tagY, tagTY, tagTX: tx + tagPadding, tagW, tag: esc(tag),
+      tagc: /cli$/i.test(p.kind) ? theme.ok : theme.accent2,
+      starX: sx - textWidth(stars, bodySize) - logoSize, starY: tagY + 1, stars: esc(stars),
+      desc: desc.map((text, i) => engine.render("cards/pcard-desc", { tx, y: descY + i * leading, text: esc(text) })).join("\n"),
       install,
-      delay: delay.toFixed(2),
     });
-    const defs = side === "R" ? slices.baseDefs(((-g.HW % 40) + 40) % 40) : undefined;
+    const body = engine.render("cards/shell", { ...themeVars(theme), ...card, content, delay });
+    const defs = side === "R" ? slices.baseDefs(((-g.HW % 40) + 40) % 40) : slices.baseDefs();
     return slices.halfSliceG(g, CARD_H, side, body, {
-      title: p.name,
-      desc: `${p.name}: ${p.description} Install: ${p.install}. ${p.stars} stars.`,
-      text: name + tag + desc.join("") + `$ ${cmd.join("")}` + stars,
-      defs,
+      title: p.name, desc: `${p.name}: ${p.description} Install: ${p.install}. ${p.stars} stars.`,
+      text: name + tag + desc.join("") + `$ ${cmd.join("")}` + stars, defs,
     });
   }
 }

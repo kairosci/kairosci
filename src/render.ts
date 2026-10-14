@@ -86,8 +86,8 @@ export class ProfileRenderer {
       page.add(
         `links/${entry[0] + 1}.svg`,
         await Promise.all([
-          this.buttons.button(b, entry[0], links.length, 0.25, true),
-          this.buttons.phoneButton(b, entry[0], links.length, 0.25, true),
+          this.buttons.button(b, entry[0], links.length, 0.25, false),
+          this.buttons.phoneButton(b, entry[0], links.length, 0.25, false),
         ]),
         `${100 / links.length}%`,
         b.label,
@@ -191,8 +191,8 @@ export class ProfileRenderer {
         page.add(
           `projects/also-${slugOf(p.name)}.svg`,
           await Promise.all([
-            this.buttons.button(b, k, group.length, 0.3, true),
-            this.buttons.phoneButton(b, k, group.length, 0.3, true),
+            this.buttons.button(b, k, group.length, 0.3, false),
+            this.buttons.phoneButton(b, k, group.length, 0.3, false),
           ]),
           `${100 / group.length}%`,
           `${p.name}: ${p.description}`,

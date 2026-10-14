@@ -1,17 +1,18 @@
 import { siGithub } from "simple-icons";
 import { z } from "zod";
-import { DESKTOP, FL, FR, M, PHONE, W, X, esc, f1, wrap } from "../console.ts";
+import { DESKTOP, FL, FR, M, PHONE, X, esc, f1 } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
 import { first, last, need } from "../defined.ts";
-import { buttonSchema } from "../schemas.ts";
+import { buttonSchema, geoSchema } from "../schemas.ts";
 import { themeVars } from "../templates.ts";
+import { cardLayout, fitText, fontMetrics, nameLayout, textWidth, wrapText } from "../layout.ts";
 
-const ADV = 0.6;
+const ADV = fontMetrics.advance;
 const SNAP = 1.04;
 
 function pack(items: string[], cols: number): string[] {
   const lines: string[] = [];
-  for (const item of items) {
+  for (const item of items.flatMap((text) => wrapText(text, cols * textWidth("M", 15), 15))) {
     const prev = lines.length === 0 ? null : last(lines, "packed line");
     if (prev !== null && prev.length + 3 + item.length <= cols) {
       lines[lines.length - 1] = `${prev} · ${item}`;
@@ -36,8 +37,8 @@ export class HeaderSection {
       .slice(0, profile.tuning.headerTools)
       .map((p) => p.name)
       .join(" · ");
-    const introWords = wrap(s.intro === "" ? profile.displayName : s.intro, 72);
-    return [need(first(introWords, "intro line"), "intro line"), tools, "personal site and profile at "];
+    const introWords = wrapText(s.intro === "" ? profile.displayName : s.intro, DESKTOP.R - DESKTOP.X - textWidth(">> ", 15), 15);
+    return [need(first(introWords, "intro line"), "intro line"), fitText(tools, DESKTOP.R - DESKTOP.X - textWidth(">> ", 15), 15), "personal site and profile at "];
   }
 
   alt(): string {
@@ -56,13 +57,16 @@ export class HeaderSection {
     const barRight = "ONLINE · ALL SYSTEMS NOMINAL";
     const lines = this.lines();
     const h = 240;
-    const nameSize = Math.min(72, Math.floor((FR - X - profile.headerName.length * 2 - 6) / (profile.headerName.length * 0.6)));
+    const name = profile.headerName.toUpperCase();
+    const nameBox = nameLayout(name, DESKTOP.R - X, 102 + 15 * fontMetrics.ascent, h - 6 - 24 - 15 * fontMetrics.ascent, DESKTOP.M * fontMetrics.advance);
     const defs = engine.render("frame/defs-header", { x: X, clipY: 80 });
-    const dotx = FR - 20 - barRight.length * 8.2 - 16;
+    const barLX = FL + DESKTOP.M;
+    const barRX = FR - DESKTOP.M;
+    const dotx = barRX - textWidth(barRight, 12, 1) - DESKTOP.M;
     const rows = [
       engine.render("frame/header-line", { x: X, text: esc(need(lines[0], "header line 1")) }),
       engine.render("frame/header-line", { x: X, text: esc(need(lines[1], "header line 2")) }),
-      engine.render("frame/header-siteline", { x: X, pre: esc(need(lines[2], "header line 3")), site: esc(profile.siteHost) }),
+      engine.render("frame/header-siteline", { x: X, pre: esc(need(lines[2], "header line 3")), site: esc(fitText(profile.siteHost, DESKTOP.R - X - textWidth(">> " + need(lines[2], "header site prefix"), 15), 15)) }),
     ];
     const staggered = slices.stagger(rows.slice(0, 2), h - 6 - 24, 24, 1.75, 0.25);
     const descLines = need(staggered[0], "header lines");
@@ -75,21 +79,21 @@ export class HeaderSection {
       m: M,
       barW: FR - FL,
       barY: M + 34,
-      barLX: FL + 16,
+      barLX,
       barLY: M + 22,
-      barRX: FR - 20,
-      barLeft: esc(barLeft),
+      barRX,
+      barLeft: esc(fitText(barLeft, dotx - barLX - (barLX - FL), 12, 1)),
       barRight: esc(barRight),
       dotx: f1(dotx),
       dotY: M + 18,
       x: X,
       whoY: 102,
-      nameSize,
-      nameSpacing: 2,
-      nameY: 172,
-      gmX: X + 3,
-      gcX: X - 3,
-      name: profile.headerName.toUpperCase(),
+      nameSize: nameBox.size,
+      nameSpacing: nameBox.spacing,
+      nameY: nameBox.baseline,
+      gmX: X + DESKTOP.M * fontMetrics.advance / 2,
+      gcX: X - DESKTOP.M * fontMetrics.advance / 2,
+      name: esc(name),
       descLines,
       scanY: M + 35,
       scanH: h - M - 35,
@@ -132,22 +136,25 @@ export class HeaderSection {
     const g = PHONE;
     const barLeft = `sys://${profile.siteHost} // ${profile.login}`;
     const barRight = "ONLINE · NOMINAL";
-    const nameSize = Math.min(56, Math.floor((g.FR - g.X - profile.headerName.length * 0.5 - 6) / (profile.headerName.length * 0.6)));
+    const name = profile.headerName.toUpperCase();
     const defs = engine.render("frame/defs-header", { x: g.X, clipY: 64 });
-    const dotx = g.FR - 14 - barRight.length * 8.2 - 16;
+    const barLX = g.FL + g.M;
+    const barRX = g.FR - g.M;
+    const dotx = barRX - textWidth(barRight, 12, 1) - g.M;
     const cols = Math.floor((g.R - g.X) / (15 * ADV * SNAP)) - 3;
-    const introLines = pack(wrap(snapshot.intro === "" ? profile.displayName : snapshot.intro, 40), cols);
+    const introLines = pack(wrapText(snapshot.intro === "" ? profile.displayName : snapshot.intro, g.R - g.X - textWidth(">> ", 15), 15), cols);
     const rows = [
       ...introLines.map((l) => engine.render("frame/header-line", { x: g.X, text: esc(l) })),
       ...pack(
         snapshot.projects.slice(0, profile.tuning.headerTools).map((p) => p.name),
         cols,
       ).map((l) => engine.render("frame/header-line", { x: g.X, text: esc(l) })),
-      engine.render("frame/header-siteline", { x: g.X, pre: "personal site at ", site: esc(profile.siteHost) }),
+      engine.render("frame/header-siteline", { x: g.X, pre: "personal site at ", site: esc(fitText(profile.siteHost, g.R - g.X - textWidth(">> personal site at ", 15), 15)) }),
     ];
     const upper = rows.slice(0, rows.length - 1);
     const lower = rows.slice(rows.length - 1);
     const h = Math.ceil((194 + (upper.length - 1) * 24 + 6) / 40) * 40;
+    const nameBox = nameLayout(name, g.R - g.X, 86 + 15 * fontMetrics.ascent, h - 6 - (upper.length - 1) * 24 - 15 * fontMetrics.ascent, g.M * fontMetrics.advance);
     const step = Math.min(0.25, 0.75 / rows.length);
     const descStaggered = slices.stagger(upper, h - 6 - (upper.length - 1) * 24, 24, 1.75, step);
     const siteStaggered = slices.stagger(lower, 18, 24, 1.75 + upper.length * step, step);
@@ -158,21 +165,21 @@ export class HeaderSection {
       m: g.M,
       barW: g.FR - g.FL,
       barY: g.M + 34,
-      barLX: g.FL + 12,
+      barLX,
       barLY: g.M + 22,
-      barRX: g.FR - 14,
-      barLeft: esc(barLeft),
+      barRX,
+      barLeft: esc(fitText(barLeft, dotx - barLX - g.M, 12, 1)),
       barRight: esc(barRight),
       dotx: f1(dotx),
       dotY: g.M + 18,
       x: g.X,
       whoY: 86,
-      nameSize,
-      nameSpacing: 0.5,
-      nameY: 150,
-      gmX: g.X + 3,
-      gcX: g.X - 3,
-      name: profile.headerName.toUpperCase(),
+      nameSize: nameBox.size,
+      nameSpacing: nameBox.spacing,
+      nameY: nameBox.baseline,
+      gmX: g.X + g.M * fontMetrics.advance / 2,
+      gcX: g.X - g.M * fontMetrics.advance / 2,
+      name: esc(name),
       descLines: need(descStaggered[0], "phone header lines"),
       scanY: g.M + 35,
       scanH: h - g.M - 35,
@@ -269,85 +276,34 @@ export class Buttons {
     }));
   }
 
-  async button(b: z.infer<typeof buttonSchema>, k: number, n: number, delay0 = 0.25, framed = false): Promise<string> {
-    const theme = this.ctx.theme;
-    const seg = W / n;
-    const bw = FR - 36 - (n - 1) * seg;
-    const gap = ((n - 1) * seg - X) / (n - 1) - bw;
-    const lx = X + k * (bw + gap) - seg * k;
-    const h = 80;
-    const by = 12;
-    const bh = 56;
-    const cut = 12;
-    const side = n === 2 ? (k === 0 ? "L" : "R") : "L";
-    const box =
-      side === "L"
-        ? `M${f1(lx)} ${by}H${f1(lx + bw - cut)}L${f1(lx + bw)} ${by + cut}V${by + bh}H${f1(lx)}Z`
-        : `M${f1(lx + cut)} ${by}H${f1(lx + bw)}V${by + bh}H${f1(lx)}L${f1(lx)} ${by + cut}Z`;
-    const cutLine =
-      side === "L"
-        ? `M${f1(lx + bw - cut)} ${by}L${f1(lx + bw)} ${by + cut}`
-        : `M${f1(lx)} ${by + cut}L${f1(lx + cut)} ${by}`;
-    const maxHandle = Math.floor((bw - 24) / 6);
-    const handle = b.handle.length > maxHandle ? `${b.handle.slice(0, maxHandle - 1)}…` : b.handle;
-    const maxLabel = Math.floor((bw - 44) / 7.8);
-    const label = b.label.length > maxLabel ? `${b.label.slice(0, maxLabel - 1)}…` : b.label;
-    const body = this.ctx.engine.render("frame/button", {
-      ...themeVars(theme),
-      box,
-      cutLine,
-      by,
-      iconX: Math.round(lx + 12),
-      iconY: by + 11,
-      icon: b.icon,
-      delay: (delay0 + k * 0.08).toFixed(2),
-      labelX: f1(lx + 38),
-      labelY: by + 25,
-      label: esc(label),
-      handleX: f1(lx + 12),
-      handleY: by + 46,
-      handle: esc(handle),
-    });
-    return this.ctx.slices.segmentG(DESKTOP, k, n, h, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: b.label + handle + ">_" }, framed);
+  button(b: z.infer<typeof buttonSchema>, k: number, n: number, delay0 = 0.25, framed = false): Promise<string> {
+    return this.renderButton(b, DESKTOP, k, n, delay0, framed);
   }
 
-  async phoneButton(b: z.infer<typeof buttonSchema>, k: number, n: number, delay0 = 0.25, framed = false): Promise<string> {
-    const g = PHONE;
-    const seg = g.W / n;
-    const x0 = g.X - 8;
-    const bw = g.R + 8 - (n - 1) * seg - 1;
-    const gap = ((n - 1) * seg + 1 - x0) / (n - 1) - bw;
-    const lx = x0 + k * (bw + gap) - seg * k;
-    const h = 80;
-    const by = 12;
-    const bh = 56;
-    const cut = 10;
-    const side = n === 2 ? (k === 0 ? "L" : "R") : "L";
-    const box =
-      side === "L"
-        ? `M${f1(lx)} ${by}H${f1(lx + bw - cut)}L${f1(lx + bw)} ${by + cut}V${by + bh}H${f1(lx)}Z`
-        : `M${f1(lx + cut)} ${by}H${f1(lx + bw)}V${by + bh}H${f1(lx)}L${f1(lx)} ${by + cut}Z`;
-    const cutLine =
-      side === "L"
-        ? `M${f1(lx + bw - cut)} ${by}L${f1(lx + bw)} ${by + cut}`
-        : `M${f1(lx)} ${by + cut}L${f1(lx + cut)} ${by}`;
-    const size = 12;
-    const maxLabel = Math.floor((bw - 8) / (size * ADV));
-    const label = b.label.length > maxLabel ? `${b.label.slice(0, maxLabel - 1)}…` : b.label;
-    const ix = Math.round(lx + bw / 2 - 9);
-    const body = this.ctx.engine.render("frame/phone-button", {
-      ...themeVars(this.ctx.theme),
-      box,
-      cutLine,
-      by,
-      iconX: ix,
-      iconY: by + 10,
-      icon: b.icon,
-      delay: (delay0 + k * 0.08).toFixed(2),
-      labelX: f1(lx + bw / 2),
-      labelY: by + 45,
-      label: esc(label),
+  phoneButton(b: z.infer<typeof buttonSchema>, k: number, n: number, delay0 = 0.25, framed = false): Promise<string> {
+    return this.renderButton(b, PHONE, k, n, delay0, framed);
+  }
+
+  private async renderButton(b: z.infer<typeof buttonSchema>, g: z.infer<typeof geoSchema>, k: number, n: number, delay0: number, framed: boolean): Promise<string> {
+    const { engine, theme, slices } = this.ctx;
+    const height = 80;
+    const card = cardLayout(g, k, n, height);
+    const iconSize = 18;
+    const centered = g.narrow;
+    const labelSize = centered ? 12 : 13;
+    const labelX = centered ? card.x + card.width / 2 : card.left + iconSize + card.padding / 2;
+    const labelWidth = centered ? card.right - card.left : card.right - labelX;
+    const label = fitText(b.label, labelWidth, labelSize);
+    const handle = fitText(b.handle, card.right - card.left, 10);
+    const content = engine.render("cards/link", {
+      ...themeVars(theme), icon: b.icon,
+      iconX: centered ? card.x + (card.width - iconSize) / 2 : card.left,
+      iconY: card.top,
+      labelX, labelY: centered ? card.bottom - labelSize * fontMetrics.descent : card.top + labelSize * fontMetrics.capitals,
+      labelSize, label: esc(label), anchor: centered ? "middle" : "start",
+      handle: centered ? "" : engine.render("cards/link-handle", { x: card.left, y: card.bottom - 10 * fontMetrics.descent, text: esc(handle) }),
     });
-    return this.ctx.slices.segmentG(g, k, n, h, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + ">_" }, framed);
+    const body = engine.render("cards/shell", { ...themeVars(theme), ...card, content, delay: delay0 + k * 0.08 });
+    return slices.segmentG(g, k, n, height, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + handle + ">_" }, framed);
   }
 }
