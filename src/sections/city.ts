@@ -18,7 +18,8 @@ import {
 import { first, need } from "../defined.ts";
 import { calendarSchema, profileSchema, skyBoxSchema, themeSchema } from "../schemas.ts";
 import { monthDay } from "../shared.ts";
-import { WHEN, daylight, mix, phaseColor, sky, skyLayer } from "../sky.ts";
+import { WHEN, sky } from "../sky/sun.ts";
+import { daylight, mix, phaseColor, skyLayer } from "../sky/layers.ts";
 import { render } from "../templates.ts";
 import { phaseSchema } from "../schemas.ts";
 
@@ -141,7 +142,7 @@ function buildings(
     const bottom: [number, number] = [cx, cy + th / 2];
     if (cell.n === 0) {
       shapes.push(
-        render("city-empty", {
+        render("city/city-empty", {
           d: `M${p2(top[0], top[1])}L${p2(right[0], right[1])}L${p2(bottom[0], bottom[1])}L${p2(left[0], left[1])}Z`,
           fill: city.empty,
           stroke: city.emptyStroke,
@@ -160,13 +161,13 @@ function buildings(
       left: need(raised[3], "roof corner"),
     };
     shapes.push(
-      render("city-face", {
+      render("city/city-face", {
         dl: `${p2(left[0], left[1])}L${p2(bottom[0], bottom[1])}L${p2(up.bottom[0], up.bottom[1])}L${p2(up.left[0], up.left[1])}Z`,
         dr: `${p2(bottom[0], bottom[1])}L${p2(right[0], right[1])}L${p2(up.right[0], up.right[1])}L${p2(up.bottom[0], up.bottom[1])}Z`,
         left: face.left,
         right: face.right,
       }) +
-        render("city-roof", {
+        render("city/city-roof", {
           d: `M${p2(up.top[0], up.top[1])}L${p2(up.right[0], up.right[1])}L${p2(up.bottom[0], up.bottom[1])}L${p2(up.left[0], up.left[1])}Z`,
           fill: need(city.roofs[level], "roof color"),
         }),
@@ -212,17 +213,17 @@ function buildings(
       }
     }
     if (face.offL === face.offR) {
-      if (offL.length + offR.length > 0) shapes.push(render("city-win", { d: [...offL, ...offR].join(""), fill: face.offL }));
+      if (offL.length + offR.length > 0) shapes.push(render("city/city-win", { d: [...offL, ...offR].join(""), fill: face.offL }));
     } else {
-      if (offL.length > 0) shapes.push(render("city-win", { d: offL.join(""), fill: face.offL }));
-      if (offR.length > 0) shapes.push(render("city-win", { d: offR.join(""), fill: face.offR }));
+      if (offL.length > 0) shapes.push(render("city/city-win", { d: offL.join(""), fill: face.offL }));
+      if (offR.length > 0) shapes.push(render("city/city-win", { d: offR.join(""), fill: face.offR }));
     }
-    if (on.length > 0) shapes.push(render("city-win", { d: on.join(""), fill: city.winOn }));
-    if (side.length > 0) shapes.push(render("city-win", { d: side.join(""), fill: city.winSide }));
+    if (on.length > 0) shapes.push(render("city/city-win", { d: on.join(""), fill: city.winOn }));
+    if (side.length > 0) shapes.push(render("city/city-win", { d: side.join(""), fill: city.winSide }));
     for (const flicker of fl) {
       flick++;
       shapes.push(
-        render("city-flicker", {
+        render("city/city-flicker", {
           d: need(flicker[0], "window"),
           fill: need(flicker[1], "window face") === "l" ? city.winOn : city.winSide,
           cls: `f${flick % 3}`,
@@ -265,16 +266,16 @@ function stars(
       fill: t.city.sky,
       opacity: (p === "night" ? o : o * 0.7).toFixed(2),
     };
-    if (i % 3 === 0) out.push(render("star-tw", { ...vars, cls: `s${i % 3}` }));
-    else out.push(render("star", vars));
+    if (i % 3 === 0) out.push(render("city/star-tw", { ...vars, cls: `s${i % 3}` }));
+    else out.push(render("city/star", vars));
   }
-  return render("fade-group", { delay: "0.00", inner: out.join("") });
+  return render("console/fade-group", { delay: "0.00", inner: out.join("") });
 }
 
 const r2 = (v: number): string => String(Number(v.toFixed(2)));
 
 function moon(t: z.infer<typeof themeSchema>, cx: number, cy: number, k: number): string {
-  return render("moon", {
+  return render("city/moon", {
     cx,
     cy,
     glowR: r2(40 * k),
@@ -288,7 +289,7 @@ function moon(t: z.infer<typeof themeSchema>, cx: number, cy: number, k: number)
 }
 
 function plane(t: z.infer<typeof themeSchema>, y: number): string {
-  return render("plane", { y, fainter: t.fainter });
+  return render("city/plane", { y, fainter: t.fainter });
 }
 
 function scene(
@@ -306,9 +307,9 @@ function scene(
 .f0{animation:fl 5s infinite}.f1{animation:fl 7s infinite 2s}.f2{animation:fl 9s infinite 4s}
 .plane{animation:fly 26s linear infinite}.bl{animation:blink 1.4s infinite}`,
   ];
-  const defs = [render("defs-frame", { x: frame.x, w: frame.w, h: frame.h })];
+  const defs = [render("sky/defs-frame", { x: frame.x, w: frame.w, h: frame.h })];
   if (p === "night") {
-    defs.push(render("defs-moonglow", { moon: t.moon }));
+    defs.push(render("sky/defs-moonglow", { moon: t.moon }));
     return {
       css: css.join("\n"),
       defs: defs.join("\n"),
@@ -321,7 +322,7 @@ function scene(
   return {
     css: css.join("\n"),
     defs: defs.join("\n"),
-    under: (st: string) => `${layer.grad}\n${st}\n${render("fade-group", { delay: "0.00", inner: `${layer.sun}\n${layer.clouds}` })}`,
+    under: (st: string) => `${layer.grad}\n${st}\n${render("console/fade-group", { delay: "0.00", inner: `${layer.sun}\n${layer.clouds}` })}`,
   };
 }
 
@@ -342,8 +343,8 @@ function readout(
     event: s.event,
     at: esc(s.at),
   };
-  if (anchor === "end") return render("readout-end", vars);
-  return render("readout-start", vars);
+  if (anchor === "end") return render("city/readout-end", vars);
+  return render("city/readout-start", vars);
 }
 
 function legendRow(t: z.infer<typeof themeSchema>, x: number, y: number, size: number, sw: number): string {
@@ -352,9 +353,9 @@ function legendRow(t: z.infer<typeof themeSchema>, x: number, y: number, size: n
   const x0 = x + 5 * cw + 7;
   const fills = [city.empty, ...city.roofs];
   const swatches = fills
-    .map((c, i) => render("city-sw", { x: f1(x0 + i * (sw + 5)), y: f1(y - sw + 1), sw, fill: c }))
+    .map((c, i) => render("city/city-sw", { x: f1(x0 + i * (sw + 5)), y: f1(y - sw + 1), sw, fill: c }))
     .join("");
-  return render("city-legend", { x, y, size, swatches, x2: f1(x0 + 5 * (sw + 5) + 1) });
+  return render("city/city-legend", { x, y, size, swatches, x2: f1(x0 + 5 * (sw + 5) + 1) });
 }
 
 export async function city(
@@ -397,14 +398,14 @@ export async function city(
   const year = yearStats(calendar);
   const busiest = year.busiest;
   const infoParts: string[] = [
-    render("city-info-total", { x: FR - 36, y: 300, total: num(year.total) }),
+    render("city/city-info-total", { x: FR - 36, y: 300, total: num(year.total) }),
   ];
   if (busiest[1] > 0) {
-    infoParts.push(render("city-info-busiest", { x: FR - 36, y: 320, date: monthDay(need(busiest[0], "day")), count: busiest[1] }));
+    infoParts.push(render("city/city-info-busiest", { x: FR - 36, y: 320, date: monthDay(need(busiest[0], "day")), count: busiest[1] }));
   }
-  infoParts.push(render("city-info-active", { x: FR - 36, y: busiest[1] > 0 ? 340 : 320, count: year.active }));
+  infoParts.push(render("city/city-info-active", { x: FR - 36, y: busiest[1] > 0 ? 340 : 320, count: year.active }));
   const legend = [city.empty, ...city.roofs]
-    .map((c, i) => render("city-sw", { x: X + 52 + i * 16, y: 642, sw: 11, fill: c }))
+    .map((c, i) => render("city/city-sw", { x: X + 52 + i * 16, y: 642, sw: 11, fill: c }))
     .join("");
   const body =
     `${heading(t, 44, "contribution-city", counter)}\n` +
@@ -413,7 +414,7 @@ export async function city(
     `${plane(t, 132)}\n` +
     `${infoParts.join("\n")}\n` +
     `${shapes}\n` +
-    render("city-legend", { x: X, y: 652, size: 11, swatches: legend, x2: X + 52 + 5 * 16 + 6 }) +
+    render("city/city-legend", { x: X, y: 652, size: 11, swatches: legend, x2: X + 52 + 5 * 16 + 6 }) +
     `\n${readout(t, FR - 36, 652, 11, "end")}`;
   return slice(t, 680, body, {
     title: `Contribution city ${need(WHEN[p], "phase word")}`,
@@ -473,14 +474,14 @@ export async function phoneCity(
   const st = stars(t, next, { x0: 150, w: 270, y0: 104, h: 110, n: 34, skip: (x, y) => x > 340 && y < 168 }, p);
   const year = yearStats(calendar);
   const busiest = year.busiest;
-  const infoParts: string[] = [render("city-pinfo-total", { x: g.X, y: 294, total: num(year.total) })];
+  const infoParts: string[] = [render("city/city-pinfo-total", { x: g.X, y: 294, total: num(year.total) })];
   if (busiest[1] > 0) {
     infoParts.push(
-      render("city-pinfo-busiest", { x: g.X, y: 312, date: monthDay(need(busiest[0], "day")), count: busiest[1] }),
+      render("city/city-pinfo-busiest", { x: g.X, y: 312, date: monthDay(need(busiest[0], "day")), count: busiest[1] }),
     );
   }
   infoParts.push(
-    render("city-pinfo-active", { x: g.X, y: busiest[1] > 0 ? 330 : 312, count: year.active }),
+    render("city/city-pinfo-active", { x: g.X, y: busiest[1] > 0 ? 330 : 312, count: year.active }),
   );
   const body =
     `${headingG(t, g, 44, "contribution-city", counter)}\n` +
