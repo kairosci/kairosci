@@ -3,7 +3,7 @@ import { z } from "zod";
 import { last, need } from "./defined.ts";
 import { errMsg, github, warn } from "./fetch/client.ts";
 import { fetchCount, fetchStarHistory } from "./fetch/counts.ts";
-import { buildProjects, fetchGitHub, iso, streaks } from "./fetch/user.ts";
+import { enrichWithEmails } from "./fetch/emails.ts";import { buildProjects, fetchGitHub, iso, streaks } from "./fetch/user.ts";
 import { loadProfile } from "./profile.ts";
 import { calendarSchema, snapshotSchema, starsSchema, userBioSchema } from "./schemas.ts";
 
@@ -60,8 +60,11 @@ async function main(): Promise<void> {
       warn(login, `fetch failed, skipped: ${errMsg(err)}`);
     }
   }
-  const built = gh === null ? null : buildProjects(gh.repos, intro, profile);
-  const prevGhLangs = previous.github === null ? {} : previous.github.languages;
+  let trackedEmails: string[] = [];
+  if (gh !== null) {
+    trackedEmails = await enrichWithEmails(gh.repos, profile);
+  }
+  const built = gh === null ? null : buildProjects(gh.repos, intro, profile);  const prevGhLangs = previous.github === null ? {} : previous.github.languages;
   const dayTotals = new Map<string, number>();
   const addCal = (cal: z.infer<typeof calendarSchema>): void => {
     for (const entry of cal) {
@@ -144,6 +147,7 @@ async function main(): Promise<void> {
   const ghStats = snapshot.github;
   console.log(
     `projects ${snapshot.projects.length} · upstream ${snapshot.upstreamRepos} repos · ` +
+      `emails ${trackedEmails.length} · ` +
       `stars ${snapshot.stars === null ? "—" : String(snapshot.stars)} · ` +
       `issues ${snapshot.issues === null ? "—" : String(snapshot.issues.count)} · ` +
       `prs ${snapshot.prs === null ? "—" : String(snapshot.prs.count)} · ` +

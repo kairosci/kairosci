@@ -36,6 +36,7 @@ export const profileSchema = z.object({
   lon: z.number().min(-180).max(180),
   memberSince: z.string().min(1),
   extraLogins: z.array(z.string().min(1)),
+  extraEmails: z.array(z.string().min(1)),
   tuning: tuningSchema,
   links: z.array(linkSchema).min(1),
 });
@@ -166,6 +167,35 @@ export const skySchema = z.object({
   event: z.enum(["sunrise", "sunset"]),
   at: z.string().min(1),
 });
+
+export const commitSearchSchema = z.object({
+  total_count: z.number().int().nonnegative(),
+  items: z.array(
+    z.object({
+      sha: z.string(),
+      author: z.object({ login: z.string() }).nullable(),
+      commit: z.object({
+        author: z.object({ name: z.string(), email: z.string() }),
+      }),
+    }),
+  ),
+});
+
+export const eventsSchema = z.array(
+  z.looseObject({
+    type: z.string(),
+    payload: z.looseObject({
+      commits: z
+        .array(
+          z.object({
+            sha: z.string(),
+            author: z.object({ email: z.string(), name: z.string() }),
+          }),
+        )
+        .optional(),
+    }),
+  }),
+);
 
 export const userBioSchema = z.object({
   bio: z.string().nullable(),

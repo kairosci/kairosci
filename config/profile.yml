@@ -16,6 +16,7 @@ extraLogins:
   - aleatd
   - sigattilio
   - alexio-dev
+extraEmails: []
 tuning:
   newDays: 60
   trendWindows:
