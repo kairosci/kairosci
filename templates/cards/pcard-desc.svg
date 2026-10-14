@@ -1,0 +1,1 @@
+<text x="{{tx}}" y="{{y}}" class="fg" style="font-size:12px">{{text}}</text>

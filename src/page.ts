@@ -16,14 +16,14 @@ export class Page {
     this.files.set(file, need(pair[0], `page ${file}`));
     this.files.set(`phone/${file}`, need(pair[1], `phone page ${file}`));
     const text = esc(alt.replace(/\s+/g, " ").trim());
-    const img = render("readme-pic", {
+    const img = render("readme/readme-pic", {
       query: PHONE_QUERY,
       raw: need(this.raw === "" ? null : this.raw, "asset base"),
       file,
       width,
       alt: text,
     });
-    const html = href === null ? img : render("readme-link", { href: esc(href), img });
+    const html = href === null ? img : render("readme/readme-link", { href: esc(href), img });
     if (sameRow && this.rows.length > 0) {
       last(this.rows, "readme row").push(html);
     } else {
@@ -32,7 +32,7 @@ export class Page {
   }
 
   readme(profile: z.infer<typeof profileSchema>): string {
-    return render("readme-doc", {
+    return render("readme/readme-doc", {
       rows: this.rows.map((r) => r.join("")).join("\n"),
       repo: profile.profileRepo,
       creditUrl: CREDIT_URL,

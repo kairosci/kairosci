@@ -54,9 +54,9 @@ export async function card(
   const tag = fit(fullTag, Math.max(tagMax, 1));
   const tagc = /cli$/i.test(p.kind) ? t.ok : t.accent2;
   const tagW = tag.length * 7.6 + 16;
-  const desc = lines.map((l, i) => render("card-desc", { tx, y: 100 + i * 20, text: esc(l) })).join("\n");
-  const logoImg = logo === null ? "" : render("logo-img", { href: logo });
-  const body = render("card", {
+  const desc = lines.map((l, i) => render("cards/card-desc", { tx, y: 100 + i * 20, text: esc(l) })).join("\n");
+  const logoImg = logo === null ? "" : render("cards/logo-img", { href: logo });
+  const body = render("cards/card", {
     ...themeVars(t),
     box,
     cutLine,
@@ -155,13 +155,13 @@ export async function phoneCard(
   const yc = yb - (cmd.length - 1) * 17;
   const install = cmd
     .map((l, i) => {
-      if (i === 0) return render("pcard-inst0", { tx, y: yc, cmd: esc(l) });
-      return render("pcard-inst1", { tx: f1(tx + 14.4), y: yc + i * 17, cmd: esc(l) });
+      if (i === 0) return render("cards/pcard-inst0", { tx, y: yc, cmd: esc(l) });
+      return render("cards/pcard-inst1", { tx: f1(tx + 14.4), y: yc + i * 17, cmd: esc(l) });
     })
     .join("\n");
 
-  const logoImg = logo === null ? "" : render("logo-img", { href: logo });
-  const body = render("phone-card", {
+  const logoImg = logo === null ? "" : render("cards/logo-img", { href: logo });
+  const body = render("cards/phone-card", {
     ...themeVars(t),
     box,
     cutLine,
@@ -187,7 +187,7 @@ export async function phoneCard(
     starY: y0 + 41,
     sx,
     stars: esc(stars),
-    desc: desc.map((l, i) => render("pcard-desc", { tx, y: y0 + 74 + i * 17, text: esc(l) })).join("\n"),
+    desc: desc.map((l, i) => render("cards/pcard-desc", { tx, y: y0 + 74 + i * 17, text: esc(l) })).join("\n"),
     install,
     delay: delay.toFixed(2),
   });
