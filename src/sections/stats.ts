@@ -89,7 +89,6 @@ function statsData(
   const member =
     `${since.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" })} (${years}y)`;
   const kv = [
-    { key: "followers", value: num(g === null ? null : g.followers) },
     { key: "public repos", value: num(g === null ? null : g.public_repos) },
     { key: "member since", value: member },
     { key: "open issues", value: num(s.issues === null ? null : s.issues.count) },
@@ -111,7 +110,6 @@ function statsData(
     `${num(g === null ? null : g.prs)} pull requests (${num(g === null ? null : g.prs_merged)} merged); ` +
     `current streak ${g === null ? "—" : String(g.streak_current)} days, ` +
     `longest ${g === null ? "—" : String(g.streak_longest)}; ` +
-    `${num(g === null ? null : g.followers)} followers; ` +
     `${num(s.issues === null ? null : s.issues.count)} open issues and ` +
     `${num(s.prs === null ? null : s.prs.count)} open pull requests. ` +
     `Top languages: ${items.map((item) => `${item.name} ${(item.share * 100).toFixed(1)}%`).join(", ")}.`;

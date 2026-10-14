@@ -14,7 +14,6 @@ import { graphql } from "./client.ts";
 const PROFILE_QUERY = `query($login: String!) {
   user(login: $login) {
     createdAt
-    followers { totalCount }
     repositories(ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC) { totalCount }
     pullRequests { totalCount }
     merged: pullRequests(states: MERGED) { totalCount }
@@ -229,7 +228,6 @@ export async function fetchGitHub(
     repos,
     github: {
       created_at: user.createdAt,
-      followers: user.followers.totalCount,
       public_repos: user.repositories.totalCount,
       prs: user.pullRequests.totalCount,
       prs_merged: user.merged.totalCount,

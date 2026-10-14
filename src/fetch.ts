@@ -103,7 +103,6 @@ async function main(): Promise<void> {
         ? null
         : {
             created_at: createdDates.length === 0 ? ghGithub.created_at : need(createdDates[0], "created date"),
-            followers: ghGithub.followers,
             public_repos: ghGithub.public_repos,
             prs: ghGithub.prs,
             prs_merged: ghGithub.prs_merged,

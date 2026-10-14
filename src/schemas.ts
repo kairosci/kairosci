@@ -105,7 +105,6 @@ export const countMapSchema = z.record(z.string(), z.number());
 
 export const gitHubStatsSchema = z.object({
   created_at: z.string(),
-  followers: z.number().int().nonnegative(),
   public_repos: z.number().int().nonnegative(),
   prs: z.number().int().nonnegative(),
   prs_merged: z.number().int().nonnegative(),
@@ -204,7 +203,6 @@ export const userBioSchema = z.object({
 export const gqlProfileSchema = z.object({
   user: z.object({
     createdAt: z.string(),
-    followers: z.object({ totalCount: z.number().int().nonnegative() }),
     repositories: z.object({ totalCount: z.number().int().nonnegative() }),
     pullRequests: z.object({ totalCount: z.number().int().nonnegative() }),
     merged: z.object({ totalCount: z.number().int().nonnegative() }),
