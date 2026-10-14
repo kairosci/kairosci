@@ -149,17 +149,15 @@ export class HeaderSection {
 
   async footer(): Promise<string> {
     const { engine, profile } = this.ctx;
-    const credit = "// console after @georgekobaidze";
     const body = engine.render("frame/footer", {
       x: X,
       login: profile.login,
-      credit: esc(credit),
       endX: FR - 36,
     });
     return this.ctx.slices.sliceG(DESKTOP, 80, body, {
       title: "End of profile",
       desc: "Connection closed.",
-      text: `$ exit connection to ${profile.login} closed. // EOF${credit}`,
+      text: `$ exit connection to ${profile.login} closed. // EOF`,
       bottom: true,
     });
   }
@@ -167,17 +165,15 @@ export class HeaderSection {
   async phoneFooter(): Promise<string> {
     const { engine, profile } = this.ctx;
     const g = PHONE;
-    const credit = "// console after @georgekobaidze";
     const body = engine.render("frame/phone-footer", {
       x: g.X,
       r: g.R,
       login: profile.login,
-      credit: esc(credit),
     });
     return this.ctx.slices.sliceG(g, 120, body, {
       title: "End of profile",
       desc: "Connection closed.",
-      text: `$ exit connection to ${profile.login} closed. // EOF${credit}`,
+      text: `$ exit connection to ${profile.login} closed. // EOF`,
       bottom: true,
     });
   }

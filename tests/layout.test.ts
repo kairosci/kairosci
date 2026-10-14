@@ -63,6 +63,16 @@ function assertCardTextFits(svg: string, card: ReturnType<typeof cardLayout>): v
   }
 }
 
+function assertProjectArrowClearsName(svg: string): void {
+  const text = [...svg.matchAll(/<text x="([\d.]+)" y="[\d.]+"[^>]*style="font-size:([\d.]+)px">([^<]*)<\/text>/g)]
+    .find((match) => match[0].includes("font-weight=\"700\""));
+  const arrow = svg.match(/<path d="M([\d.]+) [\d.]+l7-7/);
+  assert.ok(text && arrow, "project name and arrow are rendered");
+  const name = (text[3] ?? "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  const nameRight = Number(text[1]) + textWidth(name, Number(text[2]));
+  assert.ok(Number(arrow[1]) >= nameRight + 5.9, "project arrow has a visible gap after its name");
+}
+
 test("shared card renderer supports long content and single-column links without invalid SVG", async () => {
   const engine = new TemplateEngine();
   await engine.load("templates");
@@ -83,6 +93,8 @@ test("shared card renderer supports long content and single-column links without
   const cards = await Promise.all([new ProjectsSection(ctx).card(long, "L", 0), new ProjectsSection(ctx).phoneCard(long, "R", 0)]);
   assertCardTextFits(cards[0] ?? "", cardLayout(DESKTOP, 0, 2, 200));
   assertCardTextFits(cards[1] ?? "", cardLayout(PHONE, 1, 2, 200));
+  assertProjectArrowClearsName(cards[0] ?? "");
+  assertProjectArrowClearsName(cards[1] ?? "");
   for (const svg of await Promise.all([...cards,
     ...await new HeaderSection(ctx).header(), ...await new HeaderSection(ctx).phoneHeader(),
   ])) assert.doesNotMatch(svg, /NaN|Infinity|\{\{/);

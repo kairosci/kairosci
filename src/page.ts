@@ -2,7 +2,6 @@ import { z } from "zod";
 import { esc } from "./console.ts";
 import { last, need } from "./defined.ts";
 import { profileSchema } from "./schemas.ts";
-import { CREDIT_POST, CREDIT_URL } from "./shared.ts";
 import { TemplateEngine } from "./templates.ts";
 
 const PHONE_QUERY = "(max-width: 600px)";
@@ -40,8 +39,6 @@ export class Page {
     return this.engine.render("readme/readme-doc", {
       rows: this.rows.map((r) => r.join("")).join("\n"),
       repo: profile.profileRepo,
-      creditUrl: CREDIT_URL,
-      creditPost: CREDIT_POST,
     });
   }
 }

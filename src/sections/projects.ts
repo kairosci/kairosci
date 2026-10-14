@@ -50,7 +50,10 @@ export class ProjectsSection {
     const logoSize = 18;
     const nx = tx + (logo === null ? 0 : logoSize + card.padding / 2);
     const nameY = card.top + nameSize * fontMetrics.capitals;
-    const name = fitText(p.name, sx - nx - logoSize, nameSize);
+    // Keep a clear gap for the external-link arrow after the project name.
+    const arrowGap = 6;
+    const arrowWidth = 7;
+    const name = fitText(p.name, sx - nx - arrowGap - arrowWidth, nameSize);
     const nameWidth = textWidth(name, nameSize);
     const tagY = nameY + card.padding;
     const tagTY = tagY + 12;
@@ -72,8 +75,8 @@ export class ProjectsSection {
     const content = engine.render("cards/project", {
       ...themeVars(theme), tx, sx, nx, nameSize, nameY, name: esc(name),
       logoX: tx, logoY: card.top, logoImg: logo === null ? "" : engine.render("cards/logo-img", { href: logo }),
-      arrowX: nx + nameWidth + card.padding / 3, arrowY: nameY - 2,
-      arrowX2: nx + nameWidth + card.padding / 3 + 2, arrowY2: nameY - 9,
+      arrowX: nx + nameWidth + arrowGap, arrowY: nameY - 2,
+      arrowX2: nx + nameWidth + arrowGap + 2, arrowY2: nameY - 9,
       tagY, tagTY, tagTX: tx + tagPadding, tagW, tag: esc(tag),
       tagc: /cli$/i.test(p.kind) ? theme.ok : theme.accent2,
       starX: sx - textWidth(stars, bodySize) - logoSize, starY: tagY + 1, stars: esc(stars),

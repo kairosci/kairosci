@@ -2,10 +2,6 @@ import { z } from "zod";
 import { need } from "./defined.ts";
 import { countMapSchema, themesFileSchema } from "./schemas.ts";
 
-export const CREDIT_URL = "https://github.com/georgekobaidze/georgekobaidze";
-export const CREDIT_POST =
-  "https://dev.to/georgekobaidze/i-turned-my-github-profile-into-a-cyberpunk-console-with-a-city-built-from-my-contributions-h4c";
-
 export function short(n: number): string {
   const r = Number(n.toPrecision(3));
   const div = r >= 1e6 ? 1e6 : r >= 1e3 ? 1e3 : 1;

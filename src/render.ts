@@ -16,7 +16,6 @@ import { Buttons, HeaderSection } from "./sections/frame.ts";
 import { ProjectsSection, logoHref } from "./sections/projects.ts";
 import { StatsSection } from "./sections/stats.ts";
 import { TrendingSection } from "./sections/trending.ts";
-import { CREDIT_URL } from "./shared.ts";
 import { TemplateEngine } from "./templates.ts";
 
 const DEFAULT_THEME = "reef";
@@ -208,7 +207,7 @@ export class ProfileRenderer {
       await Promise.all([this.header.footer(), this.header.phoneFooter()]),
       "100%",
       "Connection closed.",
-      CREDIT_URL,
+      null,
     );
   }
 

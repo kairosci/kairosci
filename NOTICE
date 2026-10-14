@@ -1,5 +1,5 @@
-The console design, slice layout, contribution city, and parts of the data
-fetching in src/console.ts, src/render.ts, and src/fetch.ts are ported from
+The console design, slice layout, and parts of the data fetching in
+src/console.ts, src/render.ts, and src/fetch.ts are ported from
 Giorgi Kobaidze's profile generator:
 
   https://github.com/georgekobaidze/georgekobaidze (tools/profile)

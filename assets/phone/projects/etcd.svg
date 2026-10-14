@@ -30,7 +30,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <g transform="translate(37 15)"></g>
 <text x="37" y="25.95" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:15px">etcd</text>
 <text x="37" y="25.95" font-weight="700" class="cy" style="font-size:15px">etcd</text>
-<path d="M76 23.95l7-7M78 16.95h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
+<path d="M79 23.95l7-7M81 16.95h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
 <rect x="37" y="34.95" width="24.2" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
 <text x="41.5" y="46.95" letter-spacing="1" fill="#fb7185" style="font-size:11px">Go</text>
 <path transform="translate(151.6 35.95) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>

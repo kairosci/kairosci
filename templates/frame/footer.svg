@@ -1,3 +1,2 @@
 <text x="{{x}}" y="30" class="dim"><tspan class="gr">$</tspan> exit</text>
 <text x="{{x}}" y="52" class="dim">connection to <tspan class="cy">{{login}}</tspan> closed. <tspan class="fainter">// EOF</tspan></text>
-<text x="{{endX}}" y="52" text-anchor="end" class="fainter" style="font-size:11px">{{credit}}</text>
