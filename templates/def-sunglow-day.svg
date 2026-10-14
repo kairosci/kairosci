@@ -1,0 +1,1 @@
+<radialGradient id="sunglow"><stop offset="0" stop-color="{{sun}}" stop-opacity=".34"/><stop offset=".45" stop-color="{{sun}}" stop-opacity=".1"/><stop offset="1" stop-color="{{sun}}" stop-opacity="0"/></radialGradient>

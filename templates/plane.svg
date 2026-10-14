@@ -1,0 +1,1 @@
+<g clip-path="url(#frame)"><g class="plane"><g transform="translate(-30 {{y}})"><rect x="0" y="0" width="14" height="2" rx="1" fill="{{fainter}}"/><circle class="bl" cx="0" cy="1" r="1.6" fill="#ff7b72"/><circle class="bl" cx="14" cy="1" r="1.6" fill="#f0f6fc" style="animation-delay:.7s"/></g></g></g>

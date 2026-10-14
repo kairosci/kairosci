@@ -1,0 +1,32 @@
+login: kairosci
+displayName: Alessio Attilio
+headerName: Alessio Attilio
+siteUrl: https://web.kairosci.dev
+siteHost: web.kairosci.dev
+githubUrl: https://github.com/kairosci
+profileRepo: kairosci/kairosci
+userAgent: kairosci-profile (github.com/kairosci/kairosci)
+maxProjects: 12
+maxCards: 8
+tz: Europe/Rome
+lat: 40.8518
+lon: 14.2681
+tuning:
+  newDays: 60
+  trendWindows:
+    - 30
+    - 90
+  maxTrendRows: 6
+  minTrendGainers: 3
+  minTrendGain: 5
+  topLanguages: 5
+  headerTools: 7
+links:
+  - label: Website
+    handle: web.kairosci.dev
+    url: https://web.kairosci.dev
+    icon: website
+  - label: GitHub
+    handle: "@kairosci"
+    url: https://github.com/kairosci
+    icon: github

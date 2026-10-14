@@ -1,0 +1,3 @@
+<circle cx="{{cx}}" cy="{{cy}}" r="{{glowR}}" fill="url(#sunglow)"/>
+<circle cx="{{cx}}" cy="{{cy}}" r="{{faceR}}" fill="{{bottom}}" filter="url(#sunblur)" opacity=".7" mask="url(#slits)"/>
+<circle cx="{{cx}}" cy="{{cy}}" r="{{faceR}}" fill="url(#sunface)" mask="url(#slits)"/>

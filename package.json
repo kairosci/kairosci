@@ -1,0 +1,25 @@
+{
+  "name": "kairosci",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "fetch": "node src/fetch.ts",
+    "render": "node src/render.ts",
+    "readme": "node src/fetch.ts && node src/render.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "simple-icons": "^16.33.0",
+    "subset-font": "^2.9.0",
+    "yaml": "^2.9.0",
+    "zod": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="{{w}}" height="{{h}}" viewBox="0 0 {{w}} {{h}}" role="img" aria-labelledby="t d">
+<title id="t">{{title}}</title>
+<desc id="d">{{desc}}</desc>
+<style>
+{{style}}
+</style>
+<defs>
+{{defs}}
+</defs>
+{{under}}
+{{body}}
+{{over}}
+</svg>
