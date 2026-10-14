@@ -20,7 +20,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
 <filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
 </defs>
-<path d="M277.33333333333337 -40V120" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
+<path d="M0 -40V120M277.33333333333337 -40V120" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="0" y="0" width="277.33333333333337" height="80" fill="#06121b"/>
 <rect x="0" y="0" width="277.33333333333337" height="80" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.46s">
@@ -31,5 +31,5 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="38.0" y="37" font-weight="700" class="cy" style="font-size:13px">HeroicGamesLauncher</text>
 <text x="12.0" y="58" class="dim" style="font-size:10px">1 commit · 3 PRs</text>
 </g>
-<path d="M277.33333333333337 0V80" fill="none" stroke="#5eead4" stroke-width="1.2"/>
+<path d="M0 0V80M277.33333333333337 0V80" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>
