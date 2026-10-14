@@ -5,7 +5,7 @@
 <circle class="dot" cx="{{dotx}}" cy="{{dotY}}" r="4" fill="{{ok}}"/>
 <circle class="dot" cx="{{dotx}}" cy="{{dotY}}" r="4" fill="{{ok}}" filter="url(#sglow)"/>
 <g clip-path="url(#typeclip)"><text x="{{x}}" y="{{whoY}}" class="dim"><tspan class="gr">$</tspan> whoami</text></g>
-<g class="name" font-weight="800" letter-spacing="2" style="font-size:{{nameSize}}px">
+<g class="name" font-weight="800" letter-spacing="{{nameSpacing}}" style="font-size:{{nameSize}}px">
 <text x="{{x}}" y="{{nameY}}" fill="{{accent}}" opacity=".55" filter="url(#tglow)">{{name}}</text>
 <g class="gm"><text x="{{gmX}}" y="{{nameY}}" fill="{{accent2}}" opacity=".75">{{name}}</text></g>
 <g class="gc"><text x="{{gcX}}" y="{{nameY}}" fill="{{accent}}" opacity=".85">{{name}}</text></g>

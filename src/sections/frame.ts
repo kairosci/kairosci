@@ -56,7 +56,7 @@ export class HeaderSection {
     const barRight = "ONLINE · ALL SYSTEMS NOMINAL";
     const lines = this.lines();
     const h = 240;
-    const nameSize = Math.min(56, Math.floor((FR - X) / (profile.headerName.length * 0.6)));
+    const nameSize = Math.min(72, Math.floor((FR - X - profile.headerName.length * 2 - 6) / (profile.headerName.length * 0.6)));
     const defs = engine.render("frame/defs-header", { x: X, clipY: 80 });
     const dotx = FR - 20 - barRight.length * 8.2 - 16;
     const rows = [
@@ -85,6 +85,7 @@ export class HeaderSection {
       x: X,
       whoY: 102,
       nameSize,
+      nameSpacing: 2,
       nameY: 172,
       gmX: X + 3,
       gcX: X - 3,
@@ -131,7 +132,7 @@ export class HeaderSection {
     const g = PHONE;
     const barLeft = `sys://${profile.siteHost} // ${profile.login}`;
     const barRight = "ONLINE · NOMINAL";
-    const nameSize = Math.min(52, Math.floor((g.R - g.X) / (profile.headerName.length * 0.6)));
+    const nameSize = Math.min(56, Math.floor((g.FR - g.X - profile.headerName.length * 0.5 - 6) / (profile.headerName.length * 0.6)));
     const defs = engine.render("frame/defs-header", { x: g.X, clipY: 64 });
     const dotx = g.FR - 14 - barRight.length * 8.2 - 16;
     const cols = Math.floor((g.R - g.X) / (15 * ADV * SNAP)) - 3;
@@ -167,6 +168,7 @@ export class HeaderSection {
       x: g.X,
       whoY: 86,
       nameSize,
+      nameSpacing: 0.5,
       nameY: 150,
       gmX: g.X + 3,
       gcX: g.X - 3,

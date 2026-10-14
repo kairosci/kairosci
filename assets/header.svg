@@ -40,7 +40,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <circle class="dot" cx="598.4" cy="34" r="4" fill="#a3e635"/>
 <circle class="dot" cx="598.4" cy="34" r="4" fill="#a3e635" filter="url(#sglow)"/>
 <g clip-path="url(#typeclip)"><text x="52" y="102" class="dim"><tspan class="gr">$</tspan> whoami</text></g>
-<g class="name" font-weight="800" letter-spacing="2" style="font-size:56px">
+<g class="name" font-weight="800" letter-spacing="2" style="font-size:72px">
 <text x="52" y="172" fill="#5eead4" opacity=".55" filter="url(#tglow)">ALESSIO ATTILIO</text>
 <g class="gm"><text x="55" y="172" fill="#fb7185" opacity=".75">ALESSIO ATTILIO</text></g>
 <g class="gc"><text x="49" y="172" fill="#5eead4" opacity=".85">ALESSIO ATTILIO</text></g>
