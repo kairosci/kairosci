@@ -66,6 +66,11 @@ Hard rules for every change in this repo. Verify each one before finishing.
 - Legacy logins from `extraLogins` are fetched best-effort and merged into the
   calendar and totals; unreachable ones warn and skip. `memberSince` is the source of
   truth for the member-since row.
+- Commits made with addresses GitHub does not attribute to the login are tracked:
+  `extraEmails` plus addresses discovered from push events and `author-name` commit
+  search. Only unattributed addresses are counted (linked ones are already covered),
+  so link every address on github.com/settings/emails when possible: it fixes
+  counts, calendar and streak retroactively with no code involved.
 
 ## Verify every change
 
