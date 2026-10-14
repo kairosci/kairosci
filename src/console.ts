@@ -79,7 +79,7 @@ export function baseCss(t: z.infer<typeof themeSchema>): string {
 }
 
 export function baseDefs(t: z.infer<typeof themeSchema>, gridX = 0): string {
-  return render("defs-base", { ...themeVars(t), gridX });
+  return render("console/defs-base", { ...themeVars(t), gridX });
 }
 
 export async function document(
@@ -89,7 +89,7 @@ export async function document(
 ): Promise<string> {
   const weights = d.weights === undefined ? [400, 700] : d.weights;
   const style = `${await faces(d.text + visible(d.body), weights)}\n${baseCss(t)}\n${d.css === undefined ? "" : d.css}\n@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
-  return render("doc", {
+  return render("console/doc", {
     w: d.w,
     h: d.h,
     title: esc(d.title),
@@ -144,7 +144,7 @@ export async function sliceG(
     (o.bottom === true ? `M${g.FL} ${y1}H${g.FR}` : "");
   let corners = "";
   if (o.top === true) {
-    corners += render("corners-top", {
+    corners += render("console/corners-top", {
       x1: g.FL - 7,
       y1: y0 + 18,
       y2: y0 - 7,
@@ -154,7 +154,7 @@ export async function sliceG(
     });
   }
   if (o.bottom === true) {
-    corners += render("corners-bottom", {
+    corners += render("console/corners-bottom", {
       x1: g.FL - 7,
       y1: y1 - 18,
       y2: y1 + 7,
@@ -165,7 +165,7 @@ export async function sliceG(
   }
   const defs = baseDefs(t) + (o.defs === undefined ? "" : `\n${o.defs}`);
   return document(t, { ...o, w: g.W, h, body, defs }, {
-    under: render("slice-under", {
+    under: render("console/slice-under", {
       ...themeVars(t),
       glow,
       fl: g.FL,
@@ -173,7 +173,7 @@ export async function sliceG(
       rw: g.FR - g.FL,
       rh: y1 - y0,
     }),
-    over: render("slice-over", { ...themeVars(t), rails, corners }),
+    over: render("console/slice-over", { ...themeVars(t), rails, corners }),
   });
 }
 
@@ -190,7 +190,7 @@ export async function halfSliceG(
   const bx0 = side === "L" ? g.FL : 0;
   const bx1 = side === "L" ? g.HW : g.HW - g.M;
   return document(t, { ...o, w: g.HW, h, body }, {
-    under: render("half-under", {
+    under: render("console/half-under", {
       ...themeVars(t),
       glow: `M${rx} -40V${h + 40}`,
       rx,
@@ -198,7 +198,7 @@ export async function halfSliceG(
       bw: bx1 - bx0,
       h,
     }),
-    over: render("half-over", { ...themeVars(t), rails: `M${rx} 0V${h}` }),
+    over: render("console/half-over", { ...themeVars(t), rails: `M${rx} 0V${h}` }),
   });
 }
 
@@ -210,6 +210,7 @@ export async function segmentG(
   h: number,
   body: string,
   o: Omit<z.infer<typeof docSchema>, "w" | "h" | "body" | "defs">,
+  framed = false,
 ): Promise<string> {
   const seg = g.W / n;
   const x0 = seg * k;
@@ -217,17 +218,19 @@ export async function segmentG(
   const last = k === n - 1;
   const bg0 = first ? g.FL - x0 : 0;
   const bg1 = last ? g.FR - x0 : seg;
-  const rails = (first ? `M${g.FL - x0} 0V${h}` : "") + (last ? `M${g.FR - x0} 0V${h}` : "");
-  const glow = (first ? `M${g.FL - x0} -40V${h + 40}` : "") + (last ? `M${g.FR - x0} -40V${h + 40}` : "");
+  const lx = first ? g.FL - x0 : 0;
+  const rx = last ? g.FR - x0 : seg;
+  const rails = ((first || framed) ? `M${lx} 0V${h}` : "") + ((last || framed) ? `M${rx} 0V${h}` : "");
+  const glow = ((first || framed) ? `M${lx} -40V${h + 40}` : "") + ((last || framed) ? `M${rx} -40V${h + 40}` : "");
   return document(t, { ...o, w: seg, h, body, defs: baseDefs(t, ((-x0 % 40) + 40) % 40) }, {
-    under: render("segment-under", {
+    under: render("console/segment-under", {
       ...themeVars(t),
       glow,
       bg0,
       bw: bg1 - bg0,
       h,
     }),
-    over: render("segment-over", { ...themeVars(t), rails }),
+    over: render("console/segment-over", { ...themeVars(t), rails }),
   });
 }
 
@@ -238,7 +241,7 @@ export function headingG(
   name: string,
   counter: string,
 ): string {
-  return render("heading", {
+  return render("console/heading", {
     ...themeVars(t),
     x: g.X,
     r: g.R,
@@ -258,7 +261,7 @@ export function promptG(
   y = 96,
   size?: number,
 ): string {
-  return render("prompt", {
+  return render("console/prompt", {
     x: g.X,
     y,
     delay: delay.toFixed(2),
@@ -288,7 +291,8 @@ export const segment = (
   h: number,
   body: string,
   o: Omit<z.infer<typeof docSchema>, "w" | "h" | "body" | "defs">,
-): Promise<string> => segmentG(t, DESKTOP, k, n, h, body, o);
+  framed = false,
+): Promise<string> => segmentG(t, DESKTOP, k, n, h, body, o, framed);
 export const heading = (
   t: z.infer<typeof themeSchema>,
   y: number,
@@ -314,7 +318,7 @@ export function stagger(  rows: (string | null)[],
     }
     i++;
     const inner = r.replaceAll("{y}", String(y));
-    out.push(render("stagger-row", { delay: (delay0 + i * step).toFixed(2), inner }));
+    out.push(render("console/stagger-row", { delay: (delay0 + i * step).toFixed(2), inner }));
     y += lh;
   }
   return [out.join("\n"), y];
