@@ -40,7 +40,8 @@ Hard rules for every change in this repo. Verify each one before finishing.
   limits and the whole `tuning` block. `config/themes.yml`: full palettes.
 - Nothing user-visible is hardcoded in `.ts` files. Thresholds, windows, counts and
   labels come from YAML or are computed from fetched data.
-- `templates/` holds every SVG/HTML element with `{{var}}` placeholders.
+- `templates/` holds every SVG/HTML element with `{{var}}` placeholders, organized by
+  area (`console`, `frame`, `stats`, `trending`, `city`, `sky`, `cards`, `readme`).
   `.ts` files compute numbers, path data and escaped text only, never tags.
   `render()` throws on missing templates, missing vars and unresolved placeholders,
   and trims trailing newlines so joined rows keep no stray whitespace.
@@ -56,6 +57,7 @@ Hard rules for every change in this repo. Verify each one before finishing.
   full uppercase. No `.toUpperCase()` on identity strings.
 - Card pairs are mirrored: left card chamfers top-right + bottom-left, right card
   chamfers top-left + bottom-right. Font sizes are computed from the text width.
+  Button rows after the cards are framed on both sides (`framed: true`).
 - Palettes must be original (current: `reef`, `orchid`). Nothing that looks copied.
 - No slop: no filler cells, no empty descriptions, no decorative zeros, sections with
   no data are skipped, not rendered empty.
