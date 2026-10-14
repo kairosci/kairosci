@@ -122,10 +122,12 @@ export class CitySection {
   alt(calendar: z.infer<typeof calendarSchema>): string {
     const stats = yearStats(calendar);
     const s = this.ctx.sun.now();
-    const login = this.ctx.profile.login;
+    const tz = this.ctx.profile.tz;
+    const days = Math.min(calendar.length, 365);
     return (
-      `Contribution city: an isometric skyline ${need(WHEN[s.phase], "phase word")} (${s.event} ${s.at} in ${login}'s time zone) with one building per day of the last year, taller and brighter for busier days. ${num(stats.total)} contributions` +
-      (stats.busiest[1] > 0 ? `, busiest day ${monthDay(need(stats.busiest[0], "day"), true)} with ${stats.busiest[1]}.` : ".")
+      `Contribution city: ${days} buildings show daily GitHub contribution counts; taller, brighter buildings mark busier days. ${num(stats.total)} contributions in the last ${days} days` +
+      (stats.busiest[1] > 0 ? `; busiest day ${monthDay(need(stats.busiest[0], "day"), true)} (${stats.busiest[1]}).` : ".") +
+      ` Local sky in ${tz}: ${need(WHEN[s.phase], "phase word")}; ${s.event} ${s.at}.`
     );
   }
 
@@ -139,7 +141,8 @@ export class CitySection {
     const engine = this.ctx.engine;
     const city = t.city;
     const face = faces(t, p);
-    const counts = calendar.map((entry) => need(entry[1], "count"));
+    const days = calendar.slice(-365);
+    const counts = days.map((entry) => need(entry[1], "count"));
     const rank = ranker(counts);
     const lv = levels(counts);
     const tw = g.tw;
@@ -357,11 +360,12 @@ export class CitySection {
     const slices = this.ctx.slices;
     const city = theme.city;
     const p = this.ctx.sun.now().phase;
-    const counts = calendar.map((entry) => need(entry[1], "count"));
+    const days = calendar.slice(-365);
+    const counts = days.map((entry) => need(entry[1], "count"));
     const total = counts.reduce((a, b) => a + b, 0);
     const generator = rng(`${updated}-${total}`);
     const next = (): number => need(generator.next().value, "rng");
-    const shapes = this.buildings(calendar, next, deskIso(), p);
+    const shapes = this.buildings(days, next, deskIso(), p);
 
     const sc = this.scene(
       p,
@@ -419,12 +423,13 @@ export class CitySection {
     const slices = this.ctx.slices;
     const g = PHONE;
     const p = this.ctx.sun.now().phase;
-    const counts = calendar.map((entry) => need(entry[1], "count"));
+    const days = calendar.slice(-365);
+    const counts = days.map((entry) => need(entry[1], "count"));
     const total = counts.reduce((a, b) => a + b, 0);
     const generator = rng(`${updated}-${total}`);
     const next = (): number => need(generator.next().value, "rng");
     const phoneIso = { tw: 13, th: 6.5, ox: 67.5, oy: 180, hmax: 68, s: 0.52, ws: 0.7 };
-    const shapes = this.buildings(calendar, next, phoneIso, p);
+    const shapes = this.buildings(days, next, phoneIso, p);
     const H = 400;
     const sc = this.scene(
       p,

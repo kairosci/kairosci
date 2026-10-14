@@ -69,10 +69,11 @@ export class SunCalc {
 
   private clock(ms: number): string {
     const parts = new Map<string, string>();
-    for (const part of this.timeFmt.formatToParts(Math.round(ms / MIN) * MIN)) {
+    const fiveMinutes = 5 * MIN;
+    for (const part of this.timeFmt.formatToParts(Math.round(ms / fiveMinutes) * fiveMinutes)) {
       parts.set(part.type, part.value);
     }
-    return `${need(parts.get("hour"), "hour")}:${need(parts.get("minute"), "minute")} ${need(parts.get("timeZoneName"), "tz name")}`;
+    return `~${need(parts.get("hour"), "hour")}:${need(parts.get("minute"), "minute")} ${need(parts.get("timeZoneName"), "tz name")}`;
   }
 
   at(now: number): z.infer<typeof skySchema> {
