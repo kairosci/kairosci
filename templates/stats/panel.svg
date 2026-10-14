@@ -1,0 +1,3 @@
+<rect x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}" fill="{{accent}}" fill-opacity=".035" stroke="{{accent}}" stroke-opacity=".35"/>
+<path d="M{{x}} {{cornerY}}V{{y}}H{{cornerX}}" fill="none" stroke="{{accent}}" stroke-width="2"/>
+{{inner}}

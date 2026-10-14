@@ -1,0 +1,1 @@
+<rect x="{{x}}" y="{{swY}}" width="9" height="9" fill="{{color}}"/><text x="{{nameX}}" y="{{y}}" class="fg" style="font-size:13px">{{name}}</text><text x="{{pctX}}" y="{{y}}" text-anchor="end" class="dim" style="font-size:13px">{{pct}}</text>

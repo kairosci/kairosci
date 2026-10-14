@@ -35,7 +35,7 @@ function tile(
   sub: string,
   delay: number,
 ): string {
-  return render("tile", {
+  return render("stats/tile", {
     ...themeVars(t),
     x: f1(x),
     y,
@@ -131,7 +131,7 @@ function langBar(
     const item = need(items[i], `language ${i}`);
     const w = bw * item.share;
     const c = need(t.langs[i], `language color ${i}`);
-    segs.push(render("lang-seg", { x: f1(cx), y: by, w: f1(Math.max(w - 2, 1)), color: c }));
+    segs.push(render("stats/lang-seg", { x: f1(cx), y: by, w: f1(Math.max(w - 2, 1)), color: c }));
     cx += w;
   }
   return segs.join("");
@@ -162,7 +162,7 @@ export async function stats(
   const lw = 320;
   const rows = data.kv
     .map((row, i) =>
-      render("kv-row", {
+      render("stats/kv-row", {
         x: X + 16,
         y: ry + 38 + i * 28,
         key: esc(row.key),
@@ -172,10 +172,10 @@ export async function stats(
     )
     .join("\n");
   parts.push(
-    render("fade-group", {
+    render("console/fade-group", {
       delay: "0.60",
       inner:
-        render("panel", { ...themeVars(t), x: X, y: ry, w: lw, h: rh, cornerY: ry + 12, cornerX: X + 12, inner: "" }) +
+        render("stats/panel", { ...themeVars(t), x: X, y: ry, w: lw, h: rh, cornerY: ry + 12, cornerX: X + 12, inner: "" }) +
         rows,
     }),
   );
@@ -189,7 +189,7 @@ export async function stats(
     .map((item, i) => {
       const lxx = bx + (i % 2) * (bw / 2);
       const lyy = by + 36 + Math.floor(i / 2) * 26;
-      return render("lang-item", {
+      return render("stats/lang-item", {
         x: f1(lxx),
         swY: lyy - 9,
         color: need(t.langs[i], `legend color ${i}`),
@@ -202,19 +202,19 @@ export async function stats(
     })
     .join("");
   parts.push(
-    render("fade-group", {
+    render("console/fade-group", {
       delay: "0.70",
       inner:
-        render("panel", { ...themeVars(t), x: lx, y: ry, w: lwid, h: rh, cornerY: ry + 12, cornerX: lx + 12, inner: "" }) +
-        render("lang-head", { x: lx + 16, y: ry + 24, size: 10.5 }) +
-        render("lang-track", { ...themeVars(t), x: bx, y: by, w: bw }) +
+        render("stats/panel", { ...themeVars(t), x: lx, y: ry, w: lwid, h: rh, cornerY: ry + 12, cornerX: lx + 12, inner: "" }) +
+        render("stats/lang-head", { x: lx + 16, y: ry + 24, size: 10.5 }) +
+        render("stats/lang-track", { ...themeVars(t), x: bx, y: by, w: bw }) +
         langBar(t, data.items, bx, by, bw) +
         legend,
     }),
   );
 
   const fy = ry + rh + 30;
-  parts.push(render("fade-group", { delay: "1.00", inner: render("sync-line", { x: FR - 36, y: fy, updated: esc(updated) }) }));
+  parts.push(render("console/fade-group", { delay: "1.00", inner: render("stats/sync-line", { x: FR - 36, y: fy, updated: esc(updated) }) }));
   return slice(t, up40(fy + 16), parts.join("\n"), { title: "Stats", desc: data.desc, text: "—%.()d" });
 }
 
@@ -227,15 +227,15 @@ function phoneCmd(lines: string[], delay: number, y: number): string {
   const out = lines.map((l, i) => {
     const tail = i < lines.length - 1 ? " \\" : "";
     if (i === 0) {
-      return render("phone-cmd-first", { x: PHONE.X, y, cmd: esc(l), tail: esc(tail) });
+      return render("stats/phone-cmd-first", { x: PHONE.X, y, cmd: esc(l), tail: esc(tail) });
     }
-    return render("phone-cmd-cont", { x: f1(PHONE.X + 4 * 7.8), y: y + i * 18, cmd: esc(l), tail: esc(tail) });
+    return render("stats/phone-cmd-cont", { x: f1(PHONE.X + 4 * 7.8), y: y + i * 18, cmd: esc(l), tail: esc(tail) });
   });
-  return render("fade-group", { delay: delay.toFixed(2), inner: out.join("\n") });
+  return render("console/fade-group", { delay: delay.toFixed(2), inner: out.join("\n") });
 }
 
 function phoneBox(t: z.infer<typeof themeSchema>, x: number, y: number, w: number, h: number): string {
-  return render("panel", { ...themeVars(t), x: f1(x), y, w: f1(w), h, cornerY: y + 12, cornerX: f1(x + 12), inner: "" });
+  return render("stats/panel", { ...themeVars(t), x: f1(x), y, w: f1(w), h, cornerY: y + 12, cornerX: f1(x + 12), inner: "" });
 }
 
 function phoneTile(
@@ -251,7 +251,7 @@ function phoneTile(
 ): string {
   const pad = 14;
   const avail = w - 2 * pad;
-  return render("phone-tile", {
+  return render("stats/phone-tile", {
     ...themeVars(t),
     x: f1(x),
     y,
@@ -303,10 +303,10 @@ export async function phoneStats(
     .map((row, i) => {
       const y = ky + 32 + i * 26;
       const dots = ".".repeat(Math.max(cols - row.key.length - [...row.value].length - 1, 1));
-      return render("phone-kvrow", { x1: g.X + 14, y, key: esc(row.key), dots, x2: g.R - 14, value: esc(row.value) });
+      return render("stats/phone-kvrow", { x1: g.X + 14, y, key: esc(row.key), dots, x2: g.R - 14, value: esc(row.value) });
     })
     .join("\n");
-  parts.push(render("fade-group", { delay: "0.60", inner: phoneBox(t, g.X, ky, cw, kh) + rows }));
+  parts.push(render("console/fade-group", { delay: "0.60", inner: phoneBox(t, g.X, ky, cw, kh) + rows }));
 
   const ly = ky + kh + gap;
   const bx = g.X + 14;
@@ -323,7 +323,7 @@ export async function phoneStats(
       const px = lxx + colw - (i % 2 ? 0 : 20);
       const room = Math.floor((px - pct.length * 8.4 - 8 - (lxx + 18)) / 8.4);
       const name = [...item.name].length > room ? `${[...item.name].slice(0, room - 1).join("")}…` : item.name;
-      return render("phone-legend-item", {
+      return render("stats/phone-legend-item", {
         x: f1(lxx),
         swY: lyy - 10,
         color: need(t.langs[i], `phone legend color ${i}`),
@@ -336,19 +336,19 @@ export async function phoneStats(
     })
     .join("");
   parts.push(
-    render("fade-group", {
+    render("console/fade-group", {
       delay: "0.70",
       inner:
         phoneBox(t, g.X, ly, cw, lh) +
-        render("lang-head", { x: g.X + 14, y: ly + 24, size: 12 }) +
-        render("lang-track", { ...themeVars(t), x: bx, y: by, w: bw }) +
+        render("stats/lang-head", { x: g.X + 14, y: ly + 24, size: 12 }) +
+        render("stats/lang-track", { ...themeVars(t), x: bx, y: by, w: bw }) +
         langBar(t, data.items, bx, by, bw) +
         legend,
     }),
   );
 
   const fy = ly + lh + 28;
-  parts.push(render("fade-group", { delay: "1.00", inner: render("sync-line", { x: g.R, y: fy, updated: esc(updated) }) }));
+  parts.push(render("console/fade-group", { delay: "1.00", inner: render("stats/sync-line", { x: g.R, y: fy, updated: esc(updated) }) }));
   return sliceG(t, g, up40(fy + 16), parts.join("\n"), { title: "Stats", desc: data.desc, text: "—%.()d…" });
 }
 

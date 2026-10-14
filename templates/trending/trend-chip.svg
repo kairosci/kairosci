@@ -1,0 +1,2 @@
+<rect class="chip" x="{{x}}" y="{{y}}" width="{{w}}" height="15" fill="none" stroke="{{color}}" stroke-opacity=".85"/>
+<text class="chip" x="{{tx}}" y="{{ty}}" fill="{{color}}" letter-spacing=".5" style="font-size:{{size}}px">{{label}}</text>

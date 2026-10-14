@@ -82,7 +82,7 @@ export async function trendingHead(
   const body =
     `${heading(t, 44, "trending", counter)}\n` +
     `${prompt(`gh api repos/${profile.login}/{repo}/stargazers --paginate`, 0.15, "# what is getting starred")}\n` +
-    render("trend-sub", { x: X, sub: esc(sub), total: esc(`★ ${short(total)} total`), fr: FR - 36 });
+    render("trending/trend-sub", { x: X, sub: esc(sub), total: esc(`★ ${short(total)} total`), fr: FR - 36 });
   return slice(t, 160, body, {
     title: "Trending",
     desc: `Stars gained by ${profile.login}'s repos in the ${days} days to ${monthDay(stars.end)}.`,
@@ -96,7 +96,7 @@ const ROW_CSS = `.bar{transform-box:fill-box;transform-origin:0 50%;animation:gr
 .chip{animation:pulse 1s ease-in-out 3}`;
 
 const barDefs = (c: string): string =>
-  render("def-bar", { color: c });
+  render("trending/def-bar", { color: c });
 
 function rowDesc(r: z.infer<typeof trendSchema>, pitch: string): string {
   const chipText = r.isNew ? " (new)" : r.ratio === null ? "" : ` (${r.ratio.toFixed(1)}x the previous window)`;
@@ -114,7 +114,7 @@ function chip(
   if (!r.isNew && r.ratio === null) return "";
   const label = r.isNew ? "NEW" : `▲${need(r.ratio, "trend ratio").toFixed(1)}x`;
   const color = r.isNew ? t.accent2 : t.ok;
-  return render("trend-chip", {
+  return render("trending/trend-chip", {
     x: f1(cx),
     y,
     w: f1(label.length * 6.6 + 10),
@@ -141,11 +141,11 @@ export async function trendingRow(
     .map((n, k) => {
       const h = n > 0 ? Math.max(1.5, (n / hmax) * 24) : 0;
       if (h === 0) return "";
-      return render("trend-hist", { x: 660 + k * 3, y: f1(32 - h), w: 2, h: f1(h) });
+      return render("trending/trend-hist", { x: 660 + k * 3, y: f1(32 - h), w: 2, h: f1(h) });
     })
     .join("");
   const pitch = r.p.tagline === "" ? r.p.kind : r.p.tagline;
-  const body = render("trend-row", {
+  const body = render("trending/trend-row", {
     ...themeVars(t),
     stripeX: X - 10,
     stripeW: FR - 36 - X + 20,
@@ -171,7 +171,7 @@ export async function trendingRow(
     lblDelay: (delay + 0.6).toFixed(2),
     gain: num(r.gain),
     hist,
-    total: render("trend-total", { fr: FR - 36, y: 25, total: num(r.total) }),
+    total: render("trending/trend-total", { fr: FR - 36, y: 25, total: num(r.total) }),
   });
   return slice(t, 40, body, {
     title: r.p.name,
@@ -185,7 +185,7 @@ export async function trendingRow(
 export async function trendingLegend(t: z.infer<typeof themeSchema>): Promise<string> {
   const text = "bar: stars gained · ticks: stars per day · NEW: under 60 days old · ▲: faster than the window before";
   void t;
-  return slice(t, 40, render("trend-legend", { x: X, text: esc(text) }), { title: "Legend", desc: text, text });
+  return slice(t, 40, render("trending/trend-legend", { x: X, text: esc(text) }), { title: "Legend", desc: text, text });
 }
 
 const P = PHONE;
@@ -207,7 +207,7 @@ export async function phoneTrendingHead(
   const body =
     `${headingG(t, P, 44, "trending", counter)}\n` +
     `${promptG(P, `gh api repos/${profile.login}/{repo}/stargazers`, 0.15, "# starred", 92, 13)}\n` +
-    render("ptrend-sub", {
+    render("trending/ptrend-sub", {
       x: P.X,
       sub: esc(sub),
       total: esc(`${short(total)}★ total`),
@@ -245,13 +245,13 @@ export async function phoneTrendingRow(
     .map((n, k) => {
       const h = n > 0 ? Math.max(1.5, (n / hmax) * 11) : 0;
       if (h === 0) return "";
-      return render("trend-hist", { x: PHX + k * 2, y: f1(33 - h), w: 1.5, h: f1(h) });
+      return render("trending/trend-hist", { x: PHX + k * 2, y: f1(33 - h), w: 1.5, h: f1(h) });
     })
     .join("");
   const pitch = r.p.tagline === "" ? r.p.kind : r.p.tagline;
   const tag = fit(pitch, Math.floor((PHX - 10 - P.X) / CH11));
   const chipX = P.X + r.p.name.length * size * 0.6 + 8;
-  const body = render("trend-row", {
+  const body = render("trending/trend-row", {
     ...themeVars(t),
     stripeX: P.X - 10,
     stripeW: P.R - P.X + 20,
@@ -304,7 +304,7 @@ export async function phoneTrendingLegend(t: z.infer<typeof themeSchema>): Promi
   const h = up40(lines.length * 15 + 10);
   const y0 = (h - lines.length * 15) / 2 + 11;
   const inner = lines
-    .map((l, k) => render("ptrend-legend-line", { x: P.X, y: y0 + k * 15, text: esc(l) }))
+    .map((l, k) => render("trending/ptrend-legend-line", { x: P.X, y: y0 + k * 15, text: esc(l) }))
     .join("");
-  return sliceG(t, P, h, render("fade-group", { delay: "0.80", inner }), { title: "Legend", desc: text, text });
+  return sliceG(t, P, h, render("console/fade-group", { delay: "0.80", inner }), { title: "Legend", desc: text, text });
 }
