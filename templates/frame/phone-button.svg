@@ -1,7 +1,7 @@
 <g class="ln" style="animation-delay:{{delay}}s">
 <path d="{{box}}" fill="{{accent}}" fill-opacity=".05"/>
 <path d="{{box}}" fill="none" stroke="{{accent}}" stroke-opacity=".55"/>
-<path d="M{{cutX}} {{by}}L{{endX}} {{cutY}}" stroke="{{accent}}" stroke-width="2"/>
+<path d="{{cutLine}}" stroke="{{accent}}" stroke-width="2"/>
 <g transform="translate({{iconX}} {{iconY}})"><g filter="url(#g)" opacity=".5">{{icon}}</g>{{icon}}</g>
 <text x="{{labelX}}" y="{{labelY}}" text-anchor="middle" font-weight="700" class="cy" style="font-size:12px">{{label}}</text>
 </g>

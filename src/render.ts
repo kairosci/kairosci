@@ -89,7 +89,7 @@ async function main(): Promise<void> {
     const b = need(entry[1], "link");
     page.add(
       `links/${entry[0] + 1}.svg`,
-      await Promise.all([button(t, b, entry[0], links.length), phoneButton(t, b, entry[0], links.length)]),
+      await Promise.all([button(t, b, entry[0], links.length, 0.25, true), phoneButton(t, b, entry[0], links.length, 0.25, true)]),
       `${100 / links.length}%`,
       b.label,
       b.url,

@@ -199,7 +199,15 @@ export async function button(
   const by = 12;
   const bh = 56;
   const cut = 12;
-  const box = `M${f1(lx)} ${by}H${f1(lx + bw - cut)}L${f1(lx + bw)} ${by + cut}V${by + bh}H${f1(lx)}Z`;
+  const side = n === 2 ? (k === 0 ? "L" : "R") : "L";
+  const box =
+    side === "L"
+      ? `M${f1(lx)} ${by}H${f1(lx + bw - cut)}L${f1(lx + bw)} ${by + cut}V${by + bh}H${f1(lx)}Z`
+      : `M${f1(lx + cut)} ${by}H${f1(lx + bw)}V${by + bh}H${f1(lx)}L${f1(lx)} ${by + cut}Z`;
+  const cutLine =
+    side === "L"
+      ? `M${f1(lx + bw - cut)} ${by}L${f1(lx + bw)} ${by + cut}`
+      : `M${f1(lx)} ${by + cut}L${f1(lx + cut)} ${by}`;
   const maxHandle = Math.floor((bw - 24) / 6);
   const handle = b.handle.length > maxHandle ? `${b.handle.slice(0, maxHandle - 1)}…` : b.handle;
   const maxLabel = Math.floor((bw - 44) / 7.8);
@@ -207,10 +215,8 @@ export async function button(
   const body = render("frame/button", {
     ...themeVars(t),
     box,
-    cutX: f1(lx + bw - cut),
+    cutLine,
     by,
-    endX: f1(lx + bw),
-    cutY: by + cut,
     iconX: Math.round(lx + 12),
     iconY: by + 11,
     icon: b.icon,
@@ -398,7 +404,15 @@ export async function phoneButton(
   const by = 12;
   const bh = 56;
   const cut = 10;
-  const box = `M${f1(lx)} ${by}H${f1(lx + bw - cut)}L${f1(lx + bw)} ${by + cut}V${by + bh}H${f1(lx)}Z`;
+  const side = n === 2 ? (k === 0 ? "L" : "R") : "L";
+  const box =
+    side === "L"
+      ? `M${f1(lx)} ${by}H${f1(lx + bw - cut)}L${f1(lx + bw)} ${by + cut}V${by + bh}H${f1(lx)}Z`
+      : `M${f1(lx + cut)} ${by}H${f1(lx + bw)}V${by + bh}H${f1(lx)}L${f1(lx)} ${by + cut}Z`;
+  const cutLine =
+    side === "L"
+      ? `M${f1(lx + bw - cut)} ${by}L${f1(lx + bw)} ${by + cut}`
+      : `M${f1(lx)} ${by + cut}L${f1(lx + cut)} ${by}`;
   const size = 12;
   const maxLabel = Math.floor((bw - 8) / (size * ADV));
   const label = b.label.length > maxLabel ? `${b.label.slice(0, maxLabel - 1)}…` : b.label;
@@ -406,10 +420,8 @@ export async function phoneButton(
   const body = render("frame/phone-button", {
     ...themeVars(t),
     box,
-    cutX: f1(lx + bw - cut),
+    cutLine,
     by,
-    endX: f1(lx + bw),
-    cutY: by + cut,
     iconX: ix,
     iconY: by + 10,
     icon: b.icon,
