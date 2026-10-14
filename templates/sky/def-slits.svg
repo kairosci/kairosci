@@ -1,0 +1,1 @@
+<mask id="slits" maskUnits="userSpaceOnUse" x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}"><rect x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}" fill="#fff"/>{{bars}}</mask>

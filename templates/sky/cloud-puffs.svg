@@ -1,0 +1,1 @@
+<rect x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}" rx="{{rx}}"/><circle cx="{{c1x}}" cy="{{c1y}}" r="{{c1r}}"/><circle cx="{{c2x}}" cy="{{c2y}}" r="{{c2r}}"/><circle cx="{{c3x}}" cy="{{c3y}}" r="{{c3r}}"/>

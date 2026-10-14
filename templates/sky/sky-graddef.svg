@@ -1,0 +1,1 @@
+<linearGradient id="skygrad" gradientUnits="userSpaceOnUse" x1="0" y1="{{top}}" x2="0" y2="{{horizon}}">{{stops}}</linearGradient>

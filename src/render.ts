@@ -35,7 +35,7 @@ import {
   trends,
 } from "./sections/trending.ts";
 import { CREDIT_URL } from "./shared.ts";
-import { configureSky } from "./sky.ts";
+import { configureSky } from "./sky/sun.ts";
 import { loadTemplates, render } from "./templates.ts";
 
 const DEFAULT_THEME = "reef";
@@ -178,11 +178,11 @@ async function main(): Promise<void> {
           label: p.name,
           handle: p.tagline === "" ? p.kind : p.tagline,
           url: p.href,
-          icon: logo === null ? "" : render("logo-img", { href: logo }),
+          icon: logo === null ? "" : render("cards/logo-img", { href: logo }),
         });
         page.add(
           `projects/also-${slugOf(p.name)}.svg`,
-          await Promise.all([button(t, b, k, group.length, 0.3), phoneButton(t, b, k, group.length, 0.3)]),
+          await Promise.all([button(t, b, k, group.length, 0.3, true), phoneButton(t, b, k, group.length, 0.3, true)]),
           `${100 / group.length}%`,
           `${p.name}: ${p.description}`,
           p.href,
