@@ -45,8 +45,8 @@ function headerLines(
 }
 
 function iconFor(t: z.infer<typeof themeSchema>, kind: string): string {
-  if (kind === "github") return render("icon-github", { ...themeVars(t), d: siGithub.path });
-  if (kind === "website") return render("icon-website", { ...themeVars(t) });
+  if (kind === "github") return render("frame/icon-github", { ...themeVars(t), d: siGithub.path });
+  if (kind === "website") return render("frame/icon-website", { ...themeVars(t) });
   throw new Error(`missing icon ${kind}`);
 }
 
@@ -72,18 +72,18 @@ export async function header(
   const lines = headerLines(s, profile);
   const h = 240;
   const nameSize = Math.min(56, Math.floor((FR - X) / (profile.headerName.length * 0.6)));
-  const defs = render("defs-header", { x: X, clipY: 80 });
+  const defs = render("frame/defs-header", { x: X, clipY: 80 });
   const dotx = FR - 20 - barRight.length * 8.2 - 16;
   const rows = [
-    render("header-line", { x: X, text: esc(need(lines[0], "header line 1")) }),
-    render("header-line", { x: X, text: esc(need(lines[1], "header line 2")) }),
-    render("header-siteline", { x: X, pre: esc(need(lines[2], "header line 3")), site: esc(profile.siteHost) }),
+    render("frame/header-line", { x: X, text: esc(need(lines[0], "header line 1")) }),
+    render("frame/header-line", { x: X, text: esc(need(lines[1], "header line 2")) }),
+    render("frame/header-siteline", { x: X, pre: esc(need(lines[2], "header line 3")), site: esc(profile.siteHost) }),
   ];
   const staggered = stagger(rows.slice(0, 2), h - 6 - 24, 24, 1.75, 0.25);
   const descLines = need(staggered[0], "header lines");
   const siteStaggered = stagger(rows.slice(2), 18, 24, 2.25, 0.25);
   const siteLine = need(siteStaggered[0], "site line");
-  const body = render("header-top", {
+  const body = render("frame/header-top", {
     ...themeVars(t),
     fl: FL,
     fr: FR,
@@ -108,7 +108,7 @@ export async function header(
     scanY: M + 35,
     scanH: h - M - 35,
   });
-  const tail = render("header-tail", {
+  const tail = render("frame/header-tail", {
     ...themeVars(t),
     siteLine,
     x: X,
@@ -133,7 +133,7 @@ export async function header(
       title: profile.siteHost,
       desc: `Personal site and profile at ${profile.siteHost}`,
       css: HEADER_CSS,
-      defs: render("defs-scan", {}),
+      defs: render("frame/defs-scan", {}),
       text: ">>" + need(lines[2], "line") + profile.siteHost + "$",
       bottom: true,
     }),
@@ -155,7 +155,7 @@ export async function footer(
   profile: z.infer<typeof profileSchema>,
 ): Promise<string> {
   const credit = "// console after @georgekobaidze";
-  const body = render("footer", {
+  const body = render("frame/footer", {
     x: X,
     login: profile.login,
     credit: esc(credit),
@@ -189,6 +189,7 @@ export async function button(
   k: number,
   n: number,
   delay0 = 0.25,
+  framed = false,
 ): Promise<string> {
   const seg = W / n;
   const bw = FR - 36 - (n - 1) * seg;
@@ -203,7 +204,7 @@ export async function button(
   const handle = b.handle.length > maxHandle ? `${b.handle.slice(0, maxHandle - 1)}…` : b.handle;
   const maxLabel = Math.floor((bw - 44) / 7.8);
   const label = b.label.length > maxLabel ? `${b.label.slice(0, maxLabel - 1)}…` : b.label;
-  const body = render("button", {
+  const body = render("frame/button", {
     ...themeVars(t),
     box,
     cutX: f1(lx + bw - cut),
@@ -221,7 +222,7 @@ export async function button(
     handleY: by + 46,
     handle: esc(handle),
   });
-  return segment(t, k, n, h, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: b.label + handle + ">_" });
+  return segment(t, k, n, h, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: b.label + handle + ">_" }, framed);
 }
 
 const ADV = 0.6;
@@ -249,17 +250,17 @@ export async function phoneHeader(
   const barLeft = `sys://${profile.siteHost} // ${profile.login}`;
   const barRight = "ONLINE · NOMINAL";
   const nameSize = Math.min(52, Math.floor((g.R - g.X) / (profile.headerName.length * 0.6)));
-  const defs = render("defs-header", { x: g.X, clipY: 64 });
+  const defs = render("frame/defs-header", { x: g.X, clipY: 64 });
   const dotx = g.FR - 14 - barRight.length * 8.2 - 16;
   const cols = Math.floor((g.R - g.X) / (15 * ADV * SNAP)) - 3;
   const introLines = pack(wrap(s.intro === "" ? profile.displayName : s.intro, 40), cols);
   const rows = [
-    ...introLines.map((l) => render("header-line", { x: g.X, text: esc(l) })),
+    ...introLines.map((l) => render("frame/header-line", { x: g.X, text: esc(l) })),
     ...pack(
       s.projects.slice(0, profile.tuning.headerTools).map((p) => p.name),
       cols,
-    ).map((l) => render("header-line", { x: g.X, text: esc(l) })),
-    render("header-siteline", { x: g.X, pre: "personal site at ", site: esc(profile.siteHost) }),
+    ).map((l) => render("frame/header-line", { x: g.X, text: esc(l) })),
+    render("frame/header-siteline", { x: g.X, pre: "personal site at ", site: esc(profile.siteHost) }),
   ];
   const upper = rows.slice(0, rows.length - 1);
   const lower = rows.slice(rows.length - 1);
@@ -267,7 +268,7 @@ export async function phoneHeader(
   const step = Math.min(0.25, 0.75 / rows.length);
   const descStaggered = stagger(upper, h - 6 - (upper.length - 1) * 24, 24, 1.75, step);
   const siteStaggered = stagger(lower, 18, 24, 1.75 + upper.length * step, step);
-  const body = render("header-top", {
+  const body = render("frame/header-top", {
     ...themeVars(t),
     fl: g.FL,
     fr: g.FR,
@@ -292,7 +293,7 @@ export async function phoneHeader(
     scanY: g.M + 35,
     scanH: h - g.M - 35,
   });
-  const tail = render("header-tail", {
+  const tail = render("frame/header-tail", {
     ...themeVars(t),
     siteLine: need(siteStaggered[0], "phone site line"),
     x: g.X,
@@ -317,7 +318,7 @@ export async function phoneHeader(
       title: profile.siteHost,
       desc: `Personal site and profile at ${profile.siteHost}`,
       css: HEADER_CSS,
-      defs: render("defs-scan", {}),
+      defs: render("frame/defs-scan", {}),
       text: ">>·personal site at " + profile.siteHost + "$",
       bottom: true,
     }),
@@ -330,7 +331,7 @@ export async function phoneFooter(
 ): Promise<string> {
   const g = PHONE;
   const credit = "// console after @georgekobaidze";
-  const body = render("phone-footer", {
+  const body = render("frame/phone-footer", {
     x: g.X,
     r: g.R,
     login: profile.login,
@@ -365,7 +366,7 @@ export async function phoneSectionHead(
     body =
       promptG(g, cmd, 0.15, "", 96, size === 15 ? undefined : size) +
       `\n` +
-      render("phone-comment", {
+      render("frame/phone-comment", {
         x: f1(g.X + 2 * size * ADV),
         y: 96 + Math.round(size * 1.6),
         comment: esc(comment),
@@ -385,6 +386,7 @@ export async function phoneButton(
   k: number,
   n: number,
   delay0 = 0.25,
+  framed = false,
 ): Promise<string> {
   const g = PHONE;
   const seg = g.W / n;
@@ -401,7 +403,7 @@ export async function phoneButton(
   const maxLabel = Math.floor((bw - 8) / (size * ADV));
   const label = b.label.length > maxLabel ? `${b.label.slice(0, maxLabel - 1)}…` : b.label;
   const ix = Math.round(lx + bw / 2 - 9);
-  const body = render("phone-button", {
+  const body = render("frame/phone-button", {
     ...themeVars(t),
     box,
     cutX: f1(lx + bw - cut),
@@ -416,5 +418,5 @@ export async function phoneButton(
     labelY: by + 45,
     label: esc(label),
   });
-  return segmentG(t, g, k, n, h, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + ">_" });
+  return segmentG(t, g, k, n, h, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + ">_" }, framed);
 }

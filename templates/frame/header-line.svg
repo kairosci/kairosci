@@ -1,0 +1,1 @@
+<text class="fg" x="{{x}}" y="{y}"><tspan class="cy">&gt;&gt;</tspan> {{text}}</text>
