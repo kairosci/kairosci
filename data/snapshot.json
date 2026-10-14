@@ -24,17 +24,6 @@
 			"logo": ""
 		},
 		{
-			"name": "HCN",
-			"repo": "redigere/HCN",
-			"kind": "MATLAB",
-			"description": "Homework Calcolo Numerico",
-			"tagline": "21 commits · 0 PRs",
-			"install": "gh repo clone redigere/HCN",
-			"stars": "0",
-			"href": "https://github.com/redigere/HCN",
-			"logo": ""
-		},
-		{
 			"name": "kubernetes",
 			"repo": "kubernetes/kubernetes",
 			"kind": "Go",
@@ -77,55 +66,11 @@
 			"stars": "13.1k",
 			"href": "https://github.com/89luca89/distrobox",
 			"logo": ""
-		},
-		{
-			"name": "redis",
-			"repo": "redis/redis",
-			"kind": "C",
-			"description": "For developers, who are building real-time data-driven applications, Redis is the preferred, fastest, and most feature-rich cache, data structure server, and document and vector query engine.",
-			"tagline": "2 commits · 8 PRs",
-			"install": "gh repo clone redis/redis",
-			"stars": "76.8k",
-			"href": "https://github.com/redis/redis",
-			"logo": ""
-		},
-		{
-			"name": "innertubex",
-			"repo": "MetrolistGroup/innertubex",
-			"kind": "Kotlin",
-			"description": "eXtended InnerTube API library for Kotlin",
-			"tagline": "2 commits · 2 PRs",
-			"install": "gh repo clone MetrolistGroup/innertubex",
-			"stars": "21",
-			"href": "https://github.com/MetrolistGroup/innertubex",
-			"logo": ""
-		},
-		{
-			"name": "PRG32",
-			"repo": "raffmont/PRG32",
-			"kind": "C",
-			"description": "Platform for RISC-V Gaming development (32 bit)",
-			"tagline": "2 commits · 1 PR",
-			"install": "gh repo clone raffmont/PRG32",
-			"stars": "8",
-			"href": "https://github.com/raffmont/PRG32",
-			"logo": ""
-		},
-		{
-			"name": "HeroicGamesLauncher",
-			"repo": "Heroic-Games-Launcher/HeroicGamesLauncher",
-			"kind": "TypeScript",
-			"description": "A games launcher for GOG, Amazon and Epic Games for Linux, Windows and macOS.",
-			"tagline": "1 commit · 3 PRs",
-			"install": "gh repo clone Heroic-Games-Launcher/HeroicGamesLauncher",
-			"stars": "12.4k",
-			"href": "https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher",
-			"logo": ""
 		}
 	],
 	"posts": [],
-	"upstreamRepos": 11,
-	"stars": 343522,
+	"upstreamRepos": 6,
+	"stars": 254298,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
@@ -138,21 +83,18 @@
 		"created_at": "2026-01-04T18:30:55Z",
 		"followers": 6,
 		"public_repos": 5,
-		"prs": 480,
-		"prs_merged": 266,
+		"prs": 703,
+		"prs_merged": 454,
 		"year": 2026,
 		"contributions_year": 2596,
 		"contributions_all": 5056,
 		"streak_current": 14,
 		"streak_longest": 88,
 		"languages": {
-			"Kotlin": 81,
+			"Kotlin": 79,
 			"Rust": 64,
-			"MATLAB": 21,
 			"Go": 26,
-			"HTML": 5,
-			"C": 4,
-			"TypeScript": 1
+			"HTML": 5
 		}
 	}
 }

@@ -27,6 +27,8 @@ tuning:
   topLanguages: 5
   headerTools: 7
   kvKeyWidth: 16
+  minCommits: 3
+  minStars: 1
 links:
   - label: Website
     handle: web.kairosci.dev

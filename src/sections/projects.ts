@@ -46,8 +46,11 @@ export async function card(
   const lines = wrap(p.description, 43).slice(0, 3);
   const logo = await logoHref(p);
   const nx = logo === null ? tx : tx + 28;
-  const titleW = p.name.length * 10.2;
   const sx = x0 + cw - pad;
+  const nameBlock = p.stars.length * 7.2 + 20 + 8;
+  const nameMax = Math.floor((sx - nameBlock - nx) / 10.2);
+  const name = fit(p.name, Math.max(nameMax, 1));
+  const titleW = name.length * 10.2;
   const fullTag = p.tagline === "" ? p.kind : `${p.kind} · ${p.tagline}`;
   const starBlock = p.stars.length * 7.2 + 16 + 8;
   const tagMax = Math.floor((sx - tx - starBlock - 12) / 7.6);
@@ -67,7 +70,7 @@ export async function card(
     tx,
     nameY: y0 + 34,
     nx,
-    name: esc(p.name),
+    name: esc(name),
     arrowX: f1(nx + titleW + 11),
     arrowY: y0 + 31,
     arrowX2: f1(nx + titleW + 13),

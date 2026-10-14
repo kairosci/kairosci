@@ -15,32 +15,32 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 <defs>
-<pattern id="grid" x="20" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#5eead4" stroke-opacity=".06"/></pattern>
+<pattern id="grid" x="0" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#5eead4" stroke-opacity=".06"/></pattern>
 <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="6"/></filter>
 <filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
 <filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
 </defs>
-<path d="M210 -40V240" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
-<rect x="0" y="0" width="210" height="200" fill="#06121b"/>
-<rect x="0" y="0" width="210" height="200" fill="url(#grid)"/>
-<g class="ln" style="animation-delay:0.90s">
-<path d="M18 6H192V182L180 194H6V18Z" fill="#5eead4" fill-opacity=".035"/>
-<path d="M18 6H192V182L180 194H6V18Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
-<path d="M6 18L18 6" stroke="#5eead4" stroke-width="2"/>
-<g transform="translate(16 20)"></g>
-<text x="16" y="34" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:15px">easyeffects</text>
-<text x="16" y="34" font-weight="700" class="cy" style="font-size:15px">easyeffects</text>
-<path d="M123.0 32l7-7M125.0 25h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
-<rect x="16" y="46" width="42.4" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
-<text x="22" y="58" letter-spacing="1" fill="#fb7185" style="font-size:11px">HTML</text>
-<path transform="translate(130.0 47) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
-<text x="182" y="58" text-anchor="end" class="dim" style="font-size:12px">10.4k</text>
-<text x="16" y="80" class="fg" style="font-size:12px">Limiter, compressor,</text>
-<text x="16" y="97" class="fg" style="font-size:12px">convolver, equalizer</text>
-<text x="16" y="114" class="fg" style="font-size:12px">and auto volume and</text>
-<text x="16" y="131" class="fg" style="font-size:12px">many other plugins…</text>
-<text x="16" y="163" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone</text>
-<text x="30.4" y="180" class="dim" style="font-size:12px">wwmm/easyeffects</text>
+<path d="M10 -40V240" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
+<rect x="10" y="0" width="210" height="200" fill="#06121b"/>
+<rect x="10" y="0" width="210" height="200" fill="url(#grid)"/>
+<g class="ln" style="animation-delay:0.78s">
+<path d="M28 6H202L214 18V194H40L28 182Z" fill="#5eead4" fill-opacity=".035"/>
+<path d="M28 6H202L214 18V194H40L28 182Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
+<path d="M202 6L214 18" stroke="#5eead4" stroke-width="2"/>
+<g transform="translate(38 20)"></g>
+<text x="38" y="34" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:15px">easyeffects</text>
+<text x="38" y="34" font-weight="700" class="cy" style="font-size:15px">easyeffects</text>
+<path d="M145.0 32l7-7M147.0 25h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
+<rect x="38" y="46" width="42.4" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
+<text x="44" y="58" letter-spacing="1" fill="#fb7185" style="font-size:11px">HTML</text>
+<path transform="translate(152.0 47) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
+<text x="204" y="58" text-anchor="end" class="dim" style="font-size:12px">10.4k</text>
+<text x="38" y="80" class="fg" style="font-size:12px">Limiter, compressor,</text>
+<text x="38" y="97" class="fg" style="font-size:12px">convolver, equalizer</text>
+<text x="38" y="114" class="fg" style="font-size:12px">and auto volume and</text>
+<text x="38" y="131" class="fg" style="font-size:12px">many other plugins…</text>
+<text x="38" y="163" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone</text>
+<text x="52.4" y="180" class="dim" style="font-size:12px">wwmm/easyeffects</text>
 </g>
-<path d="M210 0V200" fill="none" stroke="#5eead4" stroke-width="1.2"/>
+<path d="M10 0V200" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>

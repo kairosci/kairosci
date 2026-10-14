@@ -82,16 +82,17 @@ export function buildProjects(
   earned.sort(
     (a, b) => b.commits - a.commits || b.prs - a.prs || b.stars - a.stars || a.full.localeCompare(b.full),
   );
+  const qualified = earned.filter((r) => r.commits >= profile.tuning.minCommits && r.stars >= profile.tuning.minStars);
   let upstreamStars = 0;
   const langCounts: Record<string, number> = {};
-  for (const r of earned) {
+  for (const r of qualified) {
     upstreamStars += r.stars;
     if (r.lang !== null) {
       const prev = langCounts[r.lang];
       langCounts[r.lang] = prev === undefined ? r.commits : prev + r.commits;
     }
   }
-  const projects = earned.slice(0, profile.maxProjects).map((r) => {
+  const projects = qualified.slice(0, profile.maxProjects).map((r) => {
     const parts = r.full.split("/");
     const name = need(parts[1], `repo of ${r.full}`);
     const language = r.lang === null ? "Code" : r.lang;
@@ -107,7 +108,7 @@ export function buildProjects(
       logo: "",
     };
   });
-  return { intro, projects, posts: [], upstreamRepos: earned.length, upstreamStars, langCounts };
+  return { intro, projects, posts: [], upstreamRepos: qualified.length, upstreamStars, langCounts };
 }
 
 export async function fetchGitHub(

@@ -50,7 +50,8 @@ Hard rules for every change in this repo. Verify each one before finishing.
 
 - Projects are upstream repos where the login has at least one commit, ranked by
   commits desc, then PRs desc, then stars. Skip forks, archived, private, missing
-  descriptions and the logins' own repos. Tagline shows the computed counts.
+  descriptions and the logins' own repos. `tuning.minCommits` and `tuning.minStars`
+  drop the long tail; no repo is ever excluded by name. Tagline shows the computed counts.
 - Tiles and bars show computed values only: upstream stars across N repos, languages
   weighted by commits on contributed repos, author-scoped issue/PR counts.
 - Login is always lowercase. The full name is capitalized (`Alessio Attilio`), never
@@ -58,6 +59,7 @@ Hard rules for every change in this repo. Verify each one before finishing.
 - Card pairs are mirrored: left card chamfers top-right + bottom-left, right card
   chamfers top-left + bottom-right. Font sizes are computed from the text width.
   Button rows after the cards are framed on both sides (`framed: true`).
+  Card titles are fitted against the star block width so they never collide.
 - Palettes must be original (current: `reef`, `orchid`). Nothing that looks copied.
 - No slop: no filler cells, no empty descriptions, no decorative zeros, sections with
   no data are skipped, not rendered empty.

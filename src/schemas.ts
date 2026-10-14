@@ -16,6 +16,8 @@ export const tuningSchema = z.object({
   topLanguages: z.number().int().positive(),
   headerTools: z.number().int().positive(),
   kvKeyWidth: z.number().int().positive(),
+  minCommits: z.number().int().nonnegative(),
+  minStars: z.number().int().nonnegative(),
 });
 
 export const profileSchema = z.object({
