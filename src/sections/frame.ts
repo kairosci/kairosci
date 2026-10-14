@@ -221,14 +221,14 @@ export class Buttons {
     const labelX = centered ? card.x + card.width / 2 : card.left + iconSize + card.padding / 2;
     const labelWidth = centered ? card.right - card.left : card.right - labelX;
     const label = fitText(b.label, labelWidth, labelSize);
-    const handle = fitText(b.handle, card.right - card.left, 10);
+    const handle = fitText(b.handle, centered ? card.right - card.left : labelWidth, 10);
     const content = engine.render("cards/link", {
       ...themeVars(theme), icon: b.icon,
       iconX: centered ? card.x + (card.width - iconSize) / 2 : card.left,
       iconY: card.top,
       labelX, labelY: centered ? card.bottom - labelSize * fontMetrics.descent : card.top + labelSize * fontMetrics.capitals,
       labelSize, label: esc(label), anchor: centered ? "middle" : "start",
-      handle: centered ? "" : engine.render("cards/link-handle", { x: card.left, y: card.bottom - 10 * fontMetrics.descent, text: esc(handle) }),
+      handle: centered ? "" : engine.render("cards/link-handle", { x: labelX, y: card.bottom - 10 * fontMetrics.descent, text: esc(handle) }),
     });
     const body = engine.render("cards/shell", { ...themeVars(theme), ...card, content, delay: delay0 + k * 0.08 });
     return slices.segmentG(g, k, n, height, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + handle + ">_" }, framed);

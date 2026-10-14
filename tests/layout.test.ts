@@ -73,6 +73,27 @@ function assertProjectArrowClearsName(svg: string): void {
   assert.ok(Number(arrow[1]) >= nameRight + 5.9, "project arrow has a visible gap after its name");
 }
 
+function assertLinkIconClearsText(svg: string): void {
+  const icon = svg.match(/<g transform="translate\(([\d.]+) ([\d.]+)\)">/);
+  assert.ok(icon, "link icon is rendered");
+  const ix = Number(icon[1]);
+  const iy = Number(icon[2]);
+  for (const match of svg.matchAll(/<text ([^>]+)>([\s\S]*?)<\/text>/g)) {
+    const attrs = match[1] ?? "";
+    if (!attrs.includes('class="cy"') && !attrs.includes('class="dim"')) continue;
+    const size = Number(attrs.match(/font-size:([\d.]+)px/)?.[1]);
+    let x = Number(attrs.match(/(?:^| )x="([\d.]+)"/)?.[1]);
+    const y = Number(attrs.match(/(?:^| )y="([\d.]+)"/)?.[1]);
+    const text = (match[2] ?? "").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&");
+    const width = textWidth(text, size, Number(attrs.match(/letter-spacing="([\d.]+)"/)?.[1] ?? 0));
+    if (attrs.includes('text-anchor="end"')) x -= width;
+    if (attrs.includes('text-anchor="middle"')) x -= width / 2;
+    const overlapsX = x < ix + 18 && x + width > ix;
+    const overlapsY = y - size * fontMetrics.capitals < iy + 18 && y + size * fontMetrics.descent > iy;
+    assert.ok(!(overlapsX && overlapsY), `link icon overlaps text: ${text}`);
+  }
+}
+
 test("shared card renderer supports long content and single-column links without invalid SVG", async () => {
   const engine = new TemplateEngine();
   await engine.load("templates");
@@ -80,6 +101,13 @@ test("shared card renderer supports long content and single-column links without
   const snapshot = snapshotSchema.parse(JSON.parse(await readFile("data/snapshot.json", "utf8")));
   const ctx = new RenderContext(engine, await loadTheme("reef"), snapshot, profile);
   const buttons = new Buttons(ctx);
+  const links = buttons.linkButtons();
+  for (let k = 0; k < links.length; k++) {
+    const link = links[k];
+    assert.ok(link);
+    assertLinkIconClearsText(await buttons.button(link, k, links.length));
+    assertLinkIconClearsText(await buttons.phoneButton(link, k, links.length));
+  }
   const b = { label: "label".repeat(100), handle: "handle".repeat(100), url: "https://example.com", icon: "" };
   for (const n of [1, 2, 4]) for (let k = 0; k < n; k++) for (const svg of await Promise.all([
     buttons.button(b, k, n), buttons.phoneButton(b, k, n),
