@@ -32,8 +32,8 @@ export function levels(counts: number[]): number[] {
   return [q(0.25), q(0.5), q(0.75)];
 }
 
-function deskIso(): { tw: number; th: number; ox: number; oy: number; hmax: number; s: number; ws: number } {
-  return { tw: CITY_TW, th: CITY_TH, ox: CITY_OX, oy: CITY_OY, hmax: CITY_HMAX, s: 1, ws: 1 };
+function deskIso(): { tw: number; th: number; ox: number; oy: number; hmax: number; s: number; ws: number; viewWidth: number } {
+  return { tw: CITY_TW, th: CITY_TH, ox: CITY_OX, oy: CITY_OY, hmax: CITY_HMAX, s: 1, ws: 1, viewWidth: DESKTOP.W };
 }
 
 const LIT = { night: 0.55, dawn: 0.2, day: 0.05, dusk: 0.24 };
@@ -134,7 +134,7 @@ export class CitySection {
   private buildings(
     calendar: z.infer<typeof calendarSchema>,
     next: () => number,
-    g: { tw: number; th: number; ox: number; oy: number; hmax: number; s: number; ws: number },
+    g: { tw: number; th: number; ox: number; oy: number; hmax: number; s: number; ws: number; viewWidth: number },
     p: z.infer<typeof phaseSchema>,
   ): string {
     const t = this.ctx.theme;
@@ -152,7 +152,7 @@ export class CitySection {
     const shapes: string[] = [];
     let flick = 0;
     for (const cell of cells(calendar)) {
-      const cx = g.ox + ((cell.w - cell.dow) * tw) / 2;
+      const cx = g.viewWidth - (g.ox + ((cell.w - cell.dow) * tw) / 2);
       const cy = g.oy + ((cell.w + cell.dow) * th) / 2;
       const left: [number, number] = [cx - tw / 2, cy];
       const right: [number, number] = [cx + tw / 2, cy];
@@ -428,7 +428,7 @@ export class CitySection {
     const total = counts.reduce((a, b) => a + b, 0);
     const generator = rng(`${updated}-${total}`);
     const next = (): number => need(generator.next().value, "rng");
-    const phoneIso = { tw: 13, th: 6.5, ox: 67.5, oy: 180, hmax: 68, s: 0.52, ws: 0.7 };
+    const phoneIso = { tw: 13, th: 6.5, ox: 67.5, oy: 180, hmax: 68, s: 0.52, ws: 0.7, viewWidth: g.W };
     const shapes = this.buildings(days, next, phoneIso, p);
     const H = 400;
     const sc = this.scene(
@@ -454,14 +454,14 @@ export class CitySection {
     const st = this.stars(next, { x0: 150, w: 270, y0: 104, h: 110, n: 34, skip: (x, y) => x > 340 && y < 168 }, p);
     const year = yearStats(calendar);
     const busiest = year.busiest;
-    const infoParts: string[] = [engine.render("city/city-pinfo-total", { x: g.X, y: 294, total: num(year.total) })];
+    const infoParts: string[] = [engine.render("city/city-pinfo-total", { x: g.X, y: 112, total: num(year.total) })];
     if (busiest[1] > 0) {
       infoParts.push(
-        engine.render("city/city-pinfo-busiest", { x: g.X, y: 312, date: monthDay(need(busiest[0], "day")), count: busiest[1] }),
+        engine.render("city/city-pinfo-busiest", { x: g.X, y: 130, date: monthDay(need(busiest[0], "day")), count: busiest[1] }),
       );
     }
     infoParts.push(
-      engine.render("city/city-pinfo-active", { x: g.X, y: busiest[1] > 0 ? 330 : 312, count: year.active }),
+      engine.render("city/city-pinfo-active", { x: g.X, y: busiest[1] > 0 ? 148 : 130, count: year.active }),
     );
     const body =
       `${slices.headingG(g, 44, "contribution-city", counter)}\n` +
