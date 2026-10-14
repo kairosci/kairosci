@@ -81,7 +81,7 @@
 	],
 	"posts": [],
 	"upstreamRepos": 7,
-	"stars": 276691,
+	"stars": 276701,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
@@ -96,8 +96,8 @@
 		"prs": 480,
 		"prs_merged": 273,
 		"year": 2026,
-		"contributions_year": 2625,
-		"contributions_all": 5085,
+		"contributions_year": 2669,
+		"contributions_all": 5129,
 		"streak_current": 14,
 		"streak_longest": 88,
 		"languages": {
