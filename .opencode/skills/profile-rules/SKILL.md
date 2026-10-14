@@ -51,7 +51,7 @@ Hard rules for every change in this repo. Verify each one before finishing.
   commits desc, then PRs desc, then stars. Skip forks, archived, private, missing
   descriptions and the logins' own repos. Tagline shows the computed counts.
 - Tiles and bars show computed values only: upstream stars across N repos, languages
-  counted from contributed repos, author-scoped issue/PR counts.
+  weighted by commits on contributed repos, author-scoped issue/PR counts.
 - Login is always lowercase. The full name is capitalized (`Alessio Attilio`), never
   full uppercase. No `.toUpperCase()` on identity strings.
 - Card pairs are mirrored: left card chamfers top-right + bottom-left, right card

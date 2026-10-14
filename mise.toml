@@ -17,7 +17,7 @@ run = "npx tsc --noEmit"
 description = "fetch projects and counts into data/"
 depends = ["install"]
 run = "node src/fetch.ts"
-sources = ["config/profile.yml", "src/fetch.ts", "src/schemas.ts", "src/profile.ts", "src/defined.ts"]
+sources = ["config/profile.yml", "src/fetch.ts", "src/fetch/**/*.ts", "src/schemas.ts", "src/profile.ts", "src/defined.ts"]
 outputs = ["data/snapshot.json", "data/calendar.json", "data/stars.json"]
 
 [tasks.render]

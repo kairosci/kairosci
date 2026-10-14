@@ -44,13 +44,16 @@ export async function card(
       ? `M${x0 + cw - cut} ${y0}L${x0 + cw} ${y0 + cut}`
       : `M${x0} ${y0 + cut}L${x0 + cut} ${y0}`;
   const lines = wrap(p.description, 43).slice(0, 3);
-  const tag = p.kind;
-  const tagc = /cli$/i.test(tag) ? t.ok : t.accent2;
-  const tagW = tag.length * 7.6 + 16;
   const logo = await logoHref(p);
   const nx = logo === null ? tx : tx + 28;
   const titleW = p.name.length * 10.2;
   const sx = x0 + cw - pad;
+  const fullTag = p.tagline === "" ? p.kind : `${p.kind} · ${p.tagline}`;
+  const starBlock = p.stars.length * 7.2 + 16 + 8;
+  const tagMax = Math.floor((sx - tx - starBlock - 12) / 7.6);
+  const tag = fit(fullTag, Math.max(tagMax, 1));
+  const tagc = /cli$/i.test(p.kind) ? t.ok : t.accent2;
+  const tagW = tag.length * 7.6 + 16;
   const desc = lines.map((l, i) => render("card-desc", { tx, y: 100 + i * 20, text: esc(l) })).join("\n");
   const logoImg = logo === null ? "" : render("logo-img", { href: logo });
   const body = render("card", {
