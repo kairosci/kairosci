@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["src/**", "mise.toml", "package.json", "aube-lock.yaml", ".github/workflows/readme.yml"]
+    paths: ["src/**", "config/**", "templates/**", "mise.toml", "package.json", "aube-lock.yaml", ".github/workflows/readme.yml"]
 
 permissions:
   contents: write

@@ -35,7 +35,14 @@ export async function card(
   const pad = 18;
   const cut = 16;
   const tx = x0 + pad;
-  const box = `M${x0} ${y0}H${x0 + cw - cut}L${x0 + cw} ${y0 + cut}V${y0 + ch}H${x0 + cut}L${x0} ${y0 + ch - cut}Z`;
+  const box =
+    side === "L"
+      ? `M${x0} ${y0}H${x0 + cw - cut}L${x0 + cw} ${y0 + cut}V${y0 + ch}H${x0 + cut}L${x0} ${y0 + ch - cut}Z`
+      : `M${x0 + cut} ${y0}H${x0 + cw}V${y0 + ch - cut}L${x0 + cw - cut} ${y0 + ch}H${x0}V${y0 + cut}Z`;
+  const cutLine =
+    side === "L"
+      ? `M${x0 + cw - cut} ${y0}L${x0 + cw} ${y0 + cut}`
+      : `M${x0} ${y0 + cut}L${x0 + cut} ${y0}`;
   const lines = wrap(p.description, 43).slice(0, 3);
   const tag = p.kind;
   const tagc = /cli$/i.test(tag) ? t.ok : t.accent2;
@@ -49,10 +56,8 @@ export async function card(
   const body = render("card", {
     ...themeVars(t),
     box,
-    cutX: x0 + cw - cut,
+    cutLine,
     y0,
-    endX: x0 + cw,
-    cutY: y0 + cut,
     logoX: tx,
     logoY: y0 + 18,
     logoImg,
@@ -119,7 +124,14 @@ export async function phoneCard(
   const tx = left + pad;
   const sx = left + cw - pad;
   const inner = sx - tx;
-  const box = `M${left} ${y0}H${left + cw - cut}L${left + cw} ${y0 + cut}V${y0 + ch}H${left + cut}L${left} ${y0 + ch - cut}Z`;
+  const box =
+    side === "L"
+      ? `M${left} ${y0}H${left + cw - cut}L${left + cw} ${y0 + cut}V${y0 + ch}H${left + cut}L${left} ${y0 + ch - cut}Z`
+      : `M${left + cut} ${y0}H${left + cw}V${y0 + ch - cut}L${left + cw - cut} ${y0 + ch}H${left}V${y0 + cut}Z`;
+  const cutLine =
+    side === "L"
+      ? `M${left + cw - cut} ${y0}L${left + cw} ${y0 + cut}`
+      : `M${left} ${y0 + cut}L${left + cut} ${y0}`;
 
   const logo = await logoHref(p);
   const nx = logo === null ? tx : tx + 25;
@@ -149,10 +161,8 @@ export async function phoneCard(
   const body = render("phone-card", {
     ...themeVars(t),
     box,
-    cutX: left + cw - cut,
+    cutLine,
     y0,
-    endX: left + cw,
-    cutY: y0 + cut,
     logoX: tx,
     logoY: y0 + 14,
     logoImg,

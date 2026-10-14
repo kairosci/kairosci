@@ -11,6 +11,11 @@ maxCards: 8
 tz: Europe/Rome
 lat: 40.8518
 lon: 14.2681
+memberSince: "2023-01-01"
+extraLogins:
+  - aleatd
+  - sigattilio
+  - alexio-dev
 tuning:
   newDays: 60
   trendWindows:
@@ -21,6 +26,7 @@ tuning:
   minTrendGain: 5
   topLanguages: 5
   headerTools: 7
+  kvKeyWidth: 16
 links:
   - label: Website
     handle: web.kairosci.dev

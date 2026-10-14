@@ -4,7 +4,9 @@ import { z } from "zod";
 import { profileSchema, themesFileSchema } from "./schemas.ts";
 
 export async function loadProfile(): Promise<z.infer<typeof profileSchema>> {
-  return profileSchema.parse(parseYaml(await readFile("config/profile.yml", "utf8")));
+  const profile = profileSchema.parse(parseYaml(await readFile("config/profile.yml", "utf8")));
+  if (Number.isNaN(Date.parse(profile.memberSince))) throw new Error(`memberSince is not a date: ${profile.memberSince}`);
+  return profile;
 }
 
 export async function loadTheme(name: string): Promise<z.infer<typeof themesFileSchema>["themes"][number]> {

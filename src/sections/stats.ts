@@ -65,8 +65,8 @@ function statsData(
   desc: string;
 } {
   const g = s.github;
-  const since = g === null ? null : new Date(g.created_at);
-  const years = since === null ? 0 : yearsSince(since, updated);
+  const since = new Date(profile.memberSince);
+  const years = yearsSince(since, updated);
   const yearLabel = g === null ? "" : String(g.year);
   const t1 = [
     { label: "UPSTREAM STARS", value: num(s.stars), sub: `across ${s.upstreamRepos} repos` },
@@ -87,9 +87,7 @@ function statsData(
     },
   ];
   const member =
-    since === null
-      ? "—"
-      : `${since.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" })} (${years}y)`;
+    `${since.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" })} (${years}y)`;
   const kv = [
     { key: "followers", value: num(g === null ? null : g.followers) },
     { key: "public repos", value: num(g === null ? null : g.public_repos) },
@@ -168,7 +166,7 @@ export async function stats(
         x: X + 16,
         y: ry + 38 + i * 28,
         key: esc(row.key),
-        dots: ".".repeat(16 - row.key.length),
+        dots: ".".repeat(Math.max(profile.tuning.kvKeyWidth - row.key.length, 1)),
         value: esc(row.value),
       }),
     )

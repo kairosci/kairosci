@@ -15,6 +15,7 @@ export const tuningSchema = z.object({
   minTrendGain: z.number().int().nonnegative(),
   topLanguages: z.number().int().positive(),
   headerTools: z.number().int().positive(),
+  kvKeyWidth: z.number().int().positive(),
 });
 
 export const profileSchema = z.object({
@@ -31,6 +32,8 @@ export const profileSchema = z.object({
   tz: z.string().min(1),
   lat: z.number().min(-90).max(90),
   lon: z.number().min(-180).max(180),
+  memberSince: z.string().min(1),
+  extraLogins: z.array(z.string().min(1)),
   tuning: tuningSchema,
   links: z.array(linkSchema).min(1),
 });

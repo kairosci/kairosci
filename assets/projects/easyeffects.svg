@@ -24,9 +24,9 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="0" y="0" width="424" height="200" fill="#06121b"/>
 <rect x="0" y="0" width="424" height="200" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.90s">
-<path d="M10 12H372L388 28V188H26L10 172Z" fill="#5eead4" fill-opacity=".035"/>
-<path d="M10 12H372L388 28V188H26L10 172Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
-<path d="M372 12L388 28" stroke="#5eead4" stroke-width="2"/>
+<path d="M26 12H388V172L372 188H10V28Z" fill="#5eead4" fill-opacity=".035"/>
+<path d="M26 12H388V172L372 188H10V28Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
+<path d="M10 28L26 12" stroke="#5eead4" stroke-width="2"/>
 <g transform="translate(28 30)"></g>
 <text x="28" y="46" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:17px">easyeffects</text>
 <text x="28" y="46" font-weight="700" class="cy" style="font-size:17px">easyeffects</text>

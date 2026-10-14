@@ -195,13 +195,14 @@ function streaks(days: Map<string, number>, today: Date): [number, number] {
 
 async function fetchGitHub(
   today: Date,
+  login: string,
   profile: z.infer<typeof profileSchema>,
 ): Promise<{
   github: z.infer<typeof snapshotSchema>["github"];
   calendar: z.infer<typeof calendarSchema>;
   repos: Record<string, z.infer<typeof repoStatsSchema>>;
 }> {
-  const data = await graphql(gqlProfileSchema, PROFILE_QUERY, { login: profile.login }, profile);
+  const data = await graphql(gqlProfileSchema, PROFILE_QUERY, { login }, profile);
   const user = data.user;
   const years = [...user.contributionsCollection.contributionYears].sort();
   const collected: Record<string, z.infer<typeof gqlYearsSchema>["user"][string]> = {};
@@ -224,7 +225,7 @@ async function fetchGitHub(
       )
       .join("")}
   } }`;
-    const chunk = await graphql(gqlYearsSchema, query, { login: profile.login }, profile);
+    const chunk = await graphql(gqlYearsSchema, query, { login }, profile);
     for (const entry of Object.entries(chunk.user)) {
       collected[need(entry[0], "year key")] = need(entry[1], `year ${entry[0]}`);
     }
@@ -233,9 +234,14 @@ async function fetchGitHub(
   const days = new Map<string, number>();
   let all = 0;
   const repos: Record<string, z.infer<typeof repoStatsSchema>> = {};
+  const owned = [profile.login, ...profile.extraLogins].map((l) => `${l}/`);
   const slotFor = (full: string): z.infer<typeof repoStatsSchema> => {
     const slot = repos[full];
     if (slot !== undefined) return slot;
+    let mine = false;
+    for (const prefix of owned) {
+      if (full.startsWith(prefix)) mine = true;
+    }
     const fresh = repoStatsSchema.parse({
       commits: 0,
       prs: 0,
@@ -246,7 +252,7 @@ async function fetchGitHub(
       fork: false,
       archived: false,
       private: false,
-      mine: full.startsWith(`${profile.login}/`),
+      mine,
     });
     repos[full] = fresh;
     return fresh;
@@ -496,9 +502,47 @@ async function main(): Promise<void> {
     const u = await github(userBioSchema, `users/${profile.login}`, profile.userAgent);
     return u.bio === null ? previous.intro : u.bio;
   }, previous.intro);
-  const gh = await attempt("github", () => fetchGitHub(today, profile), null);
+  const gh = await attempt("github", () => fetchGitHub(today, profile.login, profile), null);
+  const extraData: { github: z.infer<typeof snapshotSchema>["github"]; calendar: z.infer<typeof calendarSchema> }[] = [];
+  for (const login of profile.extraLogins) {
+    try {
+      await github(userBioSchema, `users/${login}`, profile.userAgent);
+    } catch {
+      warn(login, "account unreachable, skipped");
+      continue;
+    }
+    try {
+      extraData.push(await fetchGitHub(today, login, profile));
+    } catch (err) {
+      warn(login, `fetch failed, skipped: ${errMsg(err)}`);
+    }
+  }
   const built = gh === null ? null : buildProjects(gh.repos, intro, profile);
   const prevGhLangs = previous.github === null ? {} : previous.github.languages;
+  const dayTotals = new Map<string, number>();
+  const addCal = (cal: z.infer<typeof calendarSchema>): void => {
+    for (const entry of cal) {
+      const day = need(entry[0], "day");
+      const count = need(entry[1], "count");
+      const prev = dayTotals.get(day);
+      dayTotals.set(day, prev === undefined ? count : prev + count);
+    }
+  };
+  let mergedCal: z.infer<typeof calendarSchema> | null = null;
+  if (gh !== null) {
+    addCal(gh.calendar);
+    for (const extra of extraData) addCal(extra.calendar);
+    mergedCal = [...dayTotals]
+      .sort((a, b) => need(a[0], "day").localeCompare(need(b[0], "day")))
+      .map((entry): [string, number] => [need(entry[0], "day"), need(entry[1], "count")]);
+  }
+  const mergedStreak = mergedCal === null ? null : streaks(dayTotals, today);
+  const extraYear = extraData.reduce((a, e) => a + (e.github === null ? 0 : e.github.contributions_year), 0);
+  const extraAll = extraData.reduce((a, e) => a + (e.github === null ? 0 : e.github.contributions_all), 0);
+  const createdDates = [
+    ...(gh === null || gh.github === null ? [] : [gh.github.created_at]),
+    ...extraData.flatMap((e) => (e.github === null ? [] : [e.github.created_at])),
+  ].sort();
   const ghGithub = gh === null ? previous.github : gh.github;
   const snapshot = snapshotSchema.parse({
     intro,
@@ -512,23 +556,23 @@ async function main(): Promise<void> {
       ghGithub === null
         ? null
         : {
-            created_at: ghGithub.created_at,
+            created_at: createdDates.length === 0 ? ghGithub.created_at : need(createdDates[0], "created date"),
             followers: ghGithub.followers,
             public_repos: ghGithub.public_repos,
             prs: ghGithub.prs,
             prs_merged: ghGithub.prs_merged,
             year: ghGithub.year,
-            contributions_year: ghGithub.contributions_year,
-            contributions_all: ghGithub.contributions_all,
-            streak_current: ghGithub.streak_current,
-            streak_longest: ghGithub.streak_longest,
+            contributions_year: ghGithub.contributions_year + extraYear,
+            contributions_all: ghGithub.contributions_all + extraAll,
+            streak_current: mergedStreak === null ? ghGithub.streak_current : need(mergedStreak[0], "streak"),
+            streak_longest: mergedStreak === null ? ghGithub.streak_longest : need(mergedStreak[1], "streak"),
             languages: built === null ? prevGhLangs : built.langCounts,
           },
   });
   if (failures === 4) throw new Error("every source failed; leaving data/ untouched");
 
   await writeFile("data/snapshot.json", `${JSON.stringify(snapshot, null, "\t")}\n`);
-  if (gh !== null) await writeFile("data/calendar.json", `${JSON.stringify(gh.calendar)}\n`);
+  if (mergedCal !== null) await writeFile("data/calendar.json", `${JSON.stringify(mergedCal)}\n`);
 
   const prevStarsRaw = await readJson("data/stars.json");
   let prevStars: z.infer<typeof starsSchema> | null = null;
@@ -540,7 +584,7 @@ async function main(): Promise<void> {
   const stars = await attempt("star history", () => fetchStarHistory(snapshot.projects, iso(today), prevStars, profile), null);
   if (stars !== null) await writeFile("data/stars.json", `${JSON.stringify(stars)}\n`);
 
-  if (gh === null) {
+  if (mergedCal === null) {
     const calRaw = await readJson("data/calendar.json");
     let cal: z.infer<typeof calendarSchema> | null = null;
     try {
