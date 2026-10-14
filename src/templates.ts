@@ -3,8 +3,6 @@ import { z } from "zod";
 import { need } from "./defined.ts";
 import { themesFileSchema } from "./schemas.ts";
 
-const templates = new Map<string, string>();
-
 async function walk(dir: string, files: string[]): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
@@ -17,13 +15,28 @@ async function walk(dir: string, files: string[]): Promise<void> {
   }
 }
 
-export async function loadTemplates(root: string): Promise<void> {
-  templates.clear();
-  const files: string[] = [];
-  await walk(root, files);
-  for (const file of files) {
-    const name = file.slice(root.length + 1, file.lastIndexOf("."));
-    templates.set(name, await readFile(file, "utf8"));
+export class TemplateEngine {
+  private templates = new Map<string, string>();
+
+  async load(root: string): Promise<void> {
+    this.templates.clear();
+    const files: string[] = [];
+    await walk(root, files);
+    for (const file of files) {
+      const name = file.slice(root.length + 1, file.lastIndexOf("."));
+      this.templates.set(name, await readFile(file, "utf8"));
+    }
+  }
+
+  render(name: string, vars: Record<string, string | number>): string {
+    const tpl = need(this.templates.get(name), `template ${name}`);
+    const out = tpl.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (whole: string, key: string) => {
+      void whole;
+      return String(need(vars[key], `var ${key} in template ${name}`));
+    });
+    const leftover = out.match(/\{\{[a-zA-Z0-9_]+\}\}/);
+    if (leftover !== null) throw new Error(`unresolved placeholder ${need(leftover[0], "placeholder")} in ${name}`);
+    return out.replace(/\n+$/, "");
   }
 }
 
@@ -50,15 +63,4 @@ export function themeVars(theme: z.infer<typeof themesFileSchema>["themes"][numb
     cityWinOff: theme.city.winOff,
     citySky: theme.city.sky,
   };
-}
-
-export function render(name: string, vars: Record<string, string | number>): string {
-  const tpl = need(templates.get(name), `template ${name}`);
-  const out = tpl.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (whole: string, key: string) => {
-    void whole;
-    return String(need(vars[key], `var ${key} in template ${name}`));
-  });
-  const leftover = out.match(/\{\{[a-zA-Z0-9_]+\}\}/);
-  if (leftover !== null) throw new Error(`unresolved placeholder ${need(leftover[0], "placeholder")} in ${name}`);
-  return out.replace(/\n+$/, "");
 }
