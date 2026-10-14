@@ -75,10 +75,9 @@ export class ProfileRenderer {
 
   private async headerLinks(page: Page): Promise<void> {
     const profile = this.ctx.profile;
-    const headerPair = await this.header.header();
-    const phoneHeaderPair = await this.header.phoneHeader();
-    page.add("header.svg", [headerPair[0], phoneHeaderPair[0]], "100%", this.header.alt(), null);
-    page.add("header-site.svg", [headerPair[1], phoneHeaderPair[1]], "100%", "Personal site and profile", profile.siteUrl);
+    const header = await this.header.header();
+    const phoneHeader = await this.header.phoneHeader();
+    page.add("header.svg", [header, phoneHeader], "100%", this.header.alt(), null);
     const links = this.buttons.linkButtons();
     page.add("links.svg", await this.head("links", `ping ${profile.login} --all-channels`), "100%", "Links", null);
     for (const entry of links.entries()) {

@@ -2,26 +2,11 @@ import { siGithub } from "simple-icons";
 import { z } from "zod";
 import { DESKTOP, FL, FR, M, PHONE, X, esc, f1 } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
-import { first, last, need } from "../defined.ts";
+import { need } from "../defined.ts";
 import { buttonSchema, geoSchema } from "../schemas.ts";
 import { themeVars } from "../templates.ts";
 import { cardLayout, fitText, fontMetrics, nameLayout, textWidth, wrapText } from "../layout.ts";
 
-const ADV = fontMetrics.advance;
-const SNAP = 1.04;
-
-function pack(items: string[], cols: number): string[] {
-  const lines: string[] = [];
-  for (const item of items.flatMap((text) => wrapText(text, cols * textWidth("M", 15), 15))) {
-    const prev = lines.length === 0 ? null : last(lines, "packed line");
-    if (prev !== null && prev.length + 3 + item.length <= cols) {
-      lines[lines.length - 1] = `${prev} · ${item}`;
-    } else {
-      lines.push(item);
-    }
-  }
-  return lines;
-}
 
 export class HeaderSection {
   private ctx: RenderContext;
@@ -30,16 +15,6 @@ export class HeaderSection {
     this.ctx = ctx;
   }
 
-  private lines(): [string, string, string] {
-    const s = this.ctx.snapshot;
-    const profile = this.ctx.profile;
-    const tools = s.projects
-      .slice(0, profile.tuning.headerTools)
-      .map((p) => p.name)
-      .join(" · ");
-    const introWords = wrapText(s.intro === "" ? profile.displayName : s.intro, DESKTOP.R - DESKTOP.X - textWidth(">> ", 15), 15);
-    return [need(first(introWords, "intro line"), "intro line"), fitText(tools, DESKTOP.R - DESKTOP.X - textWidth(">> ", 15), 15), "personal site and profile at "];
-  }
 
   alt(): string {
     const s = this.ctx.snapshot;
@@ -50,28 +25,29 @@ export class HeaderSection {
       .join(", ")}.`;
   }
 
-  async header(): Promise<[string, string]> {
+  async header(): Promise<string> {
     const { engine, theme, profile } = this.ctx;
     const slices = this.ctx.slices;
     const barLeft = `sys://${profile.siteHost} // node:${profile.login}`;
     const barRight = "ONLINE · ALL SYSTEMS NOMINAL";
-    const lines = this.lines();
-    const h = 240;
+    const bio = this.ctx.snapshot.intro === "" ? profile.displayName : this.ctx.snapshot.intro;
     const name = profile.headerName.toUpperCase();
-    const nameBox = nameLayout(name, DESKTOP.R - X, 102 + 15 * fontMetrics.ascent, h - 6 - 24 - 15 * fontMetrics.ascent, DESKTOP.M * fontMetrics.advance);
+    const nameTop = 102 + 15 * fontMetrics.ascent;
+    const nameWidthSize = (DESKTOP.R - X - 2 * DESKTOP.M * fontMetrics.advance) /
+      (Array.from(name).length * (fontMetrics.advance + fontMetrics.advance / 25));
+    const nameBox = nameLayout(name, DESKTOP.R - X, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), DESKTOP.M * fontMetrics.advance);
+    const bioLines = wrapText(bio, DESKTOP.R - X - textWidth(">> ", 15), 15);
+    const firstRow = engine.render("frame/header-line", { x: X, text: esc(need(bioLines[0], "GitHub description")) });
+    const continuationRows = bioLines.slice(1).map((line) => engine.render("frame/header-continuation", { x: X + textWidth(">> ", 15), text: esc(line) }));
+    const bioRows = [firstRow, ...continuationRows];
+    const bioTop = Math.ceil(nameBox.baseline + nameBox.size * fontMetrics.descent + 15 * fontMetrics.ascent);
+    const bioLineHeight = 15 * fontMetrics.ascent;
+    const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + DESKTOP.M * fontMetrics.advance) / 40) * 40;
     const defs = engine.render("frame/defs-header", { x: X, clipY: 80 });
     const barLX = FL + DESKTOP.M;
     const barRX = FR - DESKTOP.M;
     const dotx = barRX - textWidth(barRight, 12, 1) - DESKTOP.M;
-    const rows = [
-      engine.render("frame/header-line", { x: X, text: esc(need(lines[0], "header line 1")) }),
-      engine.render("frame/header-line", { x: X, text: esc(need(lines[1], "header line 2")) }),
-      engine.render("frame/header-siteline", { x: X, pre: esc(need(lines[2], "header line 3")), site: esc(fitText(profile.siteHost, DESKTOP.R - X - textWidth(">> " + need(lines[2], "header site prefix"), 15), 15)) }),
-    ];
-    const staggered = slices.stagger(rows.slice(0, 2), h - 6 - 24, 24, 1.75, 0.25);
-    const descLines = need(staggered[0], "header lines");
-    const siteStaggered = slices.stagger(rows.slice(2), 18, 24, 2.25, 0.25);
-    const siteLine = need(siteStaggered[0], "site line");
+    const descLines = need(slices.stagger(bioRows, bioTop, bioLineHeight, 1.75, 0.12)[0], "GitHub description lines");
     const body = engine.render("frame/header-top", {
       ...themeVars(theme),
       fl: FL,
@@ -98,66 +74,42 @@ export class HeaderSection {
       scanY: M + 35,
       scanH: h - M - 35,
     });
-    const tail = engine.render("frame/header-tail", {
-      ...themeVars(theme),
-      siteLine,
-      x: X,
-      promptY: 56,
-      cursorX: X + 18,
-      cursorY: 43,
-      fl: FL,
-      barW: FR - FL,
-      scanH: 80 - M,
-    });
-    return Promise.all([
-      slices.sliceG(DESKTOP, h, body, {
+    return slices.sliceG(DESKTOP, h, body, {
         title: profile.displayName,
         desc: this.alt(),
-        text: barLeft + barRight + profile.headerName.toUpperCase() + "$ whoami>>" + need(lines[0], "line") + need(lines[1], "line"),
+        text: barLeft + barRight + name + "$ whoami>>" + bio,
         top: true,
         css: this.ctx.engine.render("css/header", {}),
         defs,
         weights: [400, 700, 800],
-      }),
-      slices.sliceG(DESKTOP, 80, tail, {
-        title: profile.siteHost,
-        desc: `Personal site and profile at ${profile.siteHost}`,
-        css: this.ctx.engine.render("css/header", {}),
-        defs: engine.render("frame/defs-scan", {}),
-        text: ">>" + need(lines[2], "line") + profile.siteHost + "$",
-        bottom: true,
-      }),
-    ]);
+      });
   }
 
-  async phoneHeader(): Promise<[string, string]> {
+  async phoneHeader(): Promise<string> {
     const { engine, theme, snapshot, profile } = this.ctx;
     const slices = this.ctx.slices;
     const g = PHONE;
     const barLeft = `sys://${profile.siteHost} // ${profile.login}`;
     const barRight = "ONLINE · NOMINAL";
+    const bio = snapshot.intro === "" ? profile.displayName : snapshot.intro;
     const name = profile.headerName.toUpperCase();
     const defs = engine.render("frame/defs-header", { x: g.X, clipY: 64 });
     const barLX = g.FL + g.M;
     const barRX = g.FR - g.M;
     const dotx = barRX - textWidth(barRight, 12, 1) - g.M;
-    const cols = Math.floor((g.R - g.X) / (15 * ADV * SNAP)) - 3;
-    const introLines = pack(wrapText(snapshot.intro === "" ? profile.displayName : snapshot.intro, g.R - g.X - textWidth(">> ", 15), 15), cols);
-    const rows = [
-      ...introLines.map((l) => engine.render("frame/header-line", { x: g.X, text: esc(l) })),
-      ...pack(
-        snapshot.projects.slice(0, profile.tuning.headerTools).map((p) => p.name),
-        cols,
-      ).map((l) => engine.render("frame/header-line", { x: g.X, text: esc(l) })),
-      engine.render("frame/header-siteline", { x: g.X, pre: "personal site at ", site: esc(fitText(profile.siteHost, g.R - g.X - textWidth(">> personal site at ", 15), 15)) }),
-    ];
-    const upper = rows.slice(0, rows.length - 1);
-    const lower = rows.slice(rows.length - 1);
-    const h = Math.ceil((194 + (upper.length - 1) * 24 + 6) / 40) * 40;
-    const nameBox = nameLayout(name, g.R - g.X, 86 + 15 * fontMetrics.ascent, h - 6 - (upper.length - 1) * 24 - 15 * fontMetrics.ascent, g.M * fontMetrics.advance);
-    const step = Math.min(0.25, 0.75 / rows.length);
-    const descStaggered = slices.stagger(upper, h - 6 - (upper.length - 1) * 24, 24, 1.75, step);
-    const siteStaggered = slices.stagger(lower, 18, 24, 1.75 + upper.length * step, step);
+    const nameTop = 86 + 15 * fontMetrics.ascent;
+    const nameWidthSize = (g.R - g.X - 2 * g.M * fontMetrics.advance) /
+      (Array.from(name).length * (fontMetrics.advance + fontMetrics.advance / 25));
+    const nameBox = nameLayout(name, g.R - g.X, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), g.M * fontMetrics.advance);
+    const bioLines = wrapText(bio, g.R - g.X - textWidth(">> ", 15), 15);
+    const firstRow = engine.render("frame/header-line", { x: g.X, text: esc(need(bioLines[0], "GitHub description")) });
+    const continuationRows = bioLines.slice(1).map((line) => engine.render("frame/header-continuation", { x: g.X + textWidth(">> ", 15), text: esc(line) }));
+    const bioRows = [firstRow, ...continuationRows];
+    const bioTop = Math.ceil(nameBox.baseline + nameBox.size * fontMetrics.descent + 15 * fontMetrics.ascent);
+    const bioLineHeight = 15 * fontMetrics.ascent;
+    const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + g.M * fontMetrics.advance) / 40) * 40;
+    const step = 0.12;
+    const descLines = slices.stagger(bioRows, bioTop, bioLineHeight, 1.75, step)[0];
     const body = engine.render("frame/header-top", {
       ...themeVars(theme),
       fl: g.FL,
@@ -180,40 +132,19 @@ export class HeaderSection {
       gmX: g.X + g.M * fontMetrics.advance / 2,
       gcX: g.X - g.M * fontMetrics.advance / 2,
       name: esc(name),
-      descLines: need(descStaggered[0], "phone header lines"),
+      descLines: need(descLines, "phone GitHub description lines"),
       scanY: g.M + 35,
       scanH: h - g.M - 35,
     });
-    const tail = engine.render("frame/header-tail", {
-      ...themeVars(theme),
-      siteLine: need(siteStaggered[0], "phone site line"),
-      x: g.X,
-      promptY: 52,
-      cursorX: g.X + 18,
-      cursorY: 39,
-      fl: g.FL,
-      barW: g.FR - g.FL,
-      scanH: 80 - g.M,
-    });
-    return Promise.all([
-      slices.sliceG(g, h, body, {
+    return slices.sliceG(g, h, body, {
         title: profile.displayName,
         desc: this.alt(),
-        text: barLeft + barRight + profile.headerName.toUpperCase() + "$ whoami>>·" + upper.join(""),
+        text: barLeft + barRight + name + "$ whoami>>" + bio,
         top: true,
         css: this.ctx.engine.render("css/header", {}),
         defs,
         weights: [400, 700, 800],
-      }),
-      slices.sliceG(g, 80, tail, {
-        title: profile.siteHost,
-        desc: `Personal site and profile at ${profile.siteHost}`,
-        css: this.ctx.engine.render("css/header", {}),
-        defs: engine.render("frame/defs-scan", {}),
-        text: ">>·personal site at " + profile.siteHost + "$",
-        bottom: true,
-      }),
-    ]);
+      });
   }
 
   async footer(): Promise<string> {
