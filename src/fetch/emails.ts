@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { need } from "../defined.ts";
 import { commitSearchSchema, eventsSchema, profileSchema, repoStatsSchema } from "../schemas.ts";
-import { errMsg, github, warn } from "./client.ts";
+import { GitHubClient, errMsg, warn } from "./client.ts";
 
 const SEARCH_PAUSE = 2000;
 const EVENT_PAGES = 5;
@@ -21,14 +21,14 @@ function looksMine(name: string, email: string, profile: z.infer<typeof profileS
 }
 
 async function discoverFromEvents(
+  client: GitHubClient,
   profile: z.infer<typeof profileSchema>,
 ): Promise<{ email: string; name: string }[]> {
   const found: { email: string; name: string }[] = [];
   for (let page = 1; page <= EVENT_PAGES; page++) {
-    const events = await github(
+    const events = await client.github(
       eventsSchema,
       `users/${profile.login}/events/public?per_page=100&page=${page}`,
-      profile.userAgent,
     );
     if (events.length === 0) break;
     for (const e of events) {
@@ -46,16 +46,11 @@ async function discoverFromEvents(
   return found;
 }
 
-async function nameEmails(
-  repo: string,
-  name: string,
-  profile: z.infer<typeof profileSchema>,
-): Promise<string[]> {
+async function nameEmails(repo: string, name: string, client: GitHubClient): Promise<string[]> {
   await pause();
-  const res = await github(
+  const res = await client.github(
     commitSearchSchema,
     `search/commits?q=${encodeURIComponent(`repo:${repo} author-name:"${name}"`)}&per_page=100`,
-    profile.userAgent,
   );
   const emails: string[] = [];
   for (const item of res.items) {
@@ -65,12 +60,11 @@ async function nameEmails(
   return emails;
 }
 
-async function isUnattributed(email: string, profile: z.infer<typeof profileSchema>): Promise<boolean> {
+async function isUnattributed(email: string, client: GitHubClient): Promise<boolean> {
   await pause();
-  const res = await github(
+  const res = await client.github(
     commitSearchSchema,
     `search/commits?q=${encodeURIComponent(`author-email:${email}`)}&per_page=1`,
-    profile.userAgent,
   );
   if (res.total_count === 0) return false;
   const item = res.items[0];
@@ -78,16 +72,11 @@ async function isUnattributed(email: string, profile: z.infer<typeof profileSche
   return item.author === null;
 }
 
-async function repoEmailCount(
-  repo: string,
-  email: string,
-  profile: z.infer<typeof profileSchema>,
-): Promise<number> {
+async function repoEmailCount(repo: string, email: string, client: GitHubClient): Promise<number> {
   await pause();
-  const res = await github(
+  const res = await client.github(
     commitSearchSchema,
     `search/commits?q=${encodeURIComponent(`repo:${repo} author-email:${email}`)}&per_page=1`,
-    profile.userAgent,
   );
   return res.total_count;
 }
@@ -108,6 +97,7 @@ function candidates(
 
 export async function enrichWithEmails(
   repos: Record<string, z.infer<typeof repoStatsSchema>>,
+  client: GitHubClient,
   profile: z.infer<typeof profileSchema>,
 ): Promise<string[]> {
   const found = candidates(repos);
@@ -121,14 +111,14 @@ export async function enrichWithEmails(
   };
   for (const extra of profile.extraEmails) add(extra, profile.displayName);
   try {
-    for (const d of await discoverFromEvents(profile)) add(d.email, d.name);
+    for (const d of await discoverFromEvents(client, profile)) add(d.email, d.name);
   } catch (err) {
     warn("email discovery", errMsg(err));
   }
   for (const entry of found) {
     const full = need(entry[0], "repo");
     try {
-      for (const email of await nameEmails(full, profile.displayName, profile)) {
+      for (const email of await nameEmails(full, profile.displayName, client)) {
         add(email, profile.displayName);
       }
     } catch (err) {
@@ -138,7 +128,7 @@ export async function enrichWithEmails(
   const tracked: string[] = [];
   for (const email of emails.values()) {
     try {
-      if (await isUnattributed(email, profile)) tracked.push(email);
+      if (await isUnattributed(email, client)) tracked.push(email);
     } catch (err) {
       warn(`email check for ${email}`, errMsg(err));
     }
@@ -148,7 +138,7 @@ export async function enrichWithEmails(
     const slot = need(entry[1], `stats for ${full}`);
     for (const email of tracked) {
       try {
-        slot.commits += await repoEmailCount(full, email, profile);
+        slot.commits += await repoEmailCount(full, email, client);
       } catch (err) {
         warn(`email commits for ${full}`, errMsg(err));
       }

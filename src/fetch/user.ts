@@ -9,7 +9,7 @@ import {
   repoStatsSchema,
   snapshotSchema,
 } from "../schemas.ts";
-import { graphql } from "./client.ts";
+import { GitHubClient } from "./client.ts";
 
 const PROFILE_QUERY = `query($login: String!) {
   user(login: $login) {
@@ -113,13 +113,14 @@ export function buildProjects(
 export async function fetchGitHub(
   today: Date,
   login: string,
+  client: GitHubClient,
   profile: z.infer<typeof profileSchema>,
 ): Promise<{
   github: z.infer<typeof snapshotSchema>["github"];
   calendar: z.infer<typeof calendarSchema>;
   repos: Record<string, z.infer<typeof repoStatsSchema>>;
 }> {
-  const data = await graphql(gqlProfileSchema, PROFILE_QUERY, { login }, profile);
+  const data = await client.graphql(gqlProfileSchema, PROFILE_QUERY, { login });
   const user = data.user;
   const years = [...user.contributionsCollection.contributionYears].sort();
   const collected: Record<string, z.infer<typeof gqlYearsSchema>["user"][string]> = {};
@@ -142,7 +143,7 @@ export async function fetchGitHub(
       )
       .join("")}
   } }`;
-    const chunk = await graphql(gqlYearsSchema, query, { login }, profile);
+    const chunk = await client.graphql(gqlYearsSchema, query, { login });
     for (const entry of Object.entries(chunk.user)) {
       collected[need(entry[0], "year key")] = need(entry[1], `year ${entry[0]}`);
     }
