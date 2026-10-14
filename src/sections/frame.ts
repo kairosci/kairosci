@@ -6,14 +6,6 @@ import { first, last, need } from "../defined.ts";
 import { buttonSchema } from "../schemas.ts";
 import { themeVars } from "../templates.ts";
 
-const HEADER_CSS = `@keyframes type{from{width:0}}
-@keyframes flicker{0%{opacity:0}10%{opacity:1}14%{opacity:.2}22%{opacity:1}30%{opacity:.4}40%,100%{opacity:1}}
-@keyframes gm{0%,92%,100%{transform:translate(0,0)}93%{transform:translate(5px,-1px)}95%{transform:translate(-3px,1px)}97%{transform:translate(2px,0)}}
-@keyframes gc{0%,92%,100%{transform:translate(0,0)}93%{transform:translate(-5px,1px)}95%{transform:translate(4px,-1px)}97%{transform:translate(-2px,0)}}
-.typing{animation:type .7s steps(8) .3s both}
-.name{animation:flicker .9s linear 1.1s both}
-.gm{animation:gm 6s linear 2s infinite}.gc{animation:gc 6s linear 2s infinite}`;
-
 const ADV = 0.6;
 const SNAP = 1.04;
 
@@ -96,7 +88,7 @@ export class HeaderSection {
       nameY: 172,
       gmX: X + 3,
       gcX: X - 3,
-      name: profile.headerName,
+      name: profile.headerName.toUpperCase(),
       descLines,
       scanY: M + 35,
       scanH: h - M - 35,
@@ -116,16 +108,16 @@ export class HeaderSection {
       slices.sliceG(DESKTOP, h, body, {
         title: profile.displayName,
         desc: this.alt(),
-        text: barLeft + barRight + profile.headerName + "$ whoami>>" + need(lines[0], "line") + need(lines[1], "line"),
+        text: barLeft + barRight + profile.headerName.toUpperCase() + "$ whoami>>" + need(lines[0], "line") + need(lines[1], "line"),
         top: true,
-        css: HEADER_CSS,
+        css: this.ctx.engine.render("css/header", {}),
         defs,
         weights: [400, 700, 800],
       }),
       slices.sliceG(DESKTOP, 80, tail, {
         title: profile.siteHost,
         desc: `Personal site and profile at ${profile.siteHost}`,
-        css: HEADER_CSS,
+        css: this.ctx.engine.render("css/header", {}),
         defs: engine.render("frame/defs-scan", {}),
         text: ">>" + need(lines[2], "line") + profile.siteHost + "$",
         bottom: true,
@@ -178,7 +170,7 @@ export class HeaderSection {
       nameY: 150,
       gmX: g.X + 3,
       gcX: g.X - 3,
-      name: profile.headerName,
+      name: profile.headerName.toUpperCase(),
       descLines: need(descStaggered[0], "phone header lines"),
       scanY: g.M + 35,
       scanH: h - g.M - 35,
@@ -198,16 +190,16 @@ export class HeaderSection {
       slices.sliceG(g, h, body, {
         title: profile.displayName,
         desc: this.alt(),
-        text: barLeft + barRight + profile.headerName + "$ whoami>>·" + upper.join(""),
+        text: barLeft + barRight + profile.headerName.toUpperCase() + "$ whoami>>·" + upper.join(""),
         top: true,
-        css: HEADER_CSS,
+        css: this.ctx.engine.render("css/header", {}),
         defs,
         weights: [400, 700, 800],
       }),
       slices.sliceG(g, 80, tail, {
         title: profile.siteHost,
         desc: `Personal site and profile at ${profile.siteHost}`,
-        css: HEADER_CSS,
+        css: this.ctx.engine.render("css/header", {}),
         defs: engine.render("frame/defs-scan", {}),
         text: ">>·personal site at " + profile.siteHost + "$",
         bottom: true,

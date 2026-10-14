@@ -6,11 +6,6 @@ import { projectSchema, starsSchema, trendSchema } from "../schemas.ts";
 import { age, monthDay, shift, short, sum, toolColor } from "../shared.ts";
 import { themeVars } from "../templates.ts";
 
-const ROW_CSS = `.bar{transform-box:fill-box;transform-origin:0 50%;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
-@keyframes grow{from{transform:scaleX(0)}}
-.lbl{animation:fadein .3s ease-out both}
-.chip{animation:pulse 1s ease-in-out 3}`;
-
 const P = PHONE;
 const PBX = 180;
 const PHX = P.R - 60;
@@ -39,7 +34,7 @@ export class TrendingSection {
     const theme = this.ctx.theme;
     const projects: z.infer<typeof projectSchema>[] = this.ctx.snapshot.projects;
     const tuning = this.ctx.profile.tuning;
-    const byRepo = new Map(projects.map((p) => [p.repo, p]));
+    const byRepo = new Map(projects.map((p) => [p.repo.toLowerCase(), p]));
     const end = stars.end;
     const windows = tuning.trendWindows;
     for (let wi = 0; wi < windows.length; wi++) {
@@ -48,7 +43,7 @@ export class TrendingSection {
       for (const entry of Object.entries(stars.repos)) {
         const repo = need(entry[0], "trend repo");
         const s = need(entry[1], `stars for ${repo}`);
-        const p = byRepo.get(repo);
+        const p = byRepo.get(repo.toLowerCase());
         if (p === undefined) continue;
         const from = shift(end, -(days - 1));
         const gain = sum(s.daily, from, end);
@@ -166,7 +161,7 @@ export class TrendingSection {
     });
     return slices.sliceG(DESKTOP, 40, body, {
       title: r.p.name,
-      css: ROW_CSS,
+      css: this.ctx.engine.render("css/row", {}),
       defs: this.barDefs(c),
       desc: rowDesc(r, pitch),
       text: `${r.p.name}NEW▲.x${pitch}+★${r.gain}${r.total}`,
@@ -251,7 +246,7 @@ export class TrendingSection {
     });
     return slices.sliceG(P, 40, body, {
       title: r.p.name,
-      css: ROW_CSS,
+      css: this.ctx.engine.render("css/row", {}),
       defs: this.barDefs(c),
       desc: rowDesc(r, pitch),
       text: `${r.p.name}NEW▲.x${tag}+${r.gain}`,

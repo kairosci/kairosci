@@ -27,16 +27,13 @@ export function esc(s: string | number): string {
 
 function unescape(s: string): string {
   return s
-    .replace(/&#x([0-9a-f]+);/gi, (whole: string, h: string) => {
-      void whole;
+    .replace(/&#x([0-9a-f]+);/gi, (_whole: string, h: string) => {
       return String.fromCodePoint(parseInt(h, 16));
     })
-    .replace(/&#(\d+);/g, (whole: string, d: string) => {
-      void whole;
+    .replace(/&#(\d+);/g, (_whole: string, d: string) => {
       return String.fromCodePoint(Number(d));
     })
-    .replace(/&(lt|gt|quot|amp);/g, (whole: string, n: string) => {
-      void whole;
+    .replace(/&(lt|gt|quot|amp);/g, (_whole: string, n: string) => {
       const code = need({ lt: 60, gt: 62, quot: 34, amp: 38 }[n], `entity ${n}`);
       return String.fromCharCode(code);
     });
@@ -98,15 +95,7 @@ export class Slices {
   }
 
   baseCss(): string {
-    const t = this.theme;
-    return `text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px}
-.dim{fill:${t.dim}}.cy{fill:${t.accent}}.fg{fill:${t.fg}}.gr{fill:${t.ok}}.wh{fill:${t.bright}}.fainter{fill:${t.fainter}}
-@keyframes fadein{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
-@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.ln{animation:fadein .35s ease-out both}
-.cursor{animation:blink 1.05s step-end infinite}
-.dot{animation:pulse 2s ease-in-out infinite}`;
+    return this.engine.render("css/base", themeVars(this.theme));
   }
 
   baseDefs(gridX = 0): string {
@@ -115,7 +104,7 @@ export class Slices {
 
   async document(d: z.infer<typeof docSchema>, frame: { under: string; over: string }): Promise<string> {
     const weights = d.weights === undefined ? [400, 700] : d.weights;
-    const style = `${await faces(d.text + visible(d.body), weights)}\n${this.baseCss()}\n${d.css === undefined ? "" : d.css}\n@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
+    const style = `${await faces(d.text + visible(d.body), weights)}\n${this.baseCss()}\n${d.css === undefined ? "" : d.css}\n${this.engine.render("css/reduced-motion", {})}`;
     return this.engine.render("console/doc", {
       w: d.w,
       h: d.h,

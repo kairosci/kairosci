@@ -1,0 +1,2 @@
+@keyframes drift{from{transform:translateX({{down}}px)}to{transform:translateX({{up}}px)}}
+.c0{animation:drift 70s ease-in-out infinite alternate}.c1{animation:drift 95s ease-in-out infinite alternate-reverse}.c2{animation:drift 120s ease-in-out infinite alternate}

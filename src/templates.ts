@@ -9,7 +9,7 @@ async function walk(dir: string, files: string[]): Promise<void> {
     const path = `${dir}/${entry.name}`;
     if (entry.isDirectory()) {
       await walk(path, files);
-    } else if (entry.name.endsWith(".svg") || entry.name.endsWith(".html")) {
+    } else if (entry.name.endsWith(".svg") || entry.name.endsWith(".html") || entry.name.endsWith(".css")) {
       files.push(path);
     }
   }
@@ -30,8 +30,7 @@ export class TemplateEngine {
 
   render(name: string, vars: Record<string, string | number>): string {
     const tpl = need(this.templates.get(name), `template ${name}`);
-    const out = tpl.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (whole: string, key: string) => {
-      void whole;
+    const out = tpl.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_whole: string, key: string) => {
       return String(need(vars[key], `var ${key} in template ${name}`));
     });
     const leftover = out.match(/\{\{[a-zA-Z0-9_]+\}\}/);

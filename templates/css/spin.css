@@ -1,0 +1,2 @@
+@keyframes spin{to{transform:rotate(360deg)}}
+.rays{transform-origin:{{cx}}px {{cy}}px;animation:spin 80s linear infinite}

@@ -1,0 +1,4 @@
+.bar{transform-box:fill-box;transform-origin:0 50%;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.lbl{animation:fadein .3s ease-out both}
+.chip{animation:pulse 1s ease-in-out 3}

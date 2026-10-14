@@ -118,10 +118,7 @@ export class SkyLayers {
           r: f1(15 * k),
         }),
       );
-      css.push(
-        `@keyframes spin{to{transform:rotate(360deg)}}`,
-        `.rays{transform-origin:${high[0]}px ${high[1]}px;animation:spin 80s linear infinite}`,
-      );
+      css.push(this.engine.render("css/spin", { cx: high[0], cy: high[1] }));
     } else {
       const low = b.low;
       const r = 24 * k;
@@ -199,10 +196,7 @@ export class SkyLayers {
         });
       })
       .join("");
-    css.push(
-      `@keyframes drift{from{transform:translateX(${-b.drift}px)}to{transform:translateX(${b.drift}px)}}`,
-      `.c0{animation:drift 70s ease-in-out infinite alternate}.c1{animation:drift 95s ease-in-out infinite alternate-reverse}.c2{animation:drift 120s ease-in-out infinite alternate}`,
-    );
+    css.push(this.engine.render("css/drift", { down: -b.drift, up: b.drift }));
     return { defs: defs.join("\n"), css: css.join("\n"), grad, sun: sun.join("\n"), clouds };
   }
 }

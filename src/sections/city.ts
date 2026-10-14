@@ -305,13 +305,7 @@ export class CitySection {
     const t = this.ctx.theme;
     const engine = this.ctx.engine;
     const css = [
-      `@keyframes tw{0%,100%{opacity:.9}50%{opacity:.15}}
-@keyframes fl{0%,40%,100%{opacity:1}45%,60%{opacity:.1}}
-@keyframes blink{0%,90%,100%{opacity:0}93%{opacity:1}}
-@keyframes fly{from{transform:translate(${frame.x - 10}px,0)}to{transform:translate(${frame.x + frame.w + 70}px,-30px)}}
-.s0{animation:tw 3s infinite}
-.f0{animation:fl 5s infinite}.f1{animation:fl 7s infinite 2s}.f2{animation:fl 9s infinite 4s}
-.plane{animation:fly 26s linear infinite}.bl{animation:blink 1.4s infinite}`,
+      engine.render("css/scene", { down: frame.x - 10, up: frame.x + frame.w + 70 }),
     ];
     const defs = [engine.render("sky/defs-frame", { x: frame.x, w: frame.w, h: frame.h })];
     if (p === "night") {
