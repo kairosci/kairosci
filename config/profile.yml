@@ -17,6 +17,9 @@ extraLogins:
   - sigattilio
   - alexio-dev
 extraEmails: []
+extraRepos:
+  - rustpython
+  - uutilus/coreutilus
 tuning:
   newDays: 60
   trendWindows:

@@ -6,18 +6,18 @@ import { GitHubClient, errMsg, warn } from "./client.ts";
 const SEARCH_PAUSE = 2000;
 const EVENT_PAGES = 5;
 
-function pause(): Promise<void> {
+export function pause(): Promise<void> {
   return new Promise((r) => setTimeout(r, SEARCH_PAUSE));
 }
 
 function looksMine(name: string, email: string, profile: z.infer<typeof profileSchema>): boolean {
   const clean = name.trim().toLowerCase();
   const display = profile.displayName.trim().toLowerCase();
-  const login = profile.login.toLowerCase();
-  if (clean !== "" && (clean === display || clean === login)) return true;
+  const logins = [profile.login, ...profile.extraLogins].map((login) => login.toLowerCase());
+  if (clean !== "" && (clean === display || logins.includes(clean))) return true;
   const at = email.indexOf("@");
   const local = at < 0 ? email : email.slice(0, at);
-  return local.includes(login);
+  return logins.some((login) => local.toLowerCase().includes(login));
 }
 
 async function discoverFromEvents(
@@ -36,7 +36,7 @@ async function discoverFromEvents(
       const commits = e.payload.commits;
       if (commits === undefined) continue;
       for (const c of commits) {
-        if (!found.some((f) => f.email === c.author.email)) {
+        if (!found.some((f) => f.email.trim().toLowerCase() === c.author.email.trim().toLowerCase())) {
           found.push({ email: c.author.email, name: c.author.name });
         }
       }
@@ -47,15 +47,20 @@ async function discoverFromEvents(
 }
 
 async function nameEmails(repo: string, name: string, client: GitHubClient): Promise<string[]> {
-  await pause();
-  const res = await client.github(
-    commitSearchSchema,
-    `search/commits?q=${encodeURIComponent(`repo:${repo} author-name:"${name}"`)}&per_page=100`,
+  const variants = [name, name.toLowerCase(), name.toUpperCase()].filter(
+    (v, i, arr) => v !== "" && arr.indexOf(v) === i,
   );
   const emails: string[] = [];
-  for (const item of res.items) {
-    const email = item.commit.author.email.trim().toLowerCase();
-    if (email !== "" && !emails.includes(email)) emails.push(email);
+  for (const variant of variants) {
+    await pause();
+    const res = await client.github(
+      commitSearchSchema,
+      `search/commits?q=${encodeURIComponent(`repo:${repo} author-name:"${variant}"`)}&per_page=100`,
+    );
+    for (const item of res.items) {
+      const email = item.commit.author.email.trim().toLowerCase();
+      if (email !== "" && !emails.includes(email)) emails.push(email);
+    }
   }
   return emails;
 }
@@ -107,7 +112,7 @@ export async function enrichWithEmails(
     const key = email.trim().toLowerCase();
     if (key === "" || emails.has(key)) return;
     if (!looksMine(name, key, profile)) return;
-    emails.set(key, email.trim());
+    emails.set(key, key);
   };
   for (const extra of profile.extraEmails) add(extra, profile.displayName);
   try {

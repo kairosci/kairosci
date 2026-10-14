@@ -37,6 +37,7 @@ export const profileSchema = z.object({
   memberSince: z.string().min(1),
   extraLogins: z.array(z.string().min(1)),
   extraEmails: z.array(z.string().min(1)),
+  extraRepos: z.array(z.string().trim().regex(/^[a-z0-9_.-]+(?:\/[a-z0-9_.-]+)?$/i)).default([]),
   tuning: tuningSchema,
   links: z.array(linkSchema).min(1),
 });
@@ -195,6 +196,22 @@ export const eventsSchema = z.array(
     }),
   }),
 );
+
+export const repoSearchItemSchema = z.object({
+  full_name: z.string().min(1),
+  description: z.string().nullable(),
+  stargazers_count: z.number().int().nonnegative(),
+  html_url: z.string().min(1),
+  language: z.string().nullable(),
+  fork: z.boolean(),
+  archived: z.boolean(),
+  private: z.boolean(),
+});
+
+export const repoSearchSchema = z.object({
+  total_count: z.number().int().nonnegative(),
+  items: z.array(repoSearchItemSchema),
+});
 
 export const userBioSchema = z.object({
   bio: z.string().nullable(),

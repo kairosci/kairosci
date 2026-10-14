@@ -31,8 +31,8 @@ export async function search(
 }
 
 export function isBot(login: string, kind: string): boolean {
-  if (kind === "Bot") return true;
-  return login.endsWith("[bot]");
+  if (kind.toLowerCase() === "bot") return true;
+  return login.toLowerCase().endsWith("[bot]");
 }
 
 export async function fetchCount(
@@ -52,12 +52,12 @@ export async function fetchCount(
   const kept = found.items.filter((i) => !isBot(i.user.login, i.user.type) && !(kind === "pr" && RELEASE_TITLE.test(i.title)));
   const bots: string[] = [];
   for (const i of found.items) {
-    if (isBot(i.user.login, i.user.type) && !bots.includes(i.user.login)) bots.push(i.user.login);
+    if (isBot(i.user.login, i.user.type) && !bots.some((login) => login.toLowerCase() === i.user.login.toLowerCase())) bots.push(i.user.login);
   }
   bots.sort();
   const query = [
     ...base,
-    ...bots.map((b) => (b.endsWith("[bot]") ? `-author:app/${b.slice(0, -5)}` : `-author:${b}`)),
+    ...bots.map((b) => (b.toLowerCase().endsWith("[bot]") ? `-author:app/${b.slice(0, -5)}` : `-author:${b}`)),
     ...(kind === "pr" ? ['NOT "chore: release" in:title'] : []),
   ].join(" ");
   const linked = await client.github(
@@ -111,7 +111,7 @@ export async function fetchStarHistory(
   const repos: Record<string, { created_at: string; total: number; daily: Record<string, number> }> = {};
   let ok = 0;
   for (const p of projects) {
-    const stored = previous === null ? null : previous.repos[p.repo];
+    const stored = previous === null ? null : Object.entries(previous.repos).find(([repo]) => repo.toLowerCase() === p.repo.toLowerCase())?.[1];
     const kept = stored === undefined ? null : stored;
     try {
       repos[p.repo] = await repoStars(p.repo, kept, today, client);

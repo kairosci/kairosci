@@ -12,7 +12,7 @@ export async function loadProfile(): Promise<z.infer<typeof profileSchema>> {
 export async function loadTheme(name: string): Promise<z.infer<typeof themesFileSchema>["themes"][number]> {
   const file = themesFileSchema.parse(parseYaml(await readFile("config/themes.yml", "utf8")));
   for (const theme of file.themes) {
-    if (theme.name === name) return theme;
+    if (theme.name.toLowerCase() === name.toLowerCase()) return theme;
   }
   throw new Error(`missing theme ${name}`);
 }

@@ -4,7 +4,7 @@ import { last, need } from "./defined.ts";
 import { GitHubClient, errMsg, warn } from "./fetch/client.ts";
 import { fetchCount, fetchStarHistory } from "./fetch/counts.ts";
 import { enrichWithEmails } from "./fetch/emails.ts";
-import { buildProjects, fetchGitHub, iso, streaks } from "./fetch/user.ts";
+import { buildProjects, fetchGitHub, iso, resolveExtraRepos, streaks } from "./fetch/user.ts";
 import { loadProfile } from "./profile.ts";
 import { calendarSchema, profileSchema, snapshotSchema, starsSchema, userBioSchema } from "./schemas.ts";
 
@@ -39,7 +39,10 @@ export class ProfileFetcher {
     const gh = await this.attempt("github", () => fetchGitHub(today, profile.login, this.client, profile), null);
     const extraData = await this.fetchExtras(today);
     let trackedEmails: string[] = [];
-    if (gh !== null) trackedEmails = await enrichWithEmails(gh.repos, this.client, profile);
+    if (gh !== null) {
+      await resolveExtraRepos(gh.repos, this.client, profile);
+      trackedEmails = await enrichWithEmails(gh.repos, this.client, profile);
+    }
     const built = gh === null ? null : buildProjects(gh.repos, intro, profile);
     const merged = this.mergeAll(today, gh, extraData);
     const snapshot = snapshotSchema.parse({

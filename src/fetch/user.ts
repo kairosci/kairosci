@@ -6,10 +6,96 @@ import {
   gqlYearsSchema,
   profileSchema,
   projectSchema,
+  repoSearchItemSchema,
+  repoSearchSchema,
   repoStatsSchema,
   snapshotSchema,
 } from "../schemas.ts";
-import { GitHubClient } from "./client.ts";
+import { GitHubClient, errMsg, warn } from "./client.ts";
+import { search } from "./counts.ts";
+import { pause } from "./emails.ts";
+
+export function isMine(full: string, profile: z.infer<typeof profileSchema>): boolean {
+  const lower = full.toLowerCase();
+  for (const login of [profile.login, ...profile.extraLogins]) {
+    if (lower.startsWith(`${login.toLowerCase()}/`)) return true;
+  }
+  return false;
+}
+
+async function searchRepoName(
+  client: GitHubClient,
+  name: string,
+): Promise<z.infer<typeof repoSearchItemSchema> | null> {
+  await pause();
+  const res = await client.github(
+    repoSearchSchema,
+    `search/repositories?q=${encodeURIComponent(`${name} in:name`)}&sort=stars&order=desc&per_page=100`,
+  );
+  let best: z.infer<typeof repoSearchItemSchema> | null = null;
+  for (const item of res.items) {
+    const itemName = item.full_name.split("/");
+    const short = need(itemName[1], `repo of ${item.full_name}`);
+    const matches = short.toLowerCase() === name.toLowerCase();
+    if (!matches) continue;
+    if (best === null || item.stargazers_count > best.stargazers_count) best = item;
+  }
+  if (best === null) warn("extra repo", `${name}: no match, skipped`);
+  return best;
+}
+
+async function resolveOne(
+  client: GitHubClient,
+  given: string,
+): Promise<z.infer<typeof repoSearchItemSchema> | null> {
+  const trimmed = given.trim();
+  if (trimmed === "") {
+    warn("extra repo", "empty entry, skipped");
+    return null;
+  }
+  if (trimmed.includes("/")) {
+    return client.github(repoSearchItemSchema, `repos/${trimmed}`);
+  }
+  return searchRepoName(client, trimmed);
+}
+
+export async function resolveExtraRepos(
+  repos: Record<string, z.infer<typeof repoStatsSchema>>,
+  client: GitHubClient,
+  profile: z.infer<typeof profileSchema>,
+): Promise<void> {
+  for (const given of profile.extraRepos) {
+    try {
+      const found = await resolveOne(client, given);
+      if (found === null) continue;
+      if (Object.keys(repos).some((full) => full.toLowerCase() === found.full_name.toLowerCase())) continue;
+      await pause();
+      let prs = 0;
+      try {
+        for (const login of new Set([profile.login, ...profile.extraLogins].map((login) => login.toLowerCase()))) {
+          const res = await search(`author:${login} type:pr repo:${found.full_name}`, client);
+          prs += res.total;
+        }
+      } catch (err) {
+        warn(`extra repo prs for ${found.full_name}`, errMsg(err));
+      }
+      repos[found.full_name] = repoStatsSchema.parse({
+        commits: 0,
+        prs,
+        description: found.description,
+        stars: found.stargazers_count,
+        url: found.html_url,
+        lang: found.language,
+        fork: found.fork,
+        archived: found.archived,
+        private: found.private,
+        mine: isMine(found.full_name, profile),
+      });
+    } catch (err) {
+      warn(`extra repo ${given}`, errMsg(err));
+    }
+  }
+}
 
 const PROFILE_QUERY = `query($login: String!) {
   user(login: $login) {
@@ -152,14 +238,10 @@ export async function fetchGitHub(
   const days = new Map<string, number>();
   let all = 0;
   const repos: Record<string, z.infer<typeof repoStatsSchema>> = {};
-  const owned = [profile.login, ...profile.extraLogins].map((l) => `${l}/`);
   const slotFor = (full: string): z.infer<typeof repoStatsSchema> => {
-    const slot = repos[full];
+    const key = Object.keys(repos).find((name) => name.toLowerCase() === full.toLowerCase());
+    const slot = key === undefined ? undefined : repos[key];
     if (slot !== undefined) return slot;
-    let mine = false;
-    for (const prefix of owned) {
-      if (full.startsWith(prefix)) mine = true;
-    }
     const fresh = repoStatsSchema.parse({
       commits: 0,
       prs: 0,
@@ -170,7 +252,7 @@ export async function fetchGitHub(
       fork: false,
       archived: false,
       private: false,
-      mine,
+      mine: isMine(full, profile),
     });
     repos[full] = fresh;
     return fresh;
