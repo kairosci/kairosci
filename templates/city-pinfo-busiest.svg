@@ -1,1 +1,0 @@
-<text x="{{x}}" y="{{y}}" class="dim" style="font-size:12px">busiest day <tspan class="fg">{{date}}</tspan> · {{count}}</text>

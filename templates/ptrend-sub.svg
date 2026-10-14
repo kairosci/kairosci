@@ -1,4 +1,0 @@
-<g class="ln" style="animation-delay:.25s">
-<text x="{{x}}" y="124" class="dim" style="font-size:12px">{{sub}}</text>
-<text x="{{x}}" y="144" class="dim" style="font-size:12px">{{total}}</text>
-</g>

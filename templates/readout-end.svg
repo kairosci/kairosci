@@ -1,1 +1,0 @@
-<text x="{{x}}" y="{{y}}" text-anchor="end" class="dim" style="font-size:{{size}}px"><tspan fill="{{color}}" font-weight="700">{{phase}}</tspan> · {{event}} {{at}}</text>

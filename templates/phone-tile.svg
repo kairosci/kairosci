@@ -1,8 +1,0 @@
-<g class="ln" style="animation-delay:{{delay}}s">
-<rect x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}" fill="{{accent}}" fill-opacity=".035" stroke="{{accent}}" stroke-opacity=".35"/>
-<path d="M{{x}} {{cornerY}}V{{y}}H{{cornerX}}" fill="none" stroke="{{accent}}" stroke-width="2"/>
-<text x="{{padX}}" y="{{labelY}}" letter-spacing="1" class="dim" style="font-size:{{labelSize}}px">{{label}}</text>
-<text x="{{padX}}" y="{{valueY}}" font-weight="700" fill="{{accent}}" filter="url(#g)" opacity=".55" style="font-size:{{valueSize}}px">{{value}}</text>
-<text x="{{padX}}" y="{{valueY}}" font-weight="700" fill="{{accent}}" style="font-size:{{valueSize}}px">{{value}}</text>
-<text x="{{padX}}" y="{{subY}}" fill="{{faint}}" style="font-size:{{subSize}}px">{{sub}}</text>
-</g>

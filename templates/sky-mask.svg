@@ -1,1 +1,0 @@
-<mask id="sky" maskUnits="userSpaceOnUse" x="{{x0}}" y="{{top}}" width="{{w}}" height="{{h}}"><rect x="{{x0}}" y="{{top}}" width="{{w1}}" height="{{h}}" fill="url(#fadel)"/><rect x="{{split}}" y="{{top}}" width="{{w2}}" height="{{h}}" fill="url(#fader)"/></mask>

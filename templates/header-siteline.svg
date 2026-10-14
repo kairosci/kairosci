@@ -1,1 +1,0 @@
-<text class="fg" x="{{x}}" y="{y}"><tspan class="cy">&gt;&gt;</tspan> {{pre}}<tspan class="cy" font-weight="700">{{site}}</tspan></text>

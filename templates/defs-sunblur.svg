@@ -1,1 +1,0 @@
-<filter id="sunblur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="{{blur}}"/></filter>

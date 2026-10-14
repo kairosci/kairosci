@@ -1,1 +1,0 @@
-<text x="{{x1}}" y="{{y}}"><tspan class="cy">{{key}}</tspan><tspan class="dim">{{dots}}</tspan></text><text x="{{x2}}" y="{{y}}" text-anchor="end" class="fg">{{value}}</text>
