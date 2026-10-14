@@ -23,20 +23,20 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <path d="M424 -40V240" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="0" y="0" width="424" height="200" fill="#06121b"/>
 <rect x="0" y="0" width="424" height="200" fill="url(#grid)"/>
-<g class="ln" style="animation-delay:0.66s">
-<path d="M26 12H388V172L372 188H10V28Z" fill="#5eead4" fill-opacity=".035"/>
-<path d="M26 12H388V172L372 188H10V28Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
-<path d="M10 28L26 12" stroke="#5eead4" stroke-width="2"/>
-<g transform="translate(28 30)"></g>
-<text x="28" y="46" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:17px">RustPython</text>
-<text x="28" y="46" font-weight="700" class="cy" style="font-size:17px">RustPython</text>
-<path d="M141.0 43l8-8M143.0 35h6v6" fill="none" stroke="#5eead4" stroke-width="1.6"/>
-<rect x="28" y="58" width="198.4" height="18" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
-<text x="36" y="71" letter-spacing="1" fill="#fb7185" style="font-size:11px">Rust · 8 commits · 0 PRs</text>
-<text x="28" y="100" class="fg" style="font-size:13px">A Python Interpreter written in Rust</text>
-<text x="28" y="170" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone RustPython/RustPython</text>
-<path transform="translate(314.0 158) scale(.55)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
-<text x="370" y="170" text-anchor="end" class="dim" style="font-size:12px">22.4k</text>
+<g class="ln" style="animation-delay:0.6599999999999999s">
+<path d="M28.80000000000001 9.6H388V172.4L370 190.4H10.800000000000011V27.6Z" fill="#5eead4" fill-opacity=".04"/>
+<path d="M28.80000000000001 9.6H388V172.4L370 190.4H10.800000000000011V27.6Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
+<path d="M10.800000000000011 27.6L28.80000000000001 9.6" stroke="#5eead4" stroke-width="2"/>
+<g transform="translate(28.80000000000001 27.6)"></g>
+<text x="28.80000000000001" y="40.010000000000005" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:17px">RustPython</text>
+<text x="28.80000000000001" y="40.010000000000005" font-weight="700" class="cy" style="font-size:17px">RustPython</text>
+<path d="M136.8 38.010000000000005l7-7M138.8 31.010000000000005h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
+<rect x="28.80000000000001" y="58.010000000000005" width="200.39999999999998" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
+<text x="37.80000000000001" y="70.01" letter-spacing="1" fill="#fb7185" style="font-size:11px">Rust · 8 commits · 0 PRs</text>
+<path transform="translate(316 59.010000000000005) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
+<text x="370" y="70.01" text-anchor="end" class="dim" style="font-size:12px">22.4k</text>
+<text x="28.80000000000001" y="100.77000000000001" class="fg" style="font-size:12px">A Python Interpreter written in Rust</text>
+<text x="28.80000000000001" y="168.8" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone RustPython/RustPython</text>
 </g>
 <path d="M424 0V200" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>

@@ -24,22 +24,22 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="10" y="0" width="210" height="200" fill="#06121b"/>
 <rect x="10" y="0" width="210" height="200" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.54s">
-<path d="M28 6H202L214 18V194H40L28 182Z" fill="#5eead4" fill-opacity=".035"/>
-<path d="M28 6H202L214 18V194H40L28 182Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
-<path d="M202 6L214 18" stroke="#5eead4" stroke-width="2"/>
-<g transform="translate(38 20)"></g>
-<text x="38" y="34" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:15px">kubernetes</text>
-<text x="38" y="34" font-weight="700" class="cy" style="font-size:15px">kubernetes</text>
-<path d="M136.0 32l7-7M138.0 25h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
-<rect x="38" y="46" width="27.2" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
-<text x="44" y="58" letter-spacing="1" fill="#fb7185" style="font-size:11px">Go</text>
-<path transform="translate(144.8 47) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
-<text x="204" y="58" text-anchor="end" class="dim" style="font-size:12px">128.2k</text>
-<text x="38" y="80" class="fg" style="font-size:12px">Production-Grade</text>
-<text x="38" y="97" class="fg" style="font-size:12px">Container Scheduling</text>
-<text x="38" y="114" class="fg" style="font-size:12px">and Management</text>
-<text x="38" y="163" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone</text>
-<text x="52.4" y="180" class="dim" style="font-size:12px">kubernetes/kubernetes</text>
+<path d="M28 6H205.6L214.6 15V194H37L28 185Z" fill="#5eead4" fill-opacity=".04"/>
+<path d="M28 6H205.6L214.6 15V194H37L28 185Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
+<path d="M205.6 6L214.6 15" stroke="#5eead4" stroke-width="2"/>
+<g transform="translate(37 15)"></g>
+<text x="37" y="25.95" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:15px">kubernetes</text>
+<text x="37" y="25.95" font-weight="700" class="cy" style="font-size:15px">kubernetes</text>
+<path d="M130 23.95l7-7M132 16.95h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
+<rect x="37" y="34.95" width="24.2" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
+<text x="41.5" y="46.95" letter-spacing="1" fill="#fb7185" style="font-size:11px">Go</text>
+<path transform="translate(144.4 35.95) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
+<text x="205.6" y="46.95" text-anchor="end" class="dim" style="font-size:12px">128.2k</text>
+<text x="37" y="68.71000000000001" class="fg" style="font-size:12px">Production-Grade</text>
+<text x="37" y="86.71000000000001" class="fg" style="font-size:12px">Container Scheduling</text>
+<text x="37" y="104.71000000000001" class="fg" style="font-size:12px">and Management</text>
+<text x="37" y="163.4" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone</text>
+<text x="51.4" y="181.4" class="dim" style="font-size:12px">kubernetes/kubernetes</text>
 </g>
 <path d="M10 0V200" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>

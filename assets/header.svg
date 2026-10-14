@@ -18,6 +18,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 .typing{animation:type .7s steps(8) .3s both}
 .name{animation:flicker .9s linear 1.1s both}
 .gm{animation:gm 6s linear 2s infinite}.gc{animation:gc 6s linear 2s infinite}
+.name text{font-size:inherit}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 <defs>
@@ -36,17 +37,17 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="16" y="16" width="848" height="34" fill="#5eead4" fill-opacity=".08"/>
 <line x1="16" y1="50" x2="864" y2="50" stroke="#5eead4" stroke-opacity=".5"/>
 <text x="32" y="38" letter-spacing="1" class="cy" style="font-size:12px">sys://web.kairosci.dev // node:kairosci</text>
-<text x="844" y="38" letter-spacing="1" class="dim" text-anchor="end" style="font-size:12px">ONLINE · ALL SYSTEMS NOMINAL</text>
-<circle class="dot" cx="598.4" cy="34" r="4" fill="#a3e635"/>
-<circle class="dot" cx="598.4" cy="34" r="4" fill="#a3e635" filter="url(#sglow)"/>
+<text x="848" y="38" letter-spacing="1" class="dim" text-anchor="end" style="font-size:12px">ONLINE · ALL SYSTEMS NOMINAL</text>
+<circle class="dot" cx="602.4" cy="34" r="4" fill="#a3e635"/>
+<circle class="dot" cx="602.4" cy="34" r="4" fill="#a3e635" filter="url(#sglow)"/>
 <g clip-path="url(#typeclip)"><text x="52" y="102" class="dim"><tspan class="gr">$</tspan> whoami</text></g>
-<g class="name" font-weight="800" letter-spacing="2" style="font-size:72px">
-<text x="52" y="172" fill="#5eead4" opacity=".55" filter="url(#tglow)">ALESSIO ATTILIO</text>
-<g class="gm"><text x="55" y="172" fill="#fb7185" opacity=".75">ALESSIO ATTILIO</text></g>
-<g class="gc"><text x="49" y="172" fill="#5eead4" opacity=".85">ALESSIO ATTILIO</text></g>
-<text x="52" y="172" fill="#f2fbf8">ALESSIO ATTILIO</text>
+<g class="name" font-weight="800" letter-spacing="1.803495145631068" style="font-size:75.14563106796116px">
+<text x="52" y="172.15631067961164" fill="#5eead4" opacity=".55" filter="url(#tglow)">ALESSIO ATTILIO</text>
+<g class="gm"><text x="56.8" y="172.15631067961164" fill="#fb7185" opacity=".75">ALESSIO ATTILIO</text></g>
+<g class="gc"><text x="47.2" y="172.15631067961164" fill="#5eead4" opacity=".85">ALESSIO ATTILIO</text></g>
+<text x="52" y="172.15631067961164" fill="#f2fbf8">ALESSIO ATTILIO</text>
 </g>
-<g class="ln" style="animation-delay:2.00s"><text class="fg" x="52" y="210"><tspan class="cy">&gt;&gt;</tspan> Computer science student (Entry-Level) and open‑source enthusiast,</text></g>
+<g class="ln" style="animation-delay:2.00s"><text class="fg" x="52" y="210"><tspan class="cy">&gt;&gt;</tspan> Computer science student (Entry-Level) and open‑source enthusiast, passionate about</text></g>
 <g class="ln" style="animation-delay:2.25s"><text class="fg" x="52" y="234"><tspan class="cy">&gt;&gt;</tspan> pnpm · Metrolist · kubernetes · RustPython · etcd · easyeffects · distrobox</text></g>
 <rect x="16" y="51" width="848" height="189" fill="url(#scan)"/>
 <path d="M16 16V240M864 16V240M16 16H864" fill="none" stroke="#5eead4" stroke-width="1.2"/>

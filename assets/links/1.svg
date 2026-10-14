@@ -20,16 +20,16 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
 <filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
 </defs>
-<path d="M16 -40V120M440 -40V120" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
+<path d="M16 -40V120" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="16" y="0" width="424" height="80" fill="#06121b"/>
 <rect x="16" y="0" width="424" height="80" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.25s">
-<path d="M52.0 12H428.0L440.0 24V68H52.0Z" fill="#5eead4" fill-opacity=".05"/>
-<path d="M52.0 12H428.0L440.0 24V68H52.0Z" fill="none" stroke="#5eead4" stroke-opacity=".55"/>
-<path d="M428.0 12L440.0 24" stroke="#5eead4" stroke-width="2"/>
-<g transform="translate(64 23)"><g filter="url(#g)" opacity=".5"><rect x="0" y="0" width="18" height="18" rx="3" fill="#5eead4"/><text x="9" y="13" text-anchor="middle" font-weight="700" fill="#06121b" style="font-size:10px">&gt;_</text></g><rect x="0" y="0" width="18" height="18" rx="3" fill="#5eead4"/><text x="9" y="13" text-anchor="middle" font-weight="700" fill="#06121b" style="font-size:10px">&gt;_</text></g>
-<text x="90.0" y="37" font-weight="700" class="cy" style="font-size:13px">Website</text>
-<text x="64.0" y="58" class="dim" style="font-size:10px">web.kairosci.dev</text>
+<path d="M52 9.6H414L429.2 24.799999999999997V70.39999999999999H67.2L52 55.19999999999999Z" fill="#5eead4" fill-opacity=".04"/>
+<path d="M52 9.6H414L429.2 24.799999999999997V70.39999999999999H67.2L52 55.19999999999999Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
+<path d="M414 9.6L429.2 24.799999999999997" stroke="#5eead4" stroke-width="2"/>
+<g transform="translate(70 27.6)"><g filter="url(#g)" opacity=".5"><rect x="0" y="0" width="18" height="18" rx="3" fill="#5eead4"/><text x="9" y="13" text-anchor="middle" font-weight="700" fill="#06121b" style="font-size:10px">&gt;_</text></g><rect x="0" y="0" width="18" height="18" rx="3" fill="#5eead4"/><text x="9" y="13" text-anchor="middle" font-weight="700" fill="#06121b" style="font-size:10px">&gt;_</text></g>
+<text x="97" y="37.09" text-anchor="start" font-weight="700" class="cy" style="font-size:13px">Website</text>
+<text x="70" y="49.39999999999999" class="dim" style="font-size:10px">web.kairosci.dev</text>
 </g>
-<path d="M16 0V80M440 0V80" fill="none" stroke="#5eead4" stroke-width="1.2"/>
+<path d="M16 0V80" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>
