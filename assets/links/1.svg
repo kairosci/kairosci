@@ -20,7 +20,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
 <filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
 </defs>
-<path d="M16 -40V120" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
+<path d="M16 -40V120M440 -40V120" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="16" y="0" width="424" height="80" fill="#06121b"/>
 <rect x="16" y="0" width="424" height="80" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.25s">
@@ -31,5 +31,5 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="90.0" y="37" font-weight="700" class="cy" style="font-size:13px">Website</text>
 <text x="64.0" y="58" class="dim" style="font-size:10px">web.kairosci.dev</text>
 </g>
-<path d="M16 0V80" fill="none" stroke="#5eead4" stroke-width="1.2"/>
+<path d="M16 0V80M440 0V80" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>
