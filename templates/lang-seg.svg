@@ -1,0 +1,1 @@
+<rect x="{{x}}" y="{{y}}" width="{{w}}" height="8" fill="{{color}}"/><rect x="{{x}}" y="{{y}}" width="{{w}}" height="8" fill="{{color}}" filter="url(#g)" opacity=".6"/>

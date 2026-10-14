@@ -1,0 +1,1 @@
+<text x="{{x}}" y="{{y}}" class="dim" style="font-size:{{size}}px">quiet</text>{{swatches}}<text x="{{x2}}" y="{{y}}" class="dim" style="font-size:{{size}}px">skyscraper</text>

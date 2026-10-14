@@ -1,0 +1,7 @@
+{{siteLine}}
+<g class="ln" style="animation-delay:2.8s">
+<text x="{{x}}" y="{{promptY}}" class="gr">$</text>
+<rect class="cursor" x="{{cursorX}}" y="{{cursorY}}" width="10" height="17" fill="{{accent}}"/>
+<rect class="cursor" x="{{cursorX}}" y="{{cursorY}}" width="10" height="17" fill="{{accent}}" filter="url(#sglow)"/>
+</g>
+<rect x="{{fl}}" y="0" width="{{barW}}" height="{{scanH}}" fill="url(#scan)"/>

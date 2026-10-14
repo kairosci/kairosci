@@ -1,0 +1,1 @@
+<text x="{{x}}" y="{{y}}" xml:space="preserve"><tspan class="cy">{{key}}</tspan><tspan class="dim">{{dots}}</tspan> <tspan class="fg">{{value}}</tspan></text>
