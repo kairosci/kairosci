@@ -35,6 +35,17 @@
 			"logo": ""
 		},
 		{
+			"name": "RustPython",
+			"repo": "RustPython/RustPython",
+			"kind": "Rust",
+			"description": "A Python Interpreter written in Rust",
+			"tagline": "8 commits · 0 PRs",
+			"install": "gh repo clone RustPython/RustPython",
+			"stars": "22.4k",
+			"href": "https://github.com/RustPython/RustPython",
+			"logo": ""
+		},
+		{
 			"name": "etcd",
 			"repo": "etcd-io/etcd",
 			"kind": "Go",
@@ -69,8 +80,8 @@
 		}
 	],
 	"posts": [],
-	"upstreamRepos": 6,
-	"stars": 254299,
+	"upstreamRepos": 7,
+	"stars": 276690,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
@@ -85,12 +96,12 @@
 		"prs": 480,
 		"prs_merged": 273,
 		"year": 2026,
-		"contributions_year": 2597,
-		"contributions_all": 5057,
+		"contributions_year": 2620,
+		"contributions_all": 5080,
 		"streak_current": 14,
 		"streak_longest": 88,
 		"languages": {
-			"Rust": 80,
+			"Rust": 88,
 			"Kotlin": 79,
 			"Go": 26,
 			"HTML": 5
