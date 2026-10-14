@@ -46,12 +46,30 @@ Hard rules for every change in this repo. Verify each one before finishing.
   `render()` throws on missing templates, missing vars and unresolved placeholders,
   and trims trailing newlines so joined rows keep no stray whitespace.
 
+## Structure rules
+
+- Stateful pieces are classes: `TemplateEngine` (loads/renders templates),
+  `GitHubClient` (tokens, REST/GraphQL/stargazers), `Slices` (console primitives),
+  `SunCalc`/`SkyLayers`, section classes (`HeaderSection`, `Buttons`,
+  `StatsSection`, `TrendingSection`, `CitySection`, `ProjectsSection`),
+  `Page`, `ProfileFetcher`, `ProfileRenderer`, `RenderContext` (wires engine,
+  theme, snapshot, profile plus `Slices` and `SunCalc`).
+- Pure computation stays in module functions: escaping, wrapping, ranking math,
+  schemas, geodesy helpers. No `type`/`interface` keywords anywhere; annotate
+  with `z.infer` inline.
+- No constructor parameter properties: Node runs `.ts` via type stripping, so
+  declare fields explicitly and assign them in the constructor body.
+
 ## Content rules
 
 - Projects are upstream repos where the login has at least one commit, ranked by
-  commits desc, then PRs desc, then stars. Skip forks, archived, private, missing
+  commits desc, then stars. PRs never order anything: commits and PRs are separate
+  signals, PRs only display. Skip forks, archived, private, missing
   descriptions and the logins' own repos. `tuning.minCommits` and `tuning.minStars`
   drop the long tail; no repo is ever excluded by name. Tagline shows the computed counts.
+- No followers anywhere: they are bots, so the field is not fetched, stored or shown.
+- Link buttons mirror like cards (left cut top-right, right cut top-left) and are
+  framed on both sides, same as the project button rows.
 - Tiles and bars show computed values only: upstream stars across N repos, languages
   weighted by commits on contributed repos, author-scoped issue/PR counts.
 - Login is always lowercase. The full name is capitalized (`Alessio Attilio`), never
