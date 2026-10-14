@@ -162,25 +162,6 @@ export const skySchema = z.object({
   at: z.string().min(1),
 });
 
-export const contributedRepoSchema = z.object({
-  nameWithOwner: z.string().min(1),
-  description: z.string().nullable(),
-  stargazerCount: z.number().int().nonnegative(),
-  url: z.string().min(1),
-  primaryLanguage: z.object({ name: z.string() }).nullable(),
-  isFork: z.boolean(),
-  isArchived: z.boolean(),
-  isPrivate: z.boolean(),
-});
-
-export const contributedToSchema = z.object({
-  user: z.object({
-    repositoriesContributedTo: z.object({
-      nodes: z.array(contributedRepoSchema),
-    }),
-  }),
-});
-
 export const userBioSchema = z.object({
   bio: z.string().nullable(),
 });
@@ -193,6 +174,32 @@ export const gqlProfileSchema = z.object({
     pullRequests: z.object({ totalCount: z.number().int().nonnegative() }),
     merged: z.object({ totalCount: z.number().int().nonnegative() }),
     contributionsCollection: z.object({ contributionYears: z.array(z.number().int()) }),
+  }),
+});
+
+export const repoStatsSchema = z.object({
+  commits: z.number().int().nonnegative(),
+  prs: z.number().int().nonnegative(),
+  description: z.string().nullable(),
+  stars: z.number().int().nonnegative(),
+  url: z.string().min(1),
+  lang: z.string().nullable(),
+  fork: z.boolean(),
+  archived: z.boolean(),
+  private: z.boolean(),
+  mine: z.boolean(),
+});
+
+export const contribEntrySchema = z.object({  contributions: z.object({ totalCount: z.number().int().nonnegative() }),
+  repository: z.object({
+    nameWithOwner: z.string().min(1),
+    description: z.string().nullable(),
+    stargazerCount: z.number().int().nonnegative(),
+    url: z.string().min(1),
+    primaryLanguage: z.object({ name: z.string() }).nullable(),
+    isFork: z.boolean(),
+    isArchived: z.boolean(),
+    isPrivate: z.boolean(),
   }),
 });
 
@@ -210,6 +217,8 @@ export const yearDataSchema = z.object({
       }),
     ),
   }),
+  commitContributionsByRepository: z.array(contribEntrySchema),
+  pullRequestContributionsByRepository: z.array(contribEntrySchema),
 });
 
 export const gqlYearsSchema = z.object({

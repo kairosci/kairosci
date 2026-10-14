@@ -4,7 +4,6 @@ import { last, need } from "./defined.ts";
 import { loadProfile } from "./profile.ts";
 import {
   calendarSchema,
-  contributedToSchema,
   countSchema,
   gqlEnvelopeSchema,
   gqlProfileSchema,
@@ -12,6 +11,7 @@ import {
   profileSchema,
   projectSchema,
   repoMetaSchema,
+  repoStatsSchema,
   searchCountSchema,
   searchResponseSchema,
   snapshotSchema,
@@ -64,71 +64,55 @@ function fmtStars(n: number): string {
   return String(n);
 }
 
-const CONTRIBUTED_QUERY = `query($login: String!) {
-  user(login: $login) {
-    repositoriesContributedTo(first: 100, orderBy: {field: STARGAZERS, direction: DESC}, includeUserRepositories: false) {
-      nodes {
-        nameWithOwner
-        description
-        stargazerCount
-        url
-        primaryLanguage { name }
-        isFork
-        isArchived
-        isPrivate
-      }
-    }
-  }
-}`;
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
 
-async function fetchContributed(profile: z.infer<typeof profileSchema>): Promise<{
+function buildProjects(
+  repos: Record<string, z.infer<typeof repoStatsSchema>>,
+  intro: string,
+  profile: z.infer<typeof profileSchema>,
+): {
   intro: string;
   projects: z.infer<typeof projectSchema>[];
   posts: never[];
   upstreamRepos: number;
   upstreamStars: number;
   langCounts: Record<string, number>;
-}> {
-  const user = await github(userBioSchema, `users/${profile.login}`, profile.userAgent);
-  const data = await graphql(contributedToSchema, CONTRIBUTED_QUERY, { login: profile.login }, profile);
-  const usable = data.user.repositoriesContributedTo.nodes.filter(
-    (r) => !r.isFork && !r.isArchived && !r.isPrivate && r.description !== null && r.description.trim() !== "",
+} {
+  const rows = Object.entries(repos).map((entry) => ({ full: need(entry[0], "repo"), ...need(entry[1], `stats for ${entry[0]}`) }));
+  const earned = rows.filter(
+    (r) => !r.mine && !r.fork && !r.archived && !r.private && r.commits > 0 && r.description !== null && r.description.trim() !== "",
   );
-  const ranked = [...usable].sort((a, b) => b.stargazerCount - a.stargazerCount);
+  earned.sort(
+    (a, b) => b.commits - a.commits || b.prs - a.prs || b.stars - a.stars || a.full.localeCompare(b.full),
+  );
   let upstreamStars = 0;
   const langCounts: Record<string, number> = {};
-  for (const r of ranked) {
-    upstreamStars += r.stargazerCount;
-    if (r.primaryLanguage !== null) {
-      const prev = langCounts[r.primaryLanguage.name];
-      langCounts[r.primaryLanguage.name] = prev === undefined ? 1 : prev + 1;
+  for (const r of earned) {
+    upstreamStars += r.stars;
+    if (r.lang !== null) {
+      const prev = langCounts[r.lang];
+      langCounts[r.lang] = prev === undefined ? 1 : prev + 1;
     }
   }
-  const projects = ranked.slice(0, profile.maxProjects).map((r) => {
-    const parts = r.nameWithOwner.split("/");
-    const owner = need(parts[0], `owner of ${r.nameWithOwner}`);
-    const name = need(parts[1], `repo of ${r.nameWithOwner}`);
-    const language = r.primaryLanguage === null ? "Code" : r.primaryLanguage.name;
+  const projects = earned.slice(0, profile.maxProjects).map((r) => {
+    const parts = r.full.split("/");
+    const name = need(parts[1], `repo of ${r.full}`);
+    const language = r.lang === null ? "Code" : r.lang;
     return {
       name,
-      repo: r.nameWithOwner,
+      repo: r.full,
       kind: language,
-      description: need(r.description, `description of ${r.nameWithOwner}`).trim(),
-      tagline: owner,
-      install: `gh repo clone ${r.nameWithOwner}`,
-      stars: fmtStars(r.stargazerCount),
+      description: need(r.description, `description of ${r.full}`).trim(),
+      tagline: `${plural(r.commits, "commit", "commits")} · ${plural(r.prs, "PR", "PRs")}`,
+      install: `gh repo clone ${r.full}`,
+      stars: fmtStars(r.stars),
       href: r.url,
       logo: "",
     };
   });
-  return {
-    intro: user.bio === null ? "" : user.bio,
-    projects,
-    posts: [],
-    upstreamRepos: ranked.length,
-    upstreamStars,
-    langCounts,
-  };
+  return { intro, projects, posts: [], upstreamRepos: earned.length, upstreamStars, langCounts };
 }
 
 const profileTokenEnv = process.env["PROFILE_TOKEN"];
@@ -212,11 +196,15 @@ function streaks(days: Map<string, number>, today: Date): [number, number] {
 async function fetchGitHub(
   today: Date,
   profile: z.infer<typeof profileSchema>,
-): Promise<{ github: z.infer<typeof snapshotSchema>["github"]; calendar: z.infer<typeof calendarSchema> }> {
+): Promise<{
+  github: z.infer<typeof snapshotSchema>["github"];
+  calendar: z.infer<typeof calendarSchema>;
+  repos: Record<string, z.infer<typeof repoStatsSchema>>;
+}> {
   const data = await graphql(gqlProfileSchema, PROFILE_QUERY, { login: profile.login }, profile);
   const user = data.user;
   const years = [...user.contributionsCollection.contributionYears].sort();
-  const collected: Record<string, { totalContributions: number; weeks: { contributionDays: { date: string; contributionCount: number }[] }[] }> = {};
+  const collected: Record<string, z.infer<typeof gqlYearsSchema>["user"][string]> = {};
   for (let i = 0; i < years.length; i += 4) {
     const query = `query($login: String!) { user(login: $login) {${years
       .slice(i, i + 4)
@@ -224,24 +212,81 @@ async function fetchGitHub(
         (y) => `
     y${y}: contributionsCollection(from: "${y}-01-01T00:00:00Z", to: "${y}-12-31T23:59:59Z") {
       contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } }
+      commitContributionsByRepository(maxRepositories: 100) {
+        contributions(first: 1) { totalCount }
+        repository { nameWithOwner description stargazerCount url primaryLanguage { name } isFork isArchived isPrivate }
+      }
+      pullRequestContributionsByRepository(maxRepositories: 100) {
+        contributions(first: 1) { totalCount }
+        repository { nameWithOwner description stargazerCount url primaryLanguage { name } isFork isArchived isPrivate }
+      }
     }`,
       )
       .join("")}
   } }`;
     const chunk = await graphql(gqlYearsSchema, query, { login: profile.login }, profile);
     for (const entry of Object.entries(chunk.user)) {
-      collected[need(entry[0], "year key")] = need(entry[1], `year ${entry[0]}`).contributionCalendar;
+      collected[need(entry[0], "year key")] = need(entry[1], `year ${entry[0]}`);
     }
   }
 
   const days = new Map<string, number>();
   let all = 0;
+  const repos: Record<string, z.infer<typeof repoStatsSchema>> = {};
+  const slotFor = (full: string): z.infer<typeof repoStatsSchema> => {
+    const slot = repos[full];
+    if (slot !== undefined) return slot;
+    const fresh = repoStatsSchema.parse({
+      commits: 0,
+      prs: 0,
+      description: null,
+      stars: 0,
+      url: `https://github.com/${full}`,
+      lang: null,
+      fork: false,
+      archived: false,
+      private: false,
+      mine: full.startsWith(`${profile.login}/`),
+    });
+    repos[full] = fresh;
+    return fresh;
+  };
+  const fillMeta = (
+    slot: z.infer<typeof repoStatsSchema>,
+    r: {
+      description: string | null;
+      stargazerCount: number;
+      url: string;
+      primaryLanguage: { name: string } | null;
+      isFork: boolean;
+      isArchived: boolean;
+      isPrivate: boolean;
+    },
+  ): void => {
+    slot.description = r.description;
+    slot.stars = r.stargazerCount;
+    slot.url = r.url;
+    slot.lang = r.primaryLanguage === null ? null : r.primaryLanguage.name;
+    slot.fork = r.isFork;
+    slot.archived = r.isArchived;
+    slot.private = r.isPrivate;
+  };
   for (const y of years) {
     const entry = collected[`y${y}`];
     if (entry === undefined) throw new Error(`missing contributions for ${y}`);
-    all += entry.totalContributions;
-    for (const w of entry.weeks) {
+    all += entry.contributionCalendar.totalContributions;
+    for (const w of entry.contributionCalendar.weeks) {
       for (const day of w.contributionDays) days.set(day.date, day.contributionCount);
+    }
+    for (const c of entry.commitContributionsByRepository) {
+      const slot = slotFor(c.repository.nameWithOwner);
+      slot.commits += c.contributions.totalCount;
+      fillMeta(slot, c.repository);
+    }
+    for (const c of entry.pullRequestContributionsByRepository) {
+      const slot = slotFor(c.repository.nameWithOwner);
+      slot.prs += c.contributions.totalCount;
+      fillMeta(slot, c.repository);
     }
   }
   const streak = streaks(days, today);
@@ -257,6 +302,7 @@ async function fetchGitHub(
   const thisYear = collected[`y${year}`];
   return {
     calendar,
+    repos,
     github: {
       created_at: user.createdAt,
       followers: user.followers.totalCount,
@@ -264,7 +310,7 @@ async function fetchGitHub(
       prs: user.pullRequests.totalCount,
       prs_merged: user.merged.totalCount,
       year,
-      contributions_year: thisYear === undefined ? 0 : thisYear.totalContributions,
+      contributions_year: thisYear === undefined ? 0 : thisYear.contributionCalendar.totalContributions,
       contributions_all: all,
       streak_current: need(streak[0], "streak"),
       streak_longest: need(streak[1], "streak"),
@@ -445,24 +491,21 @@ async function main(): Promise<void> {
     }
   }
 
-  const prevGhLangs = previous.github === null ? {} : previous.github.languages;
-  const contrib = await attempt("contributed", () => fetchContributed(profile), {
-    intro: previous.intro,
-    projects: previous.projects,
-    posts: [],
-    upstreamRepos: previous.upstreamRepos,
-    upstreamStars: previous.stars === null ? 0 : previous.stars,
-    langCounts: prevGhLangs,
-  });
   const today = new Date(`${need(new Date().toISOString().slice(0, 10), "today")}T00:00:00Z`);
+  const intro = await attempt("bio", async () => {
+    const u = await github(userBioSchema, `users/${profile.login}`, profile.userAgent);
+    return u.bio === null ? previous.intro : u.bio;
+  }, previous.intro);
   const gh = await attempt("github", () => fetchGitHub(today, profile), null);
+  const built = gh === null ? null : buildProjects(gh.repos, intro, profile);
+  const prevGhLangs = previous.github === null ? {} : previous.github.languages;
   const ghGithub = gh === null ? previous.github : gh.github;
   const snapshot = snapshotSchema.parse({
-    intro: contrib.intro,
-    projects: contrib.projects,
+    intro,
+    projects: built === null ? previous.projects : built.projects,
     posts: [],
-    upstreamRepos: contrib.upstreamRepos,
-    stars: contrib.upstreamStars,
+    upstreamRepos: built === null ? previous.upstreamRepos : built.upstreamRepos,
+    stars: built === null ? previous.stars : built.upstreamStars,
     issues: await attempt("issues", () => fetchCount("issue", profile), previous.issues),
     prs: await attempt("prs", () => fetchCount("pr", profile), previous.prs),
     github:
@@ -479,7 +522,7 @@ async function main(): Promise<void> {
             contributions_all: ghGithub.contributions_all,
             streak_current: ghGithub.streak_current,
             streak_longest: ghGithub.streak_longest,
-            languages: contrib.langCounts,
+            languages: built === null ? prevGhLangs : built.langCounts,
           },
   });
   if (failures === 4) throw new Error("every source failed; leaving data/ untouched");

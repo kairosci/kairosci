@@ -20,25 +20,25 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
 <filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
 </defs>
-<path d="M16 -40V240" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
-<rect x="16" y="0" width="424" height="200" fill="#06121b"/>
-<rect x="16" y="0" width="424" height="200" fill="url(#grid)"/>
-<g class="ln" style="animation-delay:1.02s">
-<path d="M52 12H414L430 28V188H68L52 172Z" fill="#5eead4" fill-opacity=".035"/>
-<path d="M52 12H414L430 28V188H68L52 172Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
-<path d="M414 12L430 28" stroke="#5eead4" stroke-width="2"/>
-<g transform="translate(70 30)"></g>
-<text x="70" y="46" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:17px">redis</text>
-<text x="70" y="46" font-weight="700" class="cy" style="font-size:17px">redis</text>
-<path d="M132.0 43l8-8M134.0 35h6v6" fill="none" stroke="#5eead4" stroke-width="1.6"/>
-<rect x="70" y="58" width="23.6" height="18" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
-<text x="78" y="71" letter-spacing="1" fill="#fb7185" style="font-size:11px">C</text>
-<text x="70" y="100" class="fg" style="font-size:13px">For developers, who are building real-time</text>
-<text x="70" y="120" class="fg" style="font-size:13px">data-driven applications, Redis is the</text>
-<text x="70" y="140" class="fg" style="font-size:13px">preferred, fastest, and most feature-rich</text>
-<text x="70" y="170" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone redis/redis</text>
-<path transform="translate(356.0 158) scale(.55)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
-<text x="412" y="170" text-anchor="end" class="dim" style="font-size:12px">76.8k</text>
+<path d="M424 -40V240" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
+<rect x="0" y="0" width="424" height="200" fill="#06121b"/>
+<rect x="0" y="0" width="424" height="200" fill="url(#grid)"/>
+<g class="ln" style="animation-delay:1.14s">
+<path d="M10 12H372L388 28V188H26L10 172Z" fill="#5eead4" fill-opacity=".035"/>
+<path d="M10 12H372L388 28V188H26L10 172Z" fill="none" stroke="#5eead4" stroke-opacity=".4"/>
+<path d="M372 12L388 28" stroke="#5eead4" stroke-width="2"/>
+<g transform="translate(28 30)"></g>
+<text x="28" y="46" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".6" style="font-size:17px">redis</text>
+<text x="28" y="46" font-weight="700" class="cy" style="font-size:17px">redis</text>
+<path d="M90.0 43l8-8M92.0 35h6v6" fill="none" stroke="#5eead4" stroke-width="1.6"/>
+<rect x="28" y="58" width="23.6" height="18" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
+<text x="36" y="71" letter-spacing="1" fill="#fb7185" style="font-size:11px">C</text>
+<text x="28" y="100" class="fg" style="font-size:13px">For developers, who are building real-time</text>
+<text x="28" y="120" class="fg" style="font-size:13px">data-driven applications, Redis is the</text>
+<text x="28" y="140" class="fg" style="font-size:13px">preferred, fastest, and most feature-rich</text>
+<text x="28" y="170" class="dim" style="font-size:12px"><tspan class="gr">$</tspan> gh repo clone redis/redis</text>
+<path transform="translate(314.0 158) scale(.55)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
+<text x="370" y="170" text-anchor="end" class="dim" style="font-size:12px">76.8k</text>
 </g>
-<path d="M16 0V200" fill="none" stroke="#5eead4" stroke-width="1.2"/>
+<path d="M424 0V200" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 </svg>
