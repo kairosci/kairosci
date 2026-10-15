@@ -34,10 +34,10 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="28" y="32" class="dim" style="font-size:11px">81 commits · 88 PRs</text>
 <rect x="180" y="7" width="170.0" height="11" fill="#0b1c26"/>
 <g class="bar" style="animation-delay:0.53s">
-<rect x="180" y="7" width="46.9" height="11" fill="#c4b5fd" filter="url(#g)" opacity=".55"/>
-<rect x="180" y="7" width="46.9" height="11" fill="url(#bar)"/>
+<rect x="180" y="7" width="43.9" height="11" fill="#c4b5fd" filter="url(#g)" opacity=".55"/>
+<rect x="180" y="7" width="43.9" height="11" fill="url(#bar)"/>
 </g>
-<text class="lbl" x="232.9" y="17.5" font-weight="700" fill="#c4b5fd" style="font-size:13px;animation-delay:0.98s">+8</text>
+<text class="lbl" x="229.9" y="17.5" font-weight="700" fill="#c4b5fd" style="font-size:13px;animation-delay:0.98s">+8</text>
 <g fill="#c4b5fd" opacity=".75"><rect x="408" y="22.0" width="1.5" height="11.0"/><rect x="410" y="22.0" width="1.5" height="11.0"/></g>
 
 </g>
