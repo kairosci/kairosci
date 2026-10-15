@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DESKTOP, PHONE } from "../src/console.ts";
-import { cardLayout, clampText, fitText, fontMetrics, nameLayout, textWidth, wrapText } from "../src/layout.ts";
+import { projectCardGeometry, clampText, fitText, fontMetrics, profileNameLayout, textWidth, wrapText } from "../src/layout.ts";
 import { readFile } from "node:fs/promises";
 import { RenderContext } from "../src/ctx.ts";
 import { loadProfile, loadTheme } from "../src/profile.ts";
@@ -12,15 +12,15 @@ import { TemplateEngine } from "../src/templates.ts";
 
 test("all card columns stay inside the content borders and share the same gap", () => {
   for (const g of [DESKTOP, PHONE]) for (const count of [1, 2, 3, 4]) {
-    let previousRight = g.X;
+    let previousRight = g.contentLeft;
     for (let i = 0; i < count; i++) {
-      const c = cardLayout(g, i, count, 200);
-      const left = c.x + i * g.W / count;
+      const c = projectCardGeometry(g, i, count, 200);
+      const left = c.x + i * g.width / count;
       assert.ok(c.width > 0 && c.height > 0);
-      assert.ok(left >= g.X - 1e-9);
-      assert.ok(left + c.width <= g.R + 1e-9);
+      assert.ok(left >= g.contentLeft - 1e-9);
+      assert.ok(left + c.width <= g.contentRight + 1e-9);
       assert.ok(c.y >= 0 && c.y + c.height <= 200);
-      if (i) assert.ok(Math.abs(left - previousRight - (g.X - g.FL) * fontMetrics.advance) < 1e-9);
+      if (i) assert.ok(Math.abs(left - previousRight - (g.contentLeft - g.frameLeft) * fontMetrics.advance) < 1e-9);
       previousRight = left + c.width;
     }
   }
@@ -28,7 +28,7 @@ test("all card columns stay inside the content borders and share the same gap", 
 
 test("name sizing is derived from both available width and vertical space", () => {
   for (const text of ["A", "ALESSIO ATTILIO", "A VERY LONG NAME ".repeat(10)]) for (const width of [160, 384, 776]) {
-    const box = nameLayout(text, width, 100, 180, 6);
+    const box = profileNameLayout(text, width, 100, 180, 6);
     assert.ok(textWidth(text, box.size, box.spacing) + 12 <= width + 1e-9);
     assert.ok(box.baseline - box.size * fontMetrics.capitals >= 100 - 1e-9);
     assert.ok(box.baseline + box.size * fontMetrics.descent <= 180 + 1e-9);
@@ -45,7 +45,7 @@ test("wrapping and truncation handle long words, Unicode and tiny widths", () =>
   }
 });
 
-function assertCardTextFits(svg: string, card: ReturnType<typeof cardLayout>): void {
+function assertCardTextFits(svg: string, card: ReturnType<typeof projectCardGeometry>): void {
   for (const match of svg.matchAll(/<text ([^>]+)>([\s\S]*?)<\/text>/g)) {
     const attrs = match[1] ?? "";
     const size = Number(attrs.match(/font-size:([\d.]+)px/)?.[1]);
@@ -113,14 +113,17 @@ test("shared card renderer supports long content and single-column links without
     buttons.button(b, k, n), buttons.phoneButton(b, k, n),
   ]).then((svgs) => svgs.map((svg, i) => ({ svg, g: i === 0 ? DESKTOP : PHONE })))) {
     assert.doesNotMatch(svg.svg, /NaN|Infinity|\{\{/);
-    assertCardTextFits(svg.svg, cardLayout(svg.g, k, n, 80));
+    assertCardTextFits(svg.svg, projectCardGeometry(svg.g, k, n, 80));
   }
   const project = snapshot.projects[0];
   assert.ok(project);
   const long = { ...project, name: "name".repeat(100), description: "word".repeat(100), install: "command".repeat(100), stars: "9".repeat(100) };
-  const cards = await Promise.all([new ProjectsSection(ctx).card(long, "L", 0), new ProjectsSection(ctx).phoneCard(long, "R", 0)]);
-  assertCardTextFits(cards[0] ?? "", cardLayout(DESKTOP, 0, 2, 200));
-  assertCardTextFits(cards[1] ?? "", cardLayout(PHONE, 1, 2, 200));
+  const cards = await Promise.all([
+    new ProjectsSection(ctx).renderDesktopProjectCard(long, "L", 0),
+    new ProjectsSection(ctx).renderPhoneProjectCard(long, "R", 0),
+  ]);
+  assertCardTextFits(cards[0] ?? "", projectCardGeometry(DESKTOP, 0, 2, 200));
+  assertCardTextFits(cards[1] ?? "", projectCardGeometry(PHONE, 1, 2, 200));
   assertProjectArrowClearsName(cards[0] ?? "");
   assertProjectArrowClearsName(cards[1] ?? "");
   for (const svg of await Promise.all([...cards,

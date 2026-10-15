@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { gqlEnvelopeSchema, stargazerListSchema } from "../schemas.ts";
 
-export function warn(title: string, message: string): void {
+export function logWarning(title: string, message: string): void {
   const actions = process.env["GITHUB_ACTIONS"];
   if (actions === undefined) console.warn(`warn: ${title}: ${message}`);
   else console.warn(`::warning title=${title}::${message}`);
 }
 
-export function errMsg(err: unknown): string {
+export function describeError(err: unknown): string {
   if (err instanceof Error) return err.message;
   return String(err);
 }
@@ -60,7 +60,7 @@ export class GitHubClient {
       signal: AbortSignal.timeout(60_000),
     });
     if ((res.status === 401 || res.status === 403) && this.graphqlToken !== this.githubToken && this.githubToken !== undefined) {
-      warn("PROFILE_TOKEN", `GraphQL returned HTTP ${res.status}; using GITHUB_TOKEN (public contributions only)`);
+      logWarning("PROFILE_TOKEN", `GraphQL returned HTTP ${res.status}; using GITHUB_TOKEN (public contributions only)`);
       this.graphqlToken = this.githubToken;
       return this.graphql(schema, query, variables);
     }

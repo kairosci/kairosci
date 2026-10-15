@@ -1,17 +1,17 @@
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
-import { DESKTOP, PHONE, esc } from "../console.ts";
+import { DESKTOP, PHONE, escapeMarkup } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
 import { geoSchema, projectSchema } from "../schemas.ts";
-import { themeVars } from "../templates.ts";
+import { createThemeSvgVariables } from "../templates.ts";
 
-import { cardLayout, clampText, fitText, fontMetrics, textWidth } from "../layout.ts";
+import { projectCardGeometry, clampText, fitText, fontMetrics, textWidth } from "../layout.ts";
 
 export const CARD_H = 200;
 
-export async function logoHref(p: z.infer<typeof projectSchema>): Promise<string | null> {
-  if (p.logo === "") return null;
-  const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+export async function resolveProjectLogoUrl(project: z.infer<typeof projectSchema>): Promise<string | null> {
+  if (project.logo === "") return null;
+  const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const svgLogo = await readFile(`data/logos/${slug}.svg`, "utf8").catch(() => null);
   if (svgLogo !== null) {
     const dark = svgLogo
@@ -29,24 +29,24 @@ export class ProjectsSection {
 
   constructor(ctx: RenderContext) { this.ctx = ctx; }
 
-  card(p: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
-    return this.renderCard(p, DESKTOP, side, delay);
+  renderDesktopProjectCard(project: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
+    return this.renderProjectCard(project, DESKTOP, side, delay);
   }
 
-  phoneCard(p: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
-    return this.renderCard(p, PHONE, side, delay);
+  renderPhoneProjectCard(project: z.infer<typeof projectSchema>, side: "L" | "R", delay: number): Promise<string> {
+    return this.renderProjectCard(project, PHONE, side, delay);
   }
 
-  private async renderCard(p: z.infer<typeof projectSchema>, g: z.infer<typeof geoSchema>, side: "L" | "R", delay: number): Promise<string> {
+  private async renderProjectCard(p: z.infer<typeof projectSchema>, g: z.infer<typeof geoSchema>, side: "L" | "R", delay: number): Promise<string> {
     const { engine, theme, slices } = this.ctx;
-    const card = cardLayout(g, side === "L" ? 0 : 1, 2, CARD_H);
+    const card = projectCardGeometry(g, side === "L" ? 0 : 1, 2, CARD_H);
     const tx = card.left;
     const sx = card.right;
     const inner = sx - tx;
     const nameSize = g.narrow ? 15 : 17;
     const bodySize = 12;
     const leading = bodySize * 1.5;
-    const logo = await logoHref(p);
+    const logo = await resolveProjectLogoUrl(p);
     const logoSize = 18;
     const nx = tx + (logo === null ? 0 : logoSize + card.padding / 2);
     const nameY = card.top + nameSize * fontMetrics.capitals;
@@ -70,22 +70,22 @@ export class ProjectsSection {
     const descRows = Math.max(0, Math.floor((installY - leading - descY) / leading) + 1);
     const desc = clampText(p.description, inner, bodySize, descRows);
     const install = cmd.map((text, i) => engine.render(i === 0 ? "cards/pcard-inst0" : "cards/pcard-inst1", {
-      tx: i === 0 ? tx : tx + textWidth("$ ", bodySize), y: installY + i * leading, cmd: esc(text),
+      tx: i === 0 ? tx : tx + textWidth("$ ", bodySize), y: installY + i * leading, cmd: escapeMarkup(text),
     })).join("\n");
     const content = engine.render("cards/project", {
-      ...themeVars(theme), tx, sx, nx, nameSize, nameY, name: esc(name),
+      ...createThemeSvgVariables(theme), tx, sx, nx, nameSize, nameY, name: escapeMarkup(name),
       logoX: tx, logoY: card.top, logoImg: logo === null ? "" : engine.render("cards/logo-img", { href: logo }),
       arrowX: nx + nameWidth + arrowGap, arrowY: nameY - 2,
       arrowX2: nx + nameWidth + arrowGap + 2, arrowY2: nameY - 9,
-      tagY, tagTY, tagTX: tx + tagPadding, tagW, tag: esc(tag),
+      tagY, tagTY, tagTX: tx + tagPadding, tagW, tag: escapeMarkup(tag),
       tagc: /cli$/i.test(p.kind) ? theme.ok : theme.accent2,
-      starX: sx - textWidth(stars, bodySize) - logoSize, starY: tagY + 1, stars: esc(stars),
-      desc: desc.map((text, i) => engine.render("cards/pcard-desc", { tx, y: descY + i * leading, text: esc(text) })).join("\n"),
+      starX: sx - textWidth(stars, bodySize) - logoSize, starY: tagY + 1, stars: escapeMarkup(stars),
+      desc: desc.map((text, i) => engine.render("cards/pcard-desc", { tx, y: descY + i * leading, text: escapeMarkup(text) })).join("\n"),
       install,
     });
-    const body = engine.render("cards/shell", { ...themeVars(theme), ...card, content, delay });
-    const defs = side === "R" ? slices.baseDefs(((-g.HW % 40) + 40) % 40) : slices.baseDefs();
-    return slices.halfSliceG(g, CARD_H, side, body, {
+    const body = engine.render("cards/shell", { ...createThemeSvgVariables(theme), ...card, content, delay });
+    const defs = side === "R" ? slices.baseDefs(((-g.centerX % 40) + 40) % 40) : slices.baseDefs();
+    return slices.createHalfSvgSlice(g, CARD_H, side, body, {
       title: p.name, desc: `${p.name}: ${p.description} Install: ${p.install}. ${p.stars} stars.`,
       text: name + tag + desc.join("") + `$ ${cmd.join("")}` + stars, defs,
     });

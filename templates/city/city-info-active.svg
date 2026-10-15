@@ -1,1 +1,1 @@
-<text x="{{x}}" y="{{y}}" text-anchor="end" class="dim" style="font-size:12px">{{count}} active days</text>
+<text x="{{x}}" y="{{y}}" text-anchor="start" class="dim" style="font-size:12px">{{count}} active days</text>

@@ -3,12 +3,12 @@ import { z } from "zod";
 import { need } from "./defined.ts";
 import { themesFileSchema } from "./schemas.ts";
 
-async function walk(dir: string, files: string[]): Promise<void> {
+async function collectTemplateFilePaths(dir: string, files: string[]): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
     const path = `${dir}/${entry.name}`;
     if (entry.isDirectory()) {
-      await walk(path, files);
+      await collectTemplateFilePaths(path, files);
     } else if (entry.name.endsWith(".svg") || entry.name.endsWith(".html") || entry.name.endsWith(".css")) {
       files.push(path);
     }
@@ -21,7 +21,7 @@ export class TemplateEngine {
   async load(root: string): Promise<void> {
     this.templates.clear();
     const files: string[] = [];
-    await walk(root, files);
+    await collectTemplateFilePaths(root, files);
     for (const file of files) {
       const name = file.slice(root.length + 1, file.lastIndexOf("."));
       this.templates.set(name, await readFile(file, "utf8"));
@@ -39,7 +39,7 @@ export class TemplateEngine {
   }
 }
 
-export function themeVars(theme: z.infer<typeof themesFileSchema>["themes"][number]): Record<string, string> {
+export function createThemeSvgVariables(theme: z.infer<typeof themesFileSchema>["themes"][number]): Record<string, string> {
   return {
     accent: theme.accent,
     accent2: theme.accent2,

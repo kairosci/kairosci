@@ -1,14 +1,20 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { z } from "zod";
 import { last, need } from "./defined.ts";
-import { GitHubClient, errMsg, warn } from "./fetch/client.ts";
-import { fetchCount, fetchStarHistory } from "./fetch/counts.ts";
-import { enrichWithEmails } from "./fetch/emails.ts";
-import { buildProjects, fetchGitHub, iso, resolveExtraRepos, streaks } from "./fetch/user.ts";
+import { GitHubClient, describeError, logWarning } from "./fetch/client.ts";
+import { collectRepositoryStarHistories, fetchOpenIssueOrPullRequestCount } from "./fetch/counts.ts";
+import { enrichRepositoryStatsWithAuthorEmails } from "./fetch/emails.ts";
+import {
+  buildEligibleProjectSummaries,
+  calculateContributionStreaks,
+  fetchGitHub,
+  formatIsoDate,
+  resolveExtraRepos,
+} from "./fetch/user.ts";
 import { loadProfile } from "./profile.ts";
 import { calendarSchema, profileSchema, snapshotSchema, starsSchema, userBioSchema } from "./schemas.ts";
 
-async function readJson(path: string): Promise<unknown> {
+async function readJsonFile(path: string): Promise<unknown> {
   try {
     return JSON.parse(await readFile(path, "utf8"));
   } catch {
@@ -16,7 +22,7 @@ async function readJson(path: string): Promise<unknown> {
   }
 }
 
-function emptySnapshot(): z.infer<typeof snapshotSchema> {
+function createEmptySnapshot(): z.infer<typeof snapshotSchema> {
   return { intro: "", projects: [], posts: [], upstreamRepos: 0, stars: null, issues: null, prs: null, github: null };
 }
 
@@ -30,69 +36,69 @@ export class ProfileFetcher {
     this.profile = profile;
   }
 
-  async run(): Promise<void> {
+  async fetchAndSaveProfileData(): Promise<void> {
     const profile = this.profile;
     await mkdir("data", { recursive: true });
-    const previous = await this.readPrevious();
+    const previous = await this.readPreviousSnapshot();
     const today = new Date(`${need(new Date().toISOString().slice(0, 10), "today")}T00:00:00Z`);
-    const intro = await this.fetchBio(previous);
-    const gh = await this.attempt("github", () => fetchGitHub(today, profile.login, this.client, profile), null);
-    const extraData = await this.fetchExtras(today);
+    const intro = await this.fetchProfileBio(previous);
+    const gh = await this.fetchWithFallback("github", () => fetchGitHub(today, profile.login, this.client, profile), null);
+    const extraData = await this.fetchAdditionalAccountData(today);
     let trackedEmails: string[] = [];
     if (gh !== null) {
       await resolveExtraRepos(gh.repos, this.client, profile);
-      trackedEmails = await enrichWithEmails(gh.repos, this.client, profile);
+      trackedEmails = await enrichRepositoryStatsWithAuthorEmails(gh.repos, this.client, profile);
     }
-    const built = gh === null ? null : buildProjects(gh.repos, intro, profile);
-    const merged = this.mergeAll(today, gh, extraData);
+    const built = gh === null ? null : buildEligibleProjectSummaries(gh.repos, intro, profile);
+    const merged = this.mergeContributionData(today, gh, extraData);
     const snapshot = snapshotSchema.parse({
       intro,
       projects: built === null ? previous.projects : built.projects,
       posts: [],
       upstreamRepos: built === null ? previous.upstreamRepos : built.upstreamRepos,
       stars: built === null ? previous.stars : built.upstreamStars,
-      issues: await this.attempt("issues", () => fetchCount("issue", this.client, profile), previous.issues),
-      prs: await this.attempt("prs", () => fetchCount("pr", this.client, profile), previous.prs),
-      github: this.mergeGithub(gh === null ? previous.github : gh.github, merged, built, previous),
+      issues: await this.fetchWithFallback("issues", () => fetchOpenIssueOrPullRequestCount("issue", this.client, profile), previous.issues),
+      prs: await this.fetchWithFallback("prs", () => fetchOpenIssueOrPullRequestCount("pr", this.client, profile), previous.prs),
+      github: this.mergeGitHubProfileData(gh === null ? previous.github : gh.github, merged, built, previous),
     });
     if (this.failures === 4) throw new Error("every source failed; leaving data/ untouched");
 
     await writeFile("data/snapshot.json", `${JSON.stringify(snapshot, null, "\t")}\n`);
     if (merged.mergedCal !== null) await writeFile("data/calendar.json", `${JSON.stringify(merged.mergedCal)}\n`);
 
-    await this.updateStars(snapshot, today);
-    await this.guardFreshness(today, merged.mergedCal);
-    this.logSummary(snapshot, trackedEmails);
+    await this.updateRepositoryStarHistory(snapshot, today);
+    await this.ensureContributionCalendarFreshness(today, merged.mergedCal);
+    this.logProfileFetchSummary(snapshot, trackedEmails);
   }
 
-  private async attempt<T>(name: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  private async fetchWithFallback<T>(name: string, fn: () => Promise<T>, fallback: T): Promise<T> {
     try {
       return await fn();
     } catch (err) {
       this.failures++;
-      warn(`${name} fetch failed`, `keeping the last value: ${errMsg(err)}`);
+      logWarning(`${name} fetch failed`, `keeping the last value: ${describeError(err)}`);
       return fallback;
     }
   }
 
-  private async readPrevious(): Promise<z.infer<typeof snapshotSchema>> {
+  private async readPreviousSnapshot(): Promise<z.infer<typeof snapshotSchema>> {
     try {
-      const prevRaw = await readJson("data/snapshot.json");
-      return prevRaw === null ? emptySnapshot() : snapshotSchema.parse(prevRaw);
+      const prevRaw = await readJsonFile("data/snapshot.json");
+      return prevRaw === null ? createEmptySnapshot() : snapshotSchema.parse(prevRaw);
     } catch {
-      return emptySnapshot();
+      return createEmptySnapshot();
     }
   }
 
-  private async fetchBio(previous: z.infer<typeof snapshotSchema>): Promise<string> {
+  private async fetchProfileBio(previous: z.infer<typeof snapshotSchema>): Promise<string> {
     const profile = this.profile;
-    return this.attempt("bio", async () => {
+    return this.fetchWithFallback("bio", async () => {
       const u = await this.client.github(userBioSchema, `users/${profile.login}`);
       return u.bio === null ? previous.intro : u.bio;
     }, previous.intro);
   }
 
-  private async fetchExtras(
+  private async fetchAdditionalAccountData(
     today: Date,
   ): Promise<{ github: z.infer<typeof snapshotSchema>["github"]; calendar: z.infer<typeof calendarSchema> }[]> {
     const profile = this.profile;
@@ -101,19 +107,19 @@ export class ProfileFetcher {
       try {
         await this.client.github(userBioSchema, `users/${login}`);
       } catch {
-        warn(login, "account unreachable, skipped");
+        logWarning(login, "account unreachable, skipped");
         continue;
       }
       try {
         extraData.push(await fetchGitHub(today, login, this.client, profile));
       } catch (err) {
-        warn(login, `fetch failed, skipped: ${errMsg(err)}`);
+        logWarning(login, `fetch failed, skipped: ${describeError(err)}`);
       }
     }
     return extraData;
   }
 
-  private mergeAll(
+  private mergeContributionData(
     today: Date,
     gh: {
       github: z.infer<typeof snapshotSchema>["github"];
@@ -144,7 +150,7 @@ export class ProfileFetcher {
     const mergedCal = [...dayTotals]
       .sort((a, b) => need(a[0], "day").localeCompare(need(b[0], "day")))
       .map((entry): [string, number] => [need(entry[0], "day"), need(entry[1], "count")]);
-    const mergedStreak = streaks(dayTotals, today);
+    const mergedStreak = calculateContributionStreaks(dayTotals, today);
     const extraYear = extraData.reduce((a, e) => a + (e.github === null ? 0 : e.github.contributions_year), 0);
     const extraAll = extraData.reduce((a, e) => a + (e.github === null ? 0 : e.github.contributions_all), 0);
     const createdDates = [
@@ -160,7 +166,7 @@ export class ProfileFetcher {
     };
   }
 
-  private mergeGithub(
+  private mergeGitHubProfileData(
     ghGithub: z.infer<typeof snapshotSchema>["github"],
     merged: {
       mergedStreak: [number, number] | null;
@@ -194,28 +200,28 @@ export class ProfileFetcher {
     };
   }
 
-  private async updateStars(
+  private async updateRepositoryStarHistory(
     snapshot: z.infer<typeof snapshotSchema>,
     today: Date,
   ): Promise<void> {
-    const prevStarsRaw = await readJson("data/stars.json");
+    const prevStarsRaw = await readJsonFile("data/stars.json");
     let prevStars: z.infer<typeof starsSchema> | null = null;
     try {
       prevStars = prevStarsRaw === null ? null : starsSchema.parse(prevStarsRaw);
     } catch {
       prevStars = null;
     }
-    const stars = await this.attempt(
+    const stars = await this.fetchWithFallback(
       "star history",
-      () => fetchStarHistory(snapshot.projects, iso(today), prevStars, this.client),
+      () => collectRepositoryStarHistories(snapshot.projects, formatIsoDate(today), prevStars, this.client),
       null,
     );
     if (stars !== null) await writeFile("data/stars.json", `${JSON.stringify(stars)}\n`);
   }
 
-  private async guardFreshness(today: Date, mergedCal: z.infer<typeof calendarSchema> | null): Promise<void> {
+  private async ensureContributionCalendarFreshness(today: Date, mergedCal: z.infer<typeof calendarSchema> | null): Promise<void> {
     if (mergedCal !== null) return;
-    const calRaw = await readJson("data/calendar.json");
+    const calRaw = await readJsonFile("data/calendar.json");
     let cal: z.infer<typeof calendarSchema> | null = null;
     try {
       cal = calRaw === null ? null : calendarSchema.parse(calRaw);
@@ -229,7 +235,7 @@ export class ProfileFetcher {
     }
   }
 
-  private logSummary(snapshot: z.infer<typeof snapshotSchema>, trackedEmails: string[]): void {
+  private logProfileFetchSummary(snapshot: z.infer<typeof snapshotSchema>, trackedEmails: string[]): void {
     const ghStats = snapshot.github;
     console.log(
       `projects ${snapshot.projects.length} · upstream ${snapshot.upstreamRepos} repos · ` +
@@ -246,7 +252,7 @@ export class ProfileFetcher {
 async function main(): Promise<void> {
   const profile = await loadProfile();
   const client = new GitHubClient(profile.userAgent, process.env["GITHUB_TOKEN"], process.env["PROFILE_TOKEN"]);
-  await new ProfileFetcher(client, profile).run();
+  await new ProfileFetcher(client, profile).fetchAndSaveProfileData();
 }
 
 if (import.meta.main) await main();

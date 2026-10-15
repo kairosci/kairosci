@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { f1 } from "../console.ts";
+import { formatSvgNumber } from "../console.ts";
 import { need } from "../defined.ts";
 import { phaseSchema, skyBoxSchema, themeSchema } from "../schemas.ts";
-import { TemplateEngine, themeVars } from "../templates.ts";
+import { TemplateEngine, createThemeSvgVariables } from "../templates.ts";
 import { RAD } from "./sun.ts";
 
-export function mix(a: string, b: string, k: number): string {
+export function blendHexColors(a: string, b: string, k: number): string {
   const rgb = (h: string): number[] => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
   const xa = rgb(a);
   const xb = rgb(b);
@@ -37,12 +37,12 @@ const GRADIENTS = {
 };
 const FACES = { dawn: ["#fff1c1", "#ff7ab6"], dusk: ["#ffe27a", "#ff2bd6"] };
 const CLOUDS = {
-  dawn: (t: z.infer<typeof themeSchema>): [string, string] => ["#ff9ec7", mix(t.bg, "#ff9ec7", 0.16)],
-  day: (t: z.infer<typeof themeSchema>): [string, string] => [t.accent, mix(t.bg, daylight(t), 0.2)],
-  dusk: (t: z.infer<typeof themeSchema>): [string, string] => ["#ff9e3d", mix(t.bg, "#ff7ab6", 0.18)],
+  dawn: (t: z.infer<typeof themeSchema>): [string, string] => ["#ff9ec7", blendHexColors(t.bg, "#ff9ec7", 0.16)],
+  day: (t: z.infer<typeof themeSchema>): [string, string] => [t.accent, blendHexColors(t.bg, daylight(t), 0.2)],
+  dusk: (t: z.infer<typeof themeSchema>): [string, string] => ["#ff9e3d", blendHexColors(t.bg, "#ff7ab6", 0.18)],
 };
-export const daylight = (t: z.infer<typeof themeSchema>): string => mix(t.accent, "#ffffff", 0.5);
-export function phaseColor(t: z.infer<typeof themeSchema>, p: z.infer<typeof phaseSchema>): string {
+export const daylight = (t: z.infer<typeof themeSchema>): string => blendHexColors(t.accent, "#ffffff", 0.5);
+export function colorForSkyPhase(t: z.infer<typeof themeSchema>, p: z.infer<typeof phaseSchema>): string {
   if (p === "night") return t.moon;
   if (p === "dawn") return "#ff9ec7";
   if (p === "day") return SUN;
@@ -61,14 +61,14 @@ export class SkyLayers {
   private fade(id: string, v: number[]): string {
     return this.engine.render("sky/sky-fade", {
       id,
-      x1: f1(need(v[0], "fade x1")),
-      y1: f1(need(v[1], "fade y1")),
-      x2: f1(need(v[2], "fade x2")),
-      y2: f1(need(v[3], "fade y2")),
+      x1: formatSvgNumber(need(v[0], "fade x1")),
+      y1: formatSvgNumber(need(v[1], "fade y1")),
+      x2: formatSvgNumber(need(v[2], "fade x2")),
+      y2: formatSvgNumber(need(v[3], "fade y2")),
     });
   }
 
-  layer(
+  buildSkyLayer(
     p: Exclude<z.infer<typeof phaseSchema>, "night">,
     b: z.infer<typeof skyBoxSchema>,
   ): { defs: string; css: string; grad: string; sun: string; clouds: string } {
@@ -103,19 +103,19 @@ export class SkyLayers {
         const a = i * 30 * RAD;
         const r0 = 21 * k;
         const r1 = (i % 2 ? 27 : 32) * k;
-        return `M${f1(high[0] + Math.cos(a) * r0)} ${f1(high[1] + Math.sin(a) * r0)}L${f1(high[0] + Math.cos(a) * r1)} ${f1(high[1] + Math.sin(a) * r1)}`;
+        return `M${formatSvgNumber(high[0] + Math.cos(a) * r0)} ${formatSvgNumber(high[1] + Math.sin(a) * r0)}L${formatSvgNumber(high[0] + Math.cos(a) * r1)} ${formatSvgNumber(high[1] + Math.sin(a) * r1)}`;
       }).join("");
       sun.push(
         this.engine.render("sky/sun-day", {
-          ...themeVars(t),
+          ...createThemeSvgVariables(t),
           cx: high[0],
           cy: high[1],
-          glowR: f1(74 * k),
+          glowR: formatSvgNumber(74 * k),
           rays,
-          rayW: f1(2 * k),
+          rayW: formatSvgNumber(2 * k),
           sun: SUN,
           sunCore: SUN_CORE,
-          r: f1(15 * k),
+          r: formatSvgNumber(15 * k),
         }),
       );
       css.push(this.engine.render("css/spin", { cx: high[0], cy: high[1] }));
@@ -136,29 +136,29 @@ export class SkyLayers {
       const bars = sunbars
         .map(([by, bh]) =>
           this.engine.render("sky/sunbar", {
-            x: f1(low[0] - r),
-            y: f1(low[1] + by * r),
-            w: f1(2 * r),
-            h: f1(bh * r),
+            x: formatSvgNumber(low[0] - r),
+            y: formatSvgNumber(low[1] + by * r),
+            w: formatSvgNumber(2 * r),
+            h: formatSvgNumber(bh * r),
           }),
         )
         .join("");
       defs.push(
         this.engine.render("sky/def-slits", {
-          x: f1(low[0] - reach),
-          y: f1(low[1] - reach),
-          w: f1(2 * reach),
-          h: f1(2 * reach),
+          x: formatSvgNumber(low[0] - reach),
+          y: formatSvgNumber(low[1] - reach),
+          w: formatSvgNumber(2 * reach),
+          h: formatSvgNumber(2 * reach),
           bars,
         }),
       );
       sun.push(
         this.engine.render("sky/sun-low", {
-          ...themeVars(t),
+          ...createThemeSvgVariables(t),
           cx: low[0],
           cy: low[1],
-          glowR: f1(96 * k),
-          faceR: f1(r),
+          glowR: formatSvgNumber(96 * k),
+          faceR: formatSvgNumber(r),
           bottom,
         }),
       );
@@ -170,27 +170,27 @@ export class SkyLayers {
       .map(([x, y, s], i) => {
         const u = s * k;
         const puffs = this.engine.render("sky/cloud-puffs", {
-          x: f1(x),
-          y: f1(y),
-          w: f1(66 * u),
-          h: f1(12 * u),
-          rx: f1(6 * u),
-          c1x: f1(x + 20 * u),
-          c1y: f1(y + 2 * u),
-          c1r: f1(9 * u),
-          c2x: f1(x + 36 * u),
-          c2y: f1(y - 2 * u),
-          c2r: f1(12 * u),
-          c3x: f1(x + 52 * u),
-          c3y: f1(y + 3 * u),
-          c3r: f1(7 * u),
+          x: formatSvgNumber(x),
+          y: formatSvgNumber(y),
+          w: formatSvgNumber(66 * u),
+          h: formatSvgNumber(12 * u),
+          rx: formatSvgNumber(6 * u),
+          c1x: formatSvgNumber(x + 20 * u),
+          c1y: formatSvgNumber(y + 2 * u),
+          c1r: formatSvgNumber(9 * u),
+          c2x: formatSvgNumber(x + 36 * u),
+          c2y: formatSvgNumber(y - 2 * u),
+          c2r: formatSvgNumber(12 * u),
+          c3x: formatSvgNumber(x + 52 * u),
+          c3y: formatSvgNumber(y + 3 * u),
+          c3r: formatSvgNumber(7 * u),
         });
         return this.engine.render("sky/cloud", {
-          ...themeVars(t),
+          ...createThemeSvgVariables(t),
           i,
           rim,
-          rimW1: f1(4 * k),
-          rimW2: f1(2.4 * k),
+          rimW1: formatSvgNumber(4 * k),
+          rimW2: formatSvgNumber(2.4 * k),
           fill,
           puffs,
         });

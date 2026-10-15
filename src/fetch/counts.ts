@@ -8,11 +8,11 @@ import {
   searchResponseSchema,
   starsSchema,
 } from "../schemas.ts";
-import { GitHubClient, errMsg, warn } from "./client.ts";
+import { GitHubClient, describeError, logWarning } from "./client.ts";
 
 const RELEASE_TITLE = /^chore(\([^)]*\))?: release\b/i;
 
-export async function search(
+export async function searchGitHubIssues(
   q: string,
   client: GitHubClient,
 ): Promise<{ total: number; items: z.infer<typeof searchResponseSchema>["items"] }> {
@@ -30,12 +30,12 @@ export async function search(
   return { total, items };
 }
 
-export function isBot(login: string, kind: string): boolean {
-  if (kind.toLowerCase() === "bot") return true;
+export function isAutomatedGitHubAccount(login: string, accountType: string): boolean {
+  if (accountType.toLowerCase() === "bot") return true;
   return login.toLowerCase().endsWith("[bot]");
 }
 
-export async function fetchCount(
+export async function fetchOpenIssueOrPullRequestCount(
   kind: "issue" | "pr",
   client: GitHubClient,
   profile: z.infer<typeof profileSchema>,
@@ -48,11 +48,11 @@ export async function fetchCount(
     `is:${kind}`,
     ...(kind === "pr" ? ["draft:false"] : []),
   ];
-  const found = await search(base.join(" "), client);
-  const kept = found.items.filter((i) => !isBot(i.user.login, i.user.type) && !(kind === "pr" && RELEASE_TITLE.test(i.title)));
+  const found = await searchGitHubIssues(base.join(" "), client);
+  const kept = found.items.filter((item) => !isAutomatedGitHubAccount(item.user.login, item.user.type) && !(kind === "pr" && RELEASE_TITLE.test(item.title)));
   const bots: string[] = [];
-  for (const i of found.items) {
-    if (isBot(i.user.login, i.user.type) && !bots.some((login) => login.toLowerCase() === i.user.login.toLowerCase())) bots.push(i.user.login);
+  for (const item of found.items) {
+    if (isAutomatedGitHubAccount(item.user.login, item.user.type) && !bots.some((login) => login.toLowerCase() === item.user.login.toLowerCase())) bots.push(item.user.login);
   }
   bots.sort();
   const query = [
@@ -65,16 +65,16 @@ export async function fetchCount(
     `search/issues?q=${encodeURIComponent(query)}&per_page=1`,
   );
   if (linked.total_count !== kept.length) {
-    warn(`${kind} count`, `${kept.length} counted but its linked search shows ${linked.total_count}`);
+    logWarning(`${kind} count`, `${kept.length} counted but its linked search shows ${linked.total_count}`);
   }
   return { count: kept.length, query };
 }
 
-export function sortDays(daily: Record<string, number>): Record<string, number> {
-  return Object.fromEntries(Object.entries(daily).sort(([a], [b]) => a.localeCompare(b)));
+export function sortDailyCountsByDate(dailyCounts: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(Object.entries(dailyCounts).sort(([dateA], [dateB]) => dateA.localeCompare(dateB)));
 }
 
-export async function repoStars(
+export async function collectRepositoryStarHistory(
   repo: string,
   prev: { created_at: string; total: number; daily: Record<string, number> } | null,
   today: string,
@@ -85,9 +85,9 @@ export async function repoStars(
   const total = info.stargazers_count;
   if (process.env["PROFILE_TOKEN"] !== undefined) {
     try {
-      return { created_at, total, daily: sortDays(await client.stargazerDays(repo)) };
+      return { created_at, total, daily: sortDailyCountsByDate(await client.stargazerDays(repo)) };
     } catch (err) {
-      warn(`stargazers for ${repo}`, `${errMsg(err)}; tracking the star count instead`);
+      logWarning(`stargazers for ${repo}`, `${describeError(err)}; tracking the star count instead`);
     }
   }
   const daily: Record<string, number> = prev === null ? {} : { ...prev.daily };
@@ -99,10 +99,10 @@ export async function repoStars(
     daily[today] = (before === undefined ? 0 : before) + total - known;
     if (daily[today] === 0) delete daily[today];
   }
-  return { created_at, total, daily: sortDays(daily) };
+  return { created_at, total, daily: sortDailyCountsByDate(daily) };
 }
 
-export async function fetchStarHistory(
+export async function collectRepositoryStarHistories(
   projects: z.infer<typeof projectSchema>[],
   today: string,
   previous: z.infer<typeof starsSchema> | null,
@@ -114,10 +114,10 @@ export async function fetchStarHistory(
     const stored = previous === null ? null : Object.entries(previous.repos).find(([repo]) => repo.toLowerCase() === p.repo.toLowerCase())?.[1];
     const kept = stored === undefined ? null : stored;
     try {
-      repos[p.repo] = await repoStars(p.repo, kept, today, client);
+      repos[p.repo] = await collectRepositoryStarHistory(p.repo, kept, today, client);
       ok++;
     } catch (err) {
-      warn(`stargazers for ${p.repo}`, `keeping the last value: ${errMsg(err)}`);
+      logWarning(`stargazers for ${p.repo}`, `keeping the last value: ${describeError(err)}`);
       if (kept !== null) repos[p.repo] = kept;
     }
   }

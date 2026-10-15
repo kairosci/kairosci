@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { loadProfile, loadTheme } from "../src/profile.ts";
 import { GitHubClient } from "../src/fetch/client.ts";
-import { isBot, fetchStarHistory } from "../src/fetch/counts.ts";
-import { isMine, resolveExtraRepos } from "../src/fetch/user.ts";
+import { isAutomatedGitHubAccount, collectRepositoryStarHistories } from "../src/fetch/counts.ts";
+import { isProfileOwnedRepository, resolveExtraRepos } from "../src/fetch/user.ts";
 import { profileSchema, repoStatsSchema } from "../src/schemas.ts";
 
 const profile = await loadProfile();
@@ -29,10 +29,10 @@ class StubClient extends GitHubClient {
 }
 
 test("identity checks and theme lookup ignore casing", async () => {
-  assert.equal(isMine(`${profile.login.toUpperCase()}/repo`, profile), true);
-  assert.equal(isMine(`other/${profile.login}`, profile), false);
-  assert.equal(isBot("Tool[BOT]", "user"), true);
-  assert.equal(isBot("tool", "BOT"), true);
+  assert.equal(isProfileOwnedRepository(`${profile.login.toUpperCase()}/repo`, profile), true);
+  assert.equal(isProfileOwnedRepository(`other/${profile.login}`, profile), false);
+  assert.equal(isAutomatedGitHubAccount("Tool[BOT]", "user"), true);
+  assert.equal(isAutomatedGitHubAccount("tool", "BOT"), true);
   assert.equal((await loadTheme("REEF")).name, "reef");
   assert.deepEqual(profileSchema.parse({ ...profile, extraRepos: undefined }).extraRepos, []);
   assert.equal(profileSchema.safeParse({ ...profile, extraRepos: ["owner/repo/invalid"] }).success, false);
@@ -54,7 +54,7 @@ test("extra repositories resolve exact names and do not overwrite existing stats
 
 test("star history survives a repository casing change", async () => {
   const project = JSON.parse(await (await import("node:fs/promises")).readFile("data/snapshot.json", "utf8")).projects[0];
-  const history = await fetchStarHistory([{ ...project, repo: "Owner/Repo" }], "2026-10-14", {
+  const history = await collectRepositoryStarHistories([{ ...project, repo: "Owner/Repo" }], "2026-10-14", {
     end: "2026-10-13", repos: { "owner/repo": { created_at: "2020-01-01", total: 100, daily: { "2026-10-13": 100 } } },
   }, new StubClient());
   assert.deepEqual(history.repos["Owner/Repo"]?.daily, { "2026-10-13": 100, "2026-10-14": 5 });

@@ -1,11 +1,11 @@
 import { siGithub } from "simple-icons";
 import { z } from "zod";
-import { DESKTOP, FL, FR, M, PHONE, X, esc, f1 } from "../console.ts";
+import { DESKTOP, FL, FR, M, PHONE, X, escapeMarkup, formatSvgNumber } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
 import { need } from "../defined.ts";
 import { buttonSchema, geoSchema } from "../schemas.ts";
-import { themeVars } from "../templates.ts";
-import { cardLayout, fitText, fontMetrics, nameLayout, textWidth, wrapText } from "../layout.ts";
+import { createThemeSvgVariables } from "../templates.ts";
+import { projectCardGeometry, fitText, fontMetrics, profileNameLayout, textWidth, wrapText } from "../layout.ts";
 
 
 export class HeaderSection {
@@ -33,23 +33,23 @@ export class HeaderSection {
     const bio = this.ctx.snapshot.intro === "" ? profile.displayName : this.ctx.snapshot.intro;
     const name = profile.headerName.toUpperCase();
     const nameTop = 102 + 15 * fontMetrics.ascent;
-    const nameWidthSize = (DESKTOP.R - X - 2 * DESKTOP.M * fontMetrics.advance) /
+    const nameWidthSize = (DESKTOP.contentRight - X - 2 * DESKTOP.margin * fontMetrics.advance) /
       (Array.from(name).length * (fontMetrics.advance + fontMetrics.advance / 25));
-    const nameBox = nameLayout(name, DESKTOP.R - X, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), DESKTOP.M * fontMetrics.advance);
-    const bioLines = wrapText(bio, DESKTOP.R - X - textWidth(">> ", 15), 15);
-    const firstRow = engine.render("frame/header-line", { x: X, text: esc(need(bioLines[0], "GitHub description")) });
-    const continuationRows = bioLines.slice(1).map((line) => engine.render("frame/header-continuation", { x: X + textWidth(">> ", 15), text: esc(line) }));
+    const nameBox = profileNameLayout(name, DESKTOP.contentRight - X, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), DESKTOP.margin * fontMetrics.advance);
+    const bioLines = wrapText(bio, DESKTOP.contentRight - X - textWidth(">> ", 15), 15);
+    const firstRow = engine.render("frame/header-line", { x: X, text: escapeMarkup(need(bioLines[0], "GitHub description")) });
+    const continuationRows = bioLines.slice(1).map((line) => engine.render("frame/header-continuation", { x: X + textWidth(">> ", 15), text: escapeMarkup(line) }));
     const bioRows = [firstRow, ...continuationRows];
     const bioTop = Math.ceil(nameBox.baseline + nameBox.size * fontMetrics.descent + 15 * fontMetrics.ascent);
     const bioLineHeight = 15 * fontMetrics.ascent;
-    const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + DESKTOP.M * fontMetrics.advance) / 40) * 40;
+    const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + DESKTOP.margin * fontMetrics.advance) / 40) * 40;
     const defs = engine.render("frame/defs-header", { x: X, clipY: 80 });
-    const barLX = FL + DESKTOP.M;
-    const barRX = FR - DESKTOP.M;
-    const dotx = barRX - textWidth(barRight, 12, 1) - DESKTOP.M;
-    const descLines = need(slices.stagger(bioRows, bioTop, bioLineHeight, 1.75, 0.12)[0], "GitHub description lines");
+    const barLX = FL + DESKTOP.margin;
+    const barRX = FR - DESKTOP.margin;
+    const dotx = barRX - textWidth(barRight, 12, 1) - DESKTOP.margin;
+    const descLines = need(slices.renderStaggeredRows(bioRows, bioTop, bioLineHeight, 1.75, 0.12)[0], "GitHub description lines");
     const body = engine.render("frame/header-top", {
-      ...themeVars(theme),
+      ...createThemeSvgVariables(theme),
       fl: FL,
       fr: FR,
       m: M,
@@ -58,23 +58,23 @@ export class HeaderSection {
       barLX,
       barLY: M + 22,
       barRX,
-      barLeft: esc(fitText(barLeft, dotx - barLX - (barLX - FL), 12, 1)),
-      barRight: esc(barRight),
-      dotx: f1(dotx),
+      barLeft: escapeMarkup(fitText(barLeft, dotx - barLX - (barLX - FL), 12, 1)),
+      barRight: escapeMarkup(barRight),
+      dotx: formatSvgNumber(dotx),
       dotY: M + 18,
       x: X,
       whoY: 102,
       nameSize: nameBox.size,
       nameSpacing: nameBox.spacing,
       nameY: nameBox.baseline,
-      gmX: X + DESKTOP.M * fontMetrics.advance / 2,
-      gcX: X - DESKTOP.M * fontMetrics.advance / 2,
-      name: esc(name),
+      gmX: X + DESKTOP.margin * fontMetrics.advance / 2,
+      gcX: X - DESKTOP.margin * fontMetrics.advance / 2,
+      name: escapeMarkup(name),
       descLines,
       scanY: M + 35,
       scanH: h - M - 35,
     });
-    return slices.sliceG(DESKTOP, h, body, {
+    return slices.createSvgSlice(DESKTOP, h, body, {
         title: profile.displayName,
         desc: this.alt(),
         text: barLeft + barRight + name + "$ whoami>>" + bio,
@@ -93,50 +93,50 @@ export class HeaderSection {
     const barRight = "ONLINE · NOMINAL";
     const bio = snapshot.intro === "" ? profile.displayName : snapshot.intro;
     const name = profile.headerName.toUpperCase();
-    const defs = engine.render("frame/defs-header", { x: g.X, clipY: 64 });
-    const barLX = g.FL + g.M;
-    const barRX = g.FR - g.M;
-    const dotx = barRX - textWidth(barRight, 12, 1) - g.M;
+    const defs = engine.render("frame/defs-header", { x: g.contentLeft, clipY: 64 });
+    const barLX = g.frameLeft + g.margin;
+    const barRX = g.frameRight - g.margin;
+    const dotx = barRX - textWidth(barRight, 12, 1) - g.margin;
     const nameTop = 86 + 15 * fontMetrics.ascent;
-    const nameWidthSize = (g.R - g.X - 2 * g.M * fontMetrics.advance) /
+    const nameWidthSize = (g.contentRight - g.contentLeft - 2 * g.margin * fontMetrics.advance) /
       (Array.from(name).length * (fontMetrics.advance + fontMetrics.advance / 25));
-    const nameBox = nameLayout(name, g.R - g.X, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), g.M * fontMetrics.advance);
-    const bioLines = wrapText(bio, g.R - g.X - textWidth(">> ", 15), 15);
-    const firstRow = engine.render("frame/header-line", { x: g.X, text: esc(need(bioLines[0], "GitHub description")) });
-    const continuationRows = bioLines.slice(1).map((line) => engine.render("frame/header-continuation", { x: g.X + textWidth(">> ", 15), text: esc(line) }));
+    const nameBox = profileNameLayout(name, g.contentRight - g.contentLeft, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), g.margin * fontMetrics.advance);
+    const bioLines = wrapText(bio, g.contentRight - g.contentLeft - textWidth(">> ", 15), 15);
+    const firstRow = engine.render("frame/header-line", { x: g.contentLeft, text: escapeMarkup(need(bioLines[0], "GitHub description")) });
+    const continuationRows = bioLines.slice(1).map((line) => engine.render("frame/header-continuation", { x: g.contentLeft + textWidth(">> ", 15), text: escapeMarkup(line) }));
     const bioRows = [firstRow, ...continuationRows];
     const bioTop = Math.ceil(nameBox.baseline + nameBox.size * fontMetrics.descent + 15 * fontMetrics.ascent);
     const bioLineHeight = 15 * fontMetrics.ascent;
-    const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + g.M * fontMetrics.advance) / 40) * 40;
+    const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + g.margin * fontMetrics.advance) / 40) * 40;
     const step = 0.12;
-    const descLines = slices.stagger(bioRows, bioTop, bioLineHeight, 1.75, step)[0];
+    const descLines = slices.renderStaggeredRows(bioRows, bioTop, bioLineHeight, 1.75, step)[0];
     const body = engine.render("frame/header-top", {
-      ...themeVars(theme),
-      fl: g.FL,
-      fr: g.FR,
-      m: g.M,
-      barW: g.FR - g.FL,
-      barY: g.M + 34,
+      ...createThemeSvgVariables(theme),
+      fl: g.frameLeft,
+      fr: g.frameRight,
+      m: g.margin,
+      barW: g.frameRight - g.frameLeft,
+      barY: g.margin + 34,
       barLX,
-      barLY: g.M + 22,
+      barLY: g.margin + 22,
       barRX,
-      barLeft: esc(fitText(barLeft, dotx - barLX - g.M, 12, 1)),
-      barRight: esc(barRight),
-      dotx: f1(dotx),
-      dotY: g.M + 18,
-      x: g.X,
+      barLeft: escapeMarkup(fitText(barLeft, dotx - barLX - g.margin, 12, 1)),
+      barRight: escapeMarkup(barRight),
+      dotx: formatSvgNumber(dotx),
+      dotY: g.margin + 18,
+      x: g.contentLeft,
       whoY: 86,
       nameSize: nameBox.size,
       nameSpacing: nameBox.spacing,
       nameY: nameBox.baseline,
-      gmX: g.X + g.M * fontMetrics.advance / 2,
-      gcX: g.X - g.M * fontMetrics.advance / 2,
-      name: esc(name),
+      gmX: g.contentLeft + g.margin * fontMetrics.advance / 2,
+      gcX: g.contentLeft - g.margin * fontMetrics.advance / 2,
+      name: escapeMarkup(name),
       descLines: need(descLines, "phone GitHub description lines"),
-      scanY: g.M + 35,
-      scanH: h - g.M - 35,
+      scanY: g.margin + 35,
+      scanH: h - g.margin - 35,
     });
-    return slices.sliceG(g, h, body, {
+    return slices.createSvgSlice(g, h, body, {
         title: profile.displayName,
         desc: this.alt(),
         text: barLeft + barRight + name + "$ whoami>>" + bio,
@@ -154,7 +154,7 @@ export class HeaderSection {
       login: profile.login,
       endX: FR - 36,
     });
-    return this.ctx.slices.sliceG(DESKTOP, 80, body, {
+    return this.ctx.slices.createSvgSlice(DESKTOP, 80, body, {
       title: "End of profile",
       desc: "Connection closed.",
       text: `$ exit connection to ${profile.login} closed. // EOF`,
@@ -166,11 +166,11 @@ export class HeaderSection {
     const { engine, profile } = this.ctx;
     const g = PHONE;
     const body = engine.render("frame/phone-footer", {
-      x: g.X,
-      r: g.R,
+      x: g.contentLeft,
+      r: g.contentRight,
       login: profile.login,
     });
-    return this.ctx.slices.sliceG(g, 120, body, {
+    return this.ctx.slices.createSvgSlice(g, 120, body, {
       title: "End of profile",
       desc: "Connection closed.",
       text: `$ exit connection to ${profile.login} closed. // EOF`,
@@ -188,8 +188,8 @@ export class Buttons {
 
   private iconFor(kind: string): string {
     const theme = this.ctx.theme;
-    if (kind === "github") return this.ctx.engine.render("frame/icon-github", { ...themeVars(theme), d: siGithub.path });
-    if (kind === "website") return this.ctx.engine.render("frame/icon-website", { ...themeVars(theme) });
+    if (kind === "github") return this.ctx.engine.render("frame/icon-github", { ...createThemeSvgVariables(theme), d: siGithub.path });
+    if (kind === "website") return this.ctx.engine.render("frame/icon-website", { ...createThemeSvgVariables(theme) });
     throw new Error(`missing icon ${kind}`);
   }
 
@@ -214,7 +214,7 @@ export class Buttons {
   private async renderButton(b: z.infer<typeof buttonSchema>, g: z.infer<typeof geoSchema>, k: number, n: number, delay0: number, framed: boolean): Promise<string> {
     const { engine, theme, slices } = this.ctx;
     const height = 80;
-    const card = cardLayout(g, k, n, height);
+    const card = projectCardGeometry(g, k, n, height);
     const iconSize = 18;
     const centered = g.narrow;
     const labelSize = centered ? 12 : 13;
@@ -223,14 +223,14 @@ export class Buttons {
     const label = fitText(b.label, labelWidth, labelSize);
     const handle = fitText(b.handle, centered ? card.right - card.left : labelWidth, 10);
     const content = engine.render("cards/link", {
-      ...themeVars(theme), icon: b.icon,
+      ...createThemeSvgVariables(theme), icon: b.icon,
       iconX: centered ? card.x + (card.width - iconSize) / 2 : card.left,
       iconY: card.top,
       labelX, labelY: centered ? card.bottom - labelSize * fontMetrics.descent : card.top + labelSize * fontMetrics.capitals,
-      labelSize, label: esc(label), anchor: centered ? "middle" : "start",
-      handle: centered ? "" : engine.render("cards/link-handle", { x: labelX, y: card.bottom - 10 * fontMetrics.descent, text: esc(handle) }),
+      labelSize, label: escapeMarkup(label), anchor: centered ? "middle" : "start",
+      handle: centered ? "" : engine.render("cards/link-handle", { x: labelX, y: card.bottom - 10 * fontMetrics.descent, text: escapeMarkup(handle) }),
     });
-    const body = engine.render("cards/shell", { ...themeVars(theme), ...card, content, delay: delay0 + k * 0.08 });
-    return slices.segmentG(g, k, n, height, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + handle + ">_" }, framed);
+    const body = engine.render("cards/shell", { ...createThemeSvgVariables(theme), ...card, content, delay: delay0 + k * 0.08 });
+    return slices.createSegmentSvgSlice(g, k, n, height, body, { title: b.label, desc: `${b.label}: ${b.url}`, text: label + handle + ">_" }, framed);
   }
 }

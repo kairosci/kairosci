@@ -11,11 +11,11 @@ import {
   repoStatsSchema,
   snapshotSchema,
 } from "../schemas.ts";
-import { GitHubClient, errMsg, warn } from "./client.ts";
-import { search } from "./counts.ts";
-import { pause } from "./emails.ts";
+import { GitHubClient, describeError, logWarning } from "./client.ts";
+import { searchGitHubIssues } from "./counts.ts";
+import { waitBetweenGitHubRequests } from "./emails.ts";
 
-export function isMine(full: string, profile: z.infer<typeof profileSchema>): boolean {
+export function isProfileOwnedRepository(full: string, profile: z.infer<typeof profileSchema>): boolean {
   const lower = full.toLowerCase();
   for (const login of [profile.login, ...profile.extraLogins]) {
     if (lower.startsWith(`${login.toLowerCase()}/`)) return true;
@@ -23,11 +23,11 @@ export function isMine(full: string, profile: z.infer<typeof profileSchema>): bo
   return false;
 }
 
-async function searchRepoName(
+async function findRepositoryByName(
   client: GitHubClient,
   name: string,
 ): Promise<z.infer<typeof repoSearchItemSchema> | null> {
-  await pause();
+  await waitBetweenGitHubRequests();
   const res = await client.github(
     repoSearchSchema,
     `search/repositories?q=${encodeURIComponent(`${name} in:name`)}&sort=stars&order=desc&per_page=100`,
@@ -40,23 +40,23 @@ async function searchRepoName(
     if (!matches) continue;
     if (best === null || item.stargazers_count > best.stargazers_count) best = item;
   }
-  if (best === null) warn("extra repo", `${name}: no match, skipped`);
+  if (best === null) logWarning("extra repo", `${name}: no match, skipped`);
   return best;
 }
 
-async function resolveOne(
+async function resolveConfiguredRepository(
   client: GitHubClient,
   given: string,
 ): Promise<z.infer<typeof repoSearchItemSchema> | null> {
   const trimmed = given.trim();
   if (trimmed === "") {
-    warn("extra repo", "empty entry, skipped");
+    logWarning("extra repo", "empty entry, skipped");
     return null;
   }
   if (trimmed.includes("/")) {
     return client.github(repoSearchItemSchema, `repos/${trimmed}`);
   }
-  return searchRepoName(client, trimmed);
+  return findRepositoryByName(client, trimmed);
 }
 
 export async function resolveExtraRepos(
@@ -66,18 +66,18 @@ export async function resolveExtraRepos(
 ): Promise<void> {
   for (const given of profile.extraRepos) {
     try {
-      const found = await resolveOne(client, given);
+      const found = await resolveConfiguredRepository(client, given);
       if (found === null) continue;
       if (Object.keys(repos).some((full) => full.toLowerCase() === found.full_name.toLowerCase())) continue;
-      await pause();
+      await waitBetweenGitHubRequests();
       let prs = 0;
       try {
         for (const login of new Set([profile.login, ...profile.extraLogins].map((login) => login.toLowerCase()))) {
-          const res = await search(`author:${login} type:pr repo:${found.full_name}`, client);
+          const res = await searchGitHubIssues(`author:${login} type:pr repo:${found.full_name}`, client);
           prs += res.total;
         }
       } catch (err) {
-        warn(`extra repo prs for ${found.full_name}`, errMsg(err));
+        logWarning(`extra repo prs for ${found.full_name}`, describeError(err));
       }
       repos[found.full_name] = repoStatsSchema.parse({
         commits: 0,
@@ -89,10 +89,10 @@ export async function resolveExtraRepos(
         fork: found.fork,
         archived: found.archived,
         private: found.private,
-        mine: isMine(found.full_name, profile),
+        mine: isProfileOwnedRepository(found.full_name, profile),
       });
     } catch (err) {
-      warn(`extra repo ${given}`, errMsg(err));
+      logWarning(`extra repo ${given}`, describeError(err));
     }
   }
 }
@@ -107,48 +107,48 @@ const PROFILE_QUERY = `query($login: String!) {
   }
 }`;
 
-export function iso(d: Date): string {
-  return need(d.toISOString().slice(0, 10), "iso date");
+export function formatIsoDate(date: Date): string {
+  return need(date.toISOString().slice(0, 10), "iso date");
 }
 
-export function addDays(d: Date, n: number): Date {
-  return new Date(d.getTime() + n * 864e5);
+export function addDaysToDate(date: Date, dayOffset: number): Date {
+  return new Date(date.getTime() + dayOffset * 864e5);
 }
 
-export function streaks(days: Map<string, number>, today: Date): [number, number] {
+export function calculateContributionStreaks(days: Map<string, number>, today: Date): [number, number] {
   let longest = 0;
   let run = 0;
-  const keys = [...days.keys()].filter((d) => d <= iso(today)).sort();
-  for (const d of keys) {
-    const count = days.get(d);
+  const contributionDates = [...days.keys()].filter((date) => date <= formatIsoDate(today)).sort();
+  for (const date of contributionDates) {
+    const count = days.get(date);
     run = count !== undefined && count > 0 ? run + 1 : 0;
     longest = Math.max(longest, run);
   }
   let current = 0;
-  let d = today;
-  if (days.get(iso(d)) === undefined) d = addDays(d, -1);
+  let currentDate = today;
+  if (days.get(formatIsoDate(currentDate)) === undefined) currentDate = addDaysToDate(currentDate, -1);
   while (true) {
-    const count = days.get(iso(d));
+    const count = days.get(formatIsoDate(currentDate));
     if (count === undefined || count <= 0) break;
     current++;
-    d = addDays(d, -1);
+    currentDate = addDaysToDate(currentDate, -1);
   }
   return [current, longest];
 }
 
-export function fmtStars(n: number): string {
-  if (n >= 1000) {
-    const v = n / 1000;
-    return Number.isInteger(v) ? String(v) : `${v.toFixed(1)}k`;
+export function formatStarCount(count: number): string {
+  if (count >= 1000) {
+    const thousands = count / 1000;
+    return Number.isInteger(thousands) ? String(thousands) : `${thousands.toFixed(1)}k`;
   }
-  return String(n);
+  return String(count);
 }
 
-export function plural(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`;
+export function formatCountWithUnit(count: number, singularUnit: string, pluralUnit: string): string {
+  return `${count} ${count === 1 ? singularUnit : pluralUnit}`;
 }
 
-export function buildProjects(
+export function buildEligibleProjectSummaries(
   repos: Record<string, z.infer<typeof repoStatsSchema>>,
   intro: string,
   profile: z.infer<typeof profileSchema>,
@@ -186,9 +186,9 @@ export function buildProjects(
       repo: r.full,
       kind: language,
       description: need(r.description, `description of ${r.full}`).trim(),
-      tagline: `${plural(r.commits, "commit", "commits")} · ${plural(r.prs, "PR", "PRs")}`,
+      tagline: `${formatCountWithUnit(r.commits, "commit", "commits")} · ${formatCountWithUnit(r.prs, "PR", "PRs")}`,
       install: `gh repo clone ${r.full}`,
-      stars: fmtStars(r.stars),
+      stars: formatStarCount(r.stars),
       href: r.url,
       logo: "",
     };
@@ -252,7 +252,7 @@ export async function fetchGitHub(
       fork: false,
       archived: false,
       private: false,
-      mine: isMine(full, profile),
+      mine: isProfileOwnedRepository(full, profile),
     });
     repos[full] = fresh;
     return fresh;
@@ -295,13 +295,13 @@ export async function fetchGitHub(
       fillMeta(slot, c.repository);
     }
   }
-  const streak = streaks(days, today);
-  let start = addDays(today, -52 * 7);
-  start = addDays(start, -start.getUTCDay());
+  const contributionStreaks = calculateContributionStreaks(days, today);
+  let calendarStartDate = addDaysToDate(today, -52 * 7);
+  calendarStartDate = addDaysToDate(calendarStartDate, -calendarStartDate.getUTCDay());
   const calendar: z.infer<typeof calendarSchema> = [];
-  for (let d = start; d <= today; d = addDays(d, 1)) {
-    const count = days.get(iso(d));
-    calendar.push([iso(d), count === undefined ? 0 : count]);
+  for (let calendarDate = calendarStartDate; calendarDate <= today; calendarDate = addDaysToDate(calendarDate, 1)) {
+    const contributionCount = days.get(formatIsoDate(calendarDate));
+    calendar.push([formatIsoDate(calendarDate), contributionCount === undefined ? 0 : contributionCount]);
   }
 
   const year = today.getUTCFullYear();
@@ -317,8 +317,8 @@ export async function fetchGitHub(
       year,
       contributions_year: thisYear === undefined ? 0 : thisYear.contributionCalendar.totalContributions,
       contributions_all: all,
-      streak_current: need(streak[0], "streak"),
-      streak_longest: need(streak[1], "streak"),
+      streak_current: need(contributionStreaks[0], "streak"),
+      streak_longest: need(contributionStreaks[1], "streak"),
       languages: {},
     },
   };

@@ -1,22 +1,22 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { DESKTOP, FL, FR, PHONE, X, esc, f1, num } from "../console.ts";
+import { DESKTOP, FL, FR, PHONE, X, escapeMarkup, formatSvgNumber, formatNumber } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
 import { first, need } from "../defined.ts";
 import { calendarSchema, phaseSchema, skyBoxSchema, themeSchema } from "../schemas.ts";
-import { monthDay } from "../shared.ts";
-import { SkyLayers, daylight, mix, phaseColor } from "../sky/layers.ts";
+import { formatMonthDay } from "../shared.ts";
+import { SkyLayers, daylight, blendHexColors, colorForSkyPhase } from "../sky/layers.ts";
 import { WHEN } from "../sky/sun.ts";
 
-export const CITY_TW = 25;
-export const CITY_TH = 12.5;
-export const CITY_OX = 152.5;
-export const CITY_OY = 262;
-export const CITY_HMAX = 118;
+export const CITY_TILE_WIDTH = 25;
+export const CITY_TILE_HEIGHT = 12.5;
+export const CITY_ORIGIN_X = 152.5;
+export const CITY_ORIGIN_Y = 262;
+export const CITY_MAX_BUILDING_HEIGHT = 118;
 
-export const p2 = (x: number, y: number): string => `${f1(x)},${f1(y)}`;
+export const formatSvgPoint = (x: number, y: number): string => `${formatSvgNumber(x)},${formatSvgNumber(y)}`;
 
-export function* rng(seed: string): Generator<number> {
+export function* createDeterministicRandomSequence(seed: string): Generator<number> {
   let state = BigInt(`0x${createHash("sha256").update(seed).digest("hex").slice(0, 16)}`);
   const mask = (1n << 64n) - 1n;
   while (true) {
@@ -25,67 +25,68 @@ export function* rng(seed: string): Generator<number> {
   }
 }
 
-export function levels(counts: number[]): number[] {
-  const nz = counts.filter((c) => c > 0).sort((a, b) => a - b);
-  if (nz.length === 0) return [1, 1, 1];
-  const q = (f: number): number => need(nz[Math.min(nz.length - 1, Math.floor(nz.length * f))], "quartile");
-  return [q(0.25), q(0.5), q(0.75)];
+export function contributionCountThresholds(counts: number[]): number[] {
+  const activeCounts = counts.filter((count) => count > 0).sort((a, b) => a - b);
+  if (activeCounts.length === 0) return [1, 1, 1];
+  const quartile = (fraction: number): number =>
+    need(activeCounts[Math.min(activeCounts.length - 1, Math.floor(activeCounts.length * fraction))], "quartile");
+  return [quartile(0.25), quartile(0.5), quartile(0.75)];
 }
 
-function deskIso(): { tw: number; th: number; ox: number; oy: number; hmax: number; s: number; ws: number; viewWidth: number } {
-  return { tw: CITY_TW, th: CITY_TH, ox: CITY_OX, oy: CITY_OY, hmax: CITY_HMAX, s: 1, ws: 1, viewWidth: DESKTOP.W };
+function desktopCityGeometry(): { tileWidth: number; tileHeight: number; originX: number; originY: number; maxBuildingHeight: number; s: number; windowScale: number; viewportWidth: number } {
+  return { tileWidth: CITY_TILE_WIDTH, tileHeight: CITY_TILE_HEIGHT, originX: CITY_ORIGIN_X, originY: CITY_ORIGIN_Y, maxBuildingHeight: CITY_MAX_BUILDING_HEIGHT, s: 1, windowScale: 1, viewportWidth: DESKTOP.width };
 }
 
 const LIT = { night: 0.55, dawn: 0.2, day: 0.05, dusk: 0.24 };
 
-function faces(t: z.infer<typeof themeSchema>, p: z.infer<typeof phaseSchema>): { left: string; right: string; offL: string; offR: string } {
-  const city = t.city;
-  if (p === "night") return { left: city.left, right: city.right, offL: city.winOff, offR: city.winOff };
-  if (p === "dawn") {
+function buildingFaceColors(theme: z.infer<typeof themeSchema>, phase: z.infer<typeof phaseSchema>): { left: string; right: string; offL: string; offR: string } {
+  const city = theme.city;
+  if (phase === "night") return { left: city.left, right: city.right, offL: city.winOff, offR: city.winOff };
+  if (phase === "dawn") {
     return {
-      left: mix(city.left, "#4b2a8a", 0.12),
-      right: mix(city.right, "#ff7ab6", 0.1),
+      left: blendHexColors(city.left, "#4b2a8a", 0.12),
+      right: blendHexColors(city.right, "#ff7ab6", 0.1),
       offL: city.winOff,
-      offR: mix(city.winOff, "#ff9ec7", 0.32),
+      offR: blendHexColors(city.winOff, "#ff9ec7", 0.32),
     };
   }
-  if (p === "dusk") {
+  if (phase === "dusk") {
     return {
-      left: mix(city.left, "#6a1b9a", 0.14),
-      right: mix(city.right, "#ff9e3d", 0.12),
+      left: blendHexColors(city.left, "#6a1b9a", 0.14),
+      right: blendHexColors(city.right, "#ff9e3d", 0.12),
       offL: city.winOff,
-      offR: mix(city.winOff, "#ff9e3d", 0.45),
+      offR: blendHexColors(city.winOff, "#ff9e3d", 0.45),
     };
   }
   return {
-    left: mix(city.left, daylight(t), 0.1),
-    right: mix(city.right, daylight(t), 0.08),
-    offL: mix(city.winOff, t.accent, 0.14),
-    offR: mix(city.winOff, t.accent, 0.22),
+    left: blendHexColors(city.left, daylight(theme), 0.1),
+    right: blendHexColors(city.right, daylight(theme), 0.08),
+    offL: blendHexColors(city.winOff, theme.accent, 0.14),
+    offR: blendHexColors(city.winOff, theme.accent, 0.22),
   };
 }
 
-function cells(calendar: z.infer<typeof calendarSchema>): { w: number; dow: number; n: number }[] {
+function calendarBuildingCells(calendar: z.infer<typeof calendarSchema>): { week: number; weekday: number; contributions: number }[] {
   const start = Date.parse(`${need(first(calendar, "calendar")[0], "first day")}T00:00:00Z`);
   return calendar
     .map((entry) => {
       const date = new Date(`${need(entry[0], "day")}T00:00:00Z`);
-      const idx = Math.round((date.getTime() - start) / 864e5);
-      return { w: Math.floor(idx / 7), dow: date.getUTCDay(), n: need(entry[1], "count") };
+      const dayIndex = Math.round((date.getTime() - start) / 864e5);
+      return { week: Math.floor(dayIndex / 7), weekday: date.getUTCDay(), contributions: need(entry[1], "count") };
     })
-    .sort((a, b) => a.w + a.dow - (b.w + b.dow) || a.w - b.w);
+    .sort((a, b) => a.week + a.weekday - (b.week + b.weekday) || a.week - b.week);
 }
 
-function ranker(counts: number[]): (n: number) => number {
-  const nz = counts.filter((c) => c > 0).sort((a, b) => a - b);
-  return (n: number) => {
-    const lo = nz.indexOf(n);
-    const hi = nz.lastIndexOf(n);
-    return nz.length > 1 ? (lo + hi) / 2 / (nz.length - 1) : 1;
+function rankContributionCounts(counts: number[]): (count: number) => number {
+  const activeCounts = counts.filter((count) => count > 0).sort((a, b) => a - b);
+  return (count: number) => {
+    const firstRank = activeCounts.indexOf(count);
+    const lastRank = activeCounts.lastIndexOf(count);
+    return activeCounts.length > 1 ? (firstRank + lastRank) / 2 / (activeCounts.length - 1) : 1;
   };
 }
 
-function yearStats(calendar: z.infer<typeof calendarSchema>): { total: number; active: number; busiest: [string, number] } {
+function summarizeContributionYear(calendar: z.infer<typeof calendarSchema>): { total: number; active: number; busiest: [string, number] } {
   const year = calendar.slice(-365);
   const seed = first(year, "year");
   let total = 0;
@@ -100,17 +101,26 @@ function yearStats(calendar: z.infer<typeof calendarSchema>): { total: number; a
   return { total, active, busiest };
 }
 
-function skyFade(g: { tw: number; th: number; ox: number; oy: number }): { x: number; left: number[]; right: number[] } {
-  const x = g.ox;
-  const y = g.oy - g.th / 2;
-  const n = Math.hypot(g.tw, g.th);
-  const a = (6 * g.tw) / 25;
-  const b = (30 * g.tw) / 25;
-  const along = (nx: number, ny: number): number[] => [x - nx * a, y - ny * a, x + nx * b, y + ny * b];
-  return { x, left: along(g.th / n, g.tw / n), right: along(-g.th / n, g.tw / n) };
+function calculateSkyFadeGeometry(city: { tileWidth: number; tileHeight: number; originX: number; originY: number; viewportWidth: number }): { x: number; left: number[]; right: number[] } {
+  const originX = city.viewportWidth - city.originX;
+  const originY = city.originY - city.tileHeight / 2;
+  const tileDiagonal = Math.hypot(city.tileWidth, city.tileHeight);
+  const nearDistance = (6 * city.tileWidth) / 25;
+  const farDistance = (30 * city.tileWidth) / 25;
+  const fadeLine = (normalX: number, normalY: number): number[] => [
+    originX - normalX * nearDistance,
+    originY - normalY * nearDistance,
+    originX + normalX * farDistance,
+    originY + normalY * farDistance,
+  ];
+  return {
+    x: originX,
+    left: fadeLine(-city.tileHeight / tileDiagonal, city.tileWidth / tileDiagonal),
+    right: fadeLine(city.tileHeight / tileDiagonal, city.tileWidth / tileDiagonal),
+  };
 }
 
-const r2 = (v: number): string => String(Number(v.toFixed(2)));
+const formatSvgDecimal = (value: number): string => String(Number(value.toFixed(2)));
 
 export class CitySection {
   private ctx: RenderContext;
@@ -119,49 +129,49 @@ export class CitySection {
     this.ctx = ctx;
   }
 
-  alt(calendar: z.infer<typeof calendarSchema>): string {
-    const stats = yearStats(calendar);
-    const s = this.ctx.sun.now();
-    const tz = this.ctx.profile.tz;
-    const days = Math.min(calendar.length, 365);
+  describeContributionCity(calendar: z.infer<typeof calendarSchema>): string {
+    const stats = summarizeContributionYear(calendar);
+    const sunPosition = this.ctx.sun.getCurrentSkyConditions();
+    const timezone = this.ctx.profile.tz;
+    const daysShown = Math.min(calendar.length, 365);
     return (
-      `Contribution city: ${days} buildings show daily GitHub contribution counts; taller, brighter buildings mark busier days. ${num(stats.total)} contributions in the last ${days} days` +
-      (stats.busiest[1] > 0 ? `; busiest day ${monthDay(need(stats.busiest[0], "day"), true)} (${stats.busiest[1]}).` : ".") +
-      ` Local sky in ${tz}: ${need(WHEN[s.phase], "phase word")}; ${s.event} ${s.at}.`
+      `Contribution city: ${daysShown} buildings show daily GitHub contribution counts; taller, brighter buildings mark busier days. ${formatNumber(stats.total)} contributions in the last ${daysShown} days` +
+      (stats.busiest[1] > 0 ? `; busiest day ${formatMonthDay(need(stats.busiest[0], "day"), true)} (${stats.busiest[1]}).` : ".") +
+      ` Local sky in ${timezone}: ${need(WHEN[sunPosition.phase], "phase word")}; ${sunPosition.event} ${sunPosition.at}.`
     );
   }
 
-  private buildings(
+  private renderContributionBuildings(
     calendar: z.infer<typeof calendarSchema>,
     next: () => number,
-    g: { tw: number; th: number; ox: number; oy: number; hmax: number; s: number; ws: number; viewWidth: number },
+    g: { tileWidth: number; tileHeight: number; originX: number; originY: number; maxBuildingHeight: number; s: number; windowScale: number; viewportWidth: number },
     p: z.infer<typeof phaseSchema>,
   ): string {
     const t = this.ctx.theme;
     const engine = this.ctx.engine;
     const city = t.city;
-    const face = faces(t, p);
+    const face = buildingFaceColors(t, p);
     const days = calendar.slice(-365);
     const counts = days.map((entry) => need(entry[1], "count"));
-    const rank = ranker(counts);
-    const lv = levels(counts);
-    const tw = g.tw;
-    const th = g.th;
+    const contributionRank = rankContributionCounts(counts);
+    const contributionThresholds = contributionCountThresholds(counts);
+    const tileWidth = g.tileWidth;
+    const tileHeight = g.tileHeight;
     const s = g.s;
-    const ws = g.ws;
+    const windowScale = g.windowScale;
     const shapes: string[] = [];
-    let flick = 0;
-    for (const cell of cells(calendar)) {
-      const cx = g.viewWidth - (g.ox + ((cell.w - cell.dow) * tw) / 2);
-      const cy = g.oy + ((cell.w + cell.dow) * th) / 2;
-      const left: [number, number] = [cx - tw / 2, cy];
-      const right: [number, number] = [cx + tw / 2, cy];
-      const top: [number, number] = [cx, cy - th / 2];
-      const bottom: [number, number] = [cx, cy + th / 2];
-      if (cell.n === 0) {
+    let flickerIndex = 0;
+    for (const cell of calendarBuildingCells(calendar)) {
+      const cx = g.viewportWidth - (g.originX + ((cell.week - cell.weekday) * tileWidth) / 2);
+      const cy = g.originY + ((cell.week + cell.weekday) * tileHeight) / 2;
+      const left: [number, number] = [cx - tileWidth / 2, cy];
+      const right: [number, number] = [cx + tileWidth / 2, cy];
+      const top: [number, number] = [cx, cy - tileHeight / 2];
+      const bottom: [number, number] = [cx, cy + tileHeight / 2];
+      if (cell.contributions === 0) {
         shapes.push(
           engine.render("city/city-empty", {
-            d: `M${p2(top[0], top[1])}L${p2(right[0], right[1])}L${p2(bottom[0], bottom[1])}L${p2(left[0], left[1])}Z`,
+            d: `M${formatSvgPoint(top[0], top[1])}L${formatSvgPoint(right[0], right[1])}L${formatSvgPoint(bottom[0], bottom[1])}L${formatSvgPoint(left[0], left[1])}Z`,
             fill: city.empty,
             stroke: city.emptyStroke,
             sw: String(0.6 * s).replace(/^0\./, "."),
@@ -169,9 +179,9 @@ export class CitySection {
         );
         continue;
       }
-      const h = 8 * s + (g.hmax - 8 * s) * rank(cell.n) ** 1.3;
-      const level = lv.filter((lim) => cell.n > lim).length;
-      const raised: [number, number][] = [top, right, bottom, left].map(([x, y]) => [x, y - h]);
+      const buildingHeight = 8 * s + (g.maxBuildingHeight - 8 * s) * contributionRank(cell.contributions) ** 1.3;
+      const roofLevel = contributionThresholds.filter((threshold) => cell.contributions > threshold).length;
+      const raised: [number, number][] = [top, right, bottom, left].map(([x, y]) => [x, y - buildingHeight]);
       const up = {
         top: need(raised[0], "roof corner"),
         right: need(raised[1], "roof corner"),
@@ -180,14 +190,14 @@ export class CitySection {
       };
       shapes.push(
         engine.render("city/city-face", {
-          dl: `${p2(left[0], left[1])}L${p2(bottom[0], bottom[1])}L${p2(up.bottom[0], up.bottom[1])}L${p2(up.left[0], up.left[1])}Z`,
-          dr: `${p2(bottom[0], bottom[1])}L${p2(right[0], right[1])}L${p2(up.right[0], up.right[1])}L${p2(up.bottom[0], up.bottom[1])}Z`,
+          dl: `M${formatSvgPoint(left[0], left[1])}L${formatSvgPoint(bottom[0], bottom[1])}L${formatSvgPoint(up.bottom[0], up.bottom[1])}L${formatSvgPoint(up.left[0], up.left[1])}Z`,
+          dr: `M${formatSvgPoint(bottom[0], bottom[1])}L${formatSvgPoint(right[0], right[1])}L${formatSvgPoint(up.right[0], up.right[1])}L${formatSvgPoint(up.bottom[0], up.bottom[1])}Z`,
           left: face.left,
           right: face.right,
         }) +
           engine.render("city/city-roof", {
-            d: `M${p2(up.top[0], up.top[1])}L${p2(up.right[0], up.right[1])}L${p2(up.bottom[0], up.bottom[1])}L${p2(up.left[0], up.left[1])}Z`,
-            fill: need(city.roofs[level], "roof color"),
+            d: `M${formatSvgPoint(up.top[0], up.top[1])}L${formatSvgPoint(up.right[0], up.right[1])}L${formatSvgPoint(up.bottom[0], up.bottom[1])}L${formatSvgPoint(up.left[0], up.left[1])}Z`,
+            fill: need(city.roofs[roofLevel], "roof color"),
           }),
       );
       const on: string[] = [];
@@ -200,8 +210,8 @@ export class CitySection {
         { face: "r", a: bottom, b: right },
       ];
       for (const sideDef of sides) {
-        for (let row = 0; row < Math.floor((h - 6 * ws) / (7 * ws)); row++) {
-          const v0 = (5 + row * 7) * ws;
+        for (let row = 0; row < Math.floor((buildingHeight - 6 * windowScale) / (7 * windowScale)); row++) {
+          const v0 = (5 + row * 7) * windowScale;
           for (const u0 of [0.18, 0.58]) {
             const u = next();
             const litAtNight = u < LIT.night;
@@ -210,11 +220,11 @@ export class CitySection {
             const corners: [number, number][] = [
               [u0, v0],
               [u0 + 0.26, v0],
-              [u0 + 0.26, v0 + 3.2 * ws],
-              [u0, v0 + 3.2 * ws],
+              [u0 + 0.26, v0 + 3.2 * windowScale],
+              [u0, v0 + 3.2 * windowScale],
             ];
             const pts = corners.map(([uu, vv]) =>
-              p2(sideDef.a[0] + (sideDef.b[0] - sideDef.a[0]) * uu, sideDef.a[1] + (sideDef.b[1] - sideDef.a[1]) * uu - vv),
+              formatSvgPoint(sideDef.a[0] + (sideDef.b[0] - sideDef.a[0]) * uu, sideDef.a[1] + (sideDef.b[1] - sideDef.a[1]) * uu - vv),
             );
             const seg = `M${pts.join("L")}Z`;
             if (u >= LIT[p]) {
@@ -239,12 +249,12 @@ export class CitySection {
       if (on.length > 0) shapes.push(engine.render("city/city-win", { d: on.join(""), fill: city.winOn }));
       if (side.length > 0) shapes.push(engine.render("city/city-win", { d: side.join(""), fill: city.winSide }));
       for (const flicker of fl) {
-        flick++;
+        flickerIndex++;
         shapes.push(
           engine.render("city/city-flicker", {
             d: need(flicker[0], "window"),
             fill: need(flicker[1], "window face") === "l" ? city.winOn : city.winSide,
-            cls: `f${flick % 3}`,
+            cls: `f${flickerIndex % 3}`,
           }),
         );
       }
@@ -252,7 +262,7 @@ export class CitySection {
     return shapes.join("");
   }
 
-  private stars(
+  private renderSkyStars(
     next: () => number,
     field: { x0: number; w: number; y0: number; h: number; n: number; skip: (x: number, y: number) => boolean },
     p: z.infer<typeof phaseSchema>,
@@ -269,38 +279,38 @@ export class CitySection {
       const o = 0.35 + next() * 0.5;
       if (y >= field.y0 + field.h * keep) continue;
       const vars = {
-        x: f1(x),
-        y: f1(y),
+        x: formatSvgNumber(x),
+        y: formatSvgNumber(y),
         r: need(sizes[i % 3], "star size"),
         fill: t.city.sky,
         opacity: (p === "night" ? o : o * 0.7).toFixed(2),
       };
-      if (i % 3 === 0) out.push(engine.render("city/star-tw", { ...vars, cls: `s${i % 3}` }));
+      if (i % 3 === 0) out.push(engine.render("city/star-tileWidth", { ...vars, cls: `s${i % 3}` }));
       else out.push(engine.render("city/star", vars));
     }
     return engine.render("console/fade-group", { delay: "0.00", inner: out.join("") });
   }
 
-  private moon(cx: number, cy: number, k: number): string {
-    const t = this.ctx.theme;
+  private renderMoon(centerX: number, centerY: number, scale: number): string {
+    const theme = this.ctx.theme;
     return this.ctx.engine.render("city/moon", {
-      cx,
-      cy,
-      glowR: r2(40 * k),
-      faceR: r2(14 * k),
-      moon: t.moon,
-      shadeX: r2(cx + 6 * k),
-      shadeY: r2(cy - 5 * k),
-      shadeR: r2(12.5 * k),
-      bg: t.bg,
+      cx: centerX,
+      cy: centerY,
+      glowR: formatSvgDecimal(40 * scale),
+      faceR: formatSvgDecimal(14 * scale),
+      moon: theme.moon,
+      shadeX: formatSvgDecimal(centerX + 6 * scale),
+      shadeY: formatSvgDecimal(centerY - 5 * scale),
+      shadeR: formatSvgDecimal(12.5 * scale),
+      bg: theme.bg,
     });
   }
 
-  private plane(y: number): string {
+  private renderPassingPlane(y: number): string {
     return this.ctx.engine.render("city/plane", { y, fainter: this.ctx.theme.fainter });
   }
 
-  private scene(
+  private composeSkyScene(
     p: z.infer<typeof phaseSchema>,
     box: z.infer<typeof skyBoxSchema>,
     frame: { x: number; w: number; h: number },
@@ -316,58 +326,59 @@ export class CitySection {
       return {
         css: css.join("\n"),
         defs: defs.join("\n"),
-        under: (st: string) => `${st}\n${this.moon(need(box.high[0], "moon x"), need(box.high[1], "moon y"), box.k)}`,
+        under: (stars: string) => `${stars}\n${this.renderMoon(need(box.high[0], "moon x"), need(box.high[1], "moon y"), box.k)}`,
       };
     }
-    const layer = new SkyLayers(engine, t).layer(p, box);
+    const layer = new SkyLayers(engine, t).buildSkyLayer(p, box);
     css.push(layer.css);
     defs.push(layer.defs);
     return {
       css: css.join("\n"),
       defs: defs.join("\n"),
-      under: (st: string) => `${layer.grad}\n${st}\n${engine.render("console/fade-group", { delay: "0.00", inner: `${layer.sun}\n${layer.clouds}` })}`,
+      under: (stars: string) => `${layer.grad}\n${stars}\n${engine.render("console/fade-group", { delay: "0.00", inner: `${layer.sun}\n${layer.clouds}` })}`,
     };
   }
 
-  private readout(x: number, y: number, size: number, anchor: "start" | "end"): string {
-    const s = this.ctx.sun.now();
+  private renderSkyReadout(x: number, y: number, size: number, anchor: "start" | "end"): string {
+    const s = this.ctx.sun.getCurrentSkyConditions();
     const vars = {
       x,
       y,
       size,
       phase: s.phase,
-      color: phaseColor(this.ctx.theme, s.phase),
+      color: colorForSkyPhase(this.ctx.theme, s.phase),
       event: s.event,
-      at: esc(s.at),
+      at: escapeMarkup(s.at),
     };
     if (anchor === "end") return this.ctx.engine.render("city/readout-end", vars);
     return this.ctx.engine.render("city/readout-start", vars);
   }
 
-  private legendRow(x: number, y: number, size: number, sw: number): string {
+  private renderContributionLegendRow(x: number, y: number, size: number, sw: number): string {
     const city = this.ctx.theme.city;
     const cw = size * 0.6;
     const x0 = x + 5 * cw + 7;
     const fills = [city.empty, ...city.roofs];
     const swatches = fills
-      .map((c, i) => this.ctx.engine.render("city/city-sw", { x: f1(x0 + i * (sw + 5)), y: f1(y - sw + 1), sw, fill: c }))
+      .map((c, i) => this.ctx.engine.render("city/city-sw", { x: formatSvgNumber(x0 + i * (sw + 5)), y: formatSvgNumber(y - sw + 1), sw, fill: c }))
       .join("");
-    return this.ctx.engine.render("city/city-legend", { x, y, size, swatches, x2: f1(x0 + 5 * (sw + 5) + 1) });
+    return this.ctx.engine.render("city/city-legend", { x, y, size, swatches, x2: formatSvgNumber(x0 + 5 * (sw + 5) + 1) });
   }
 
-  async city(calendar: z.infer<typeof calendarSchema>, updated: string, counter: string): Promise<string> {
+  async renderDesktopCity(calendar: z.infer<typeof calendarSchema>, updated: string, counter: string): Promise<string> {
     const { engine, theme } = this.ctx;
     const slices = this.ctx.slices;
     const city = theme.city;
-    const p = this.ctx.sun.now().phase;
+    const p = this.ctx.sun.getCurrentSkyConditions().phase;
     const days = calendar.slice(-365);
     const counts = days.map((entry) => need(entry[1], "count"));
     const total = counts.reduce((a, b) => a + b, 0);
-    const generator = rng(`${updated}-${total}`);
-    const next = (): number => need(generator.next().value, "rng");
-    const shapes = this.buildings(days, next, deskIso(), p);
+    const randomValues = createDeterministicRandomSequence(`${updated}-${total}`);
+    const nextRandomValue = (): number => need(randomValues.next().value, "random value");
+    const desktopGeometry = desktopCityGeometry();
+    const buildingShapes = this.renderContributionBuildings(days, nextRandomValue, desktopGeometry, p);
 
-    const sc = this.scene(
+    const skyScene = this.composeSkyScene(
       p,
       {
         x0: FL,
@@ -375,108 +386,108 @@ export class CitySection {
         top: 62,
         horizon: 600,
         bottom: 680,
-        fade: skyFade(deskIso()),
-        high: [FR - 80, 160],
+        fade: calculateSkyFadeGeometry(desktopGeometry),
+        high: [FR - 96, 142],
         low: [FR - 86, 486],
         k: 1,
         clouds: [
-          [488, 150, 1],
-          [606, 226, 0.8],
+          [390, 152, 0.9],
+          [548, 222, 0.75],
         ],
         drift: 40,
       },
       { x: FL, w: FR - FL, h: 680 },
     );
-    const st = this.stars(next, { x0: 470, w: 350, y0: 118, h: 150, n: 46, skip: (x, y) => x > 700 && y < 215 }, p);
-    const year = yearStats(calendar);
-    const busiest = year.busiest;
+    const stars = this.renderSkyStars(nextRandomValue, { x0: 470, w: 350, y0: 118, h: 150, n: 46, skip: (x, y) => x > 700 && y < 215 }, p);
+    const yearSummary = summarizeContributionYear(calendar);
+    const busiestDay = yearSummary.busiest;
     const infoParts: string[] = [
-      engine.render("city/city-info-total", { x: FR - 36, y: 300, total: num(year.total) }),
+      engine.render("city/city-info-total", { x: X, y: 112, total: formatNumber(yearSummary.total) }),
     ];
-    if (busiest[1] > 0) {
-      infoParts.push(engine.render("city/city-info-busiest", { x: FR - 36, y: 320, date: monthDay(need(busiest[0], "day")), count: busiest[1] }));
+    if (busiestDay[1] > 0) {
+      infoParts.push(engine.render("city/city-info-busiest", { x: X, y: 132, date: formatMonthDay(need(busiestDay[0], "day")), count: busiestDay[1] }));
     }
-    infoParts.push(engine.render("city/city-info-active", { x: FR - 36, y: busiest[1] > 0 ? 340 : 320, count: year.active }));
+    infoParts.push(engine.render("city/city-info-active", { x: X, y: busiestDay[1] > 0 ? 152 : 132, count: yearSummary.active }));
     const legend = [city.empty, ...city.roofs]
-      .map((c, i) => engine.render("city/city-sw", { x: X + 52 + i * 16, y: 642, sw: 11, fill: c }))
+      .map((color, index) => engine.render("city/city-sw", { x: X + 52 + index * 16, y: 642, sw: 11, fill: color }))
       .join("");
     const body =
-      `${slices.headingG(DESKTOP, 44, "contribution-city", counter)}\n` +
-      `${slices.promptG(DESKTOP, "render-city --last 365d", 0.15, "# one building per day")}\n` +
-      `${sc.under(st)}\n` +
-      `${this.plane(132)}\n` +
+      `${slices.renderSectionHeading(DESKTOP, 44, "contribution-city", counter)}\n` +
+      `${slices.renderCommandPrompt(DESKTOP, "render-city --last 365d", 0.15, "# one building per day")}\n` +
+      `${skyScene.under(stars)}\n` +
+      `${this.renderPassingPlane(132)}\n` +
       `${infoParts.join("\n")}\n` +
-      `${shapes}\n` +
+      `${buildingShapes}\n` +
       engine.render("city/city-legend", { x: X, y: 652, size: 11, swatches: legend, x2: X + 52 + 5 * 16 + 6 }) +
-      `\n${this.readout(FR - 36, 652, 11, "end")}`;
-    return slices.sliceG(DESKTOP, 680, body, {
+      `\n${this.renderSkyReadout(FR - 36, 652, 11, "end")}`;
+    return slices.createSvgSlice(DESKTOP, 680, body, {
       title: `Contribution city ${need(WHEN[p], "phase word")}`,
-      desc: this.alt(calendar),
-      css: sc.css,
-      defs: sc.defs,
+      desc: this.describeContributionCity(calendar),
+      css: skyScene.css,
+      defs: skyScene.defs,
       text: `~/contribution-city${counter}$ render-city --last 365d # one building per dayquietskyscraper`,
     });
   }
 
-  async phoneCity(calendar: z.infer<typeof calendarSchema>, updated: string, counter: string): Promise<string> {
+  async renderPhoneCity(calendar: z.infer<typeof calendarSchema>, updated: string, counter: string): Promise<string> {
     const { engine } = this.ctx;
     const slices = this.ctx.slices;
     const g = PHONE;
-    const p = this.ctx.sun.now().phase;
+    const p = this.ctx.sun.getCurrentSkyConditions().phase;
     const days = calendar.slice(-365);
     const counts = days.map((entry) => need(entry[1], "count"));
     const total = counts.reduce((a, b) => a + b, 0);
-    const generator = rng(`${updated}-${total}`);
-    const next = (): number => need(generator.next().value, "rng");
-    const phoneIso = { tw: 13, th: 6.5, ox: 67.5, oy: 180, hmax: 68, s: 0.52, ws: 0.7, viewWidth: g.W };
-    const shapes = this.buildings(days, next, phoneIso, p);
-    const H = 400;
-    const sc = this.scene(
+    const randomValues = createDeterministicRandomSequence(`${updated}-${total}`);
+    const nextRandomValue = (): number => need(randomValues.next().value, "random value");
+    const phoneIso = { tileWidth: 13, tileHeight: 6.5, originX: 67.5, originY: 180, maxBuildingHeight: 68, s: 0.52, windowScale: 0.7, viewportWidth: g.width };
+    const buildingShapes = this.renderContributionBuildings(days, nextRandomValue, phoneIso, p);
+    const phoneHeight = 400;
+    const skyScene = this.composeSkyScene(
       p,
       {
-        x0: g.FL,
-        x1: g.FR,
+        x0: g.frameLeft,
+        x1: g.frameRight,
         top: 62,
         horizon: 340,
-        bottom: H,
-        fade: skyFade(phoneIso),
-        high: [g.R - 34, 134],
-        low: [g.R - 30, 286],
+        bottom: phoneHeight,
+        fade: calculateSkyFadeGeometry(phoneIso),
+        high: [g.frameRight - 34, 134],
+        low: [g.frameRight - 30, 286],
         k: 0.6,
         clouds: [
-          [236, 124, 0.8],
-          [292, 186, 0.62],
+          [235, 102, 0.62],
+          [286, 132, 0.48],
         ],
         drift: 22,
       },
-      { x: g.FL, w: g.FR - g.FL, h: H },
+      { x: g.frameLeft, w: g.frameRight - g.frameLeft, h: phoneHeight },
     );
-    const st = this.stars(next, { x0: 150, w: 270, y0: 104, h: 110, n: 34, skip: (x, y) => x > 340 && y < 168 }, p);
-    const year = yearStats(calendar);
-    const busiest = year.busiest;
-    const infoParts: string[] = [engine.render("city/city-pinfo-total", { x: g.X, y: 112, total: num(year.total) })];
-    if (busiest[1] > 0) {
+    const stars = this.renderSkyStars(nextRandomValue, { x0: 150, w: 270, y0: 104, h: 110, n: 34, skip: (x, y) => x > 340 && y < 168 }, p);
+    const yearSummary = summarizeContributionYear(calendar);
+    const busiestDay = yearSummary.busiest;
+    const infoParts: string[] = [engine.render("city/city-pinfo-total", { x: g.contentLeft, y: 112, total: formatNumber(yearSummary.total) })];
+    if (busiestDay[1] > 0) {
       infoParts.push(
-        engine.render("city/city-pinfo-busiest", { x: g.X, y: 130, date: monthDay(need(busiest[0], "day")), count: busiest[1] }),
+        engine.render("city/city-pinfo-busiest", { x: g.contentLeft, y: 130, date: formatMonthDay(need(busiestDay[0], "day")), count: busiestDay[1] }),
       );
     }
     infoParts.push(
-      engine.render("city/city-pinfo-active", { x: g.X, y: busiest[1] > 0 ? 148 : 130, count: year.active }),
+      engine.render("city/city-pinfo-active", { x: g.contentLeft, y: busiestDay[1] > 0 ? 148 : 130, count: yearSummary.active }),
     );
     const body =
-      `${slices.headingG(g, 44, "contribution-city", counter)}\n` +
-      `${slices.promptG(g, "render-city --last 365d", 0.15, "# one building per day", 90, 13)}\n` +
-      `${sc.under(st)}\n` +
-      `${this.plane(120)}\n` +
-      `${shapes}\n` +
+      `${slices.renderSectionHeading(g, 44, "contribution-city", counter)}\n` +
+      `${slices.renderCommandPrompt(g, "render-city --last 365d", 0.15, "# one building per day", 90, 13)}\n` +
+      `${skyScene.under(stars)}\n` +
+      `${this.renderPassingPlane(120)}\n` +
+      `${buildingShapes}\n` +
       `${infoParts.join("\n")}\n` +
-      `${this.readout(g.X, 356, 12, "start")}\n` +
-      `${this.legendRow(g.X, 382, 12, 11)}`;
-    return slices.sliceG(g, H, body, {
+      `${this.renderSkyReadout(g.contentRight, 356, 12, "end")}\n` +
+      `${this.renderContributionLegendRow(g.contentLeft, 382, 12, 11)}`;
+    return slices.createSvgSlice(g, phoneHeight, body, {
       title: `Contribution city ${need(WHEN[p], "phase word")}`,
-      desc: this.alt(calendar),
-      css: sc.css,
-      defs: sc.defs,
+      desc: this.describeContributionCity(calendar),
+      css: skyScene.css,
+      defs: skyScene.defs,
       text: `~/contribution-city${counter}$ render-city --last 365d # one building per dayquietskyscraper`,
     });
   }

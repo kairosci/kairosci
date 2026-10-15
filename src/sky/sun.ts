@@ -36,7 +36,7 @@ export class SunCalc {
     });
   }
 
-  sunTimes(y: number, m: number, d: number): { rise: number; set: number } {
+  calculateSunriseAndSunset(y: number, m: number, d: number): { rise: number; set: number } {
     const day0 = Date.UTC(y, m - 1, d);
     const doy = (day0 - Date.UTC(y, 0, 1)) / 864e5 + 1;
     const len = (Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1)) / 864e5;
@@ -67,32 +67,36 @@ export class SunCalc {
     };
   }
 
-  private clock(ms: number): string {
+  private formatLocalSunEventTime(timestamp: number): string {
     const parts = new Map<string, string>();
     const fiveMinutes = 5 * MIN;
-    for (const part of this.timeFmt.formatToParts(Math.round(ms / fiveMinutes) * fiveMinutes)) {
+    for (const part of this.timeFmt.formatToParts(Math.round(timestamp / fiveMinutes) * fiveMinutes)) {
       parts.set(part.type, part.value);
     }
     return `~${need(parts.get("hour"), "hour")}:${need(parts.get("minute"), "minute")} ${need(parts.get("timeZoneName"), "tz name")}`;
   }
 
-  at(now: number): z.infer<typeof skySchema> {
-    const [y, m, d] = splitDate(this.dateFmt.format(now));
-    const times = this.sunTimes(y, m, d);
-    if (now < times.rise - DAWN_BEFORE * MIN) return { phase: "night", event: "sunrise", at: this.clock(times.rise) };
-    if (now < times.rise + DAWN_AFTER * MIN) return { phase: "dawn", event: "sunrise", at: this.clock(times.rise) };
-    if (now < times.set - DUSK_BEFORE * MIN) return { phase: "day", event: "sunset", at: this.clock(times.set) };
-    if (now < times.set + DUSK_AFTER * MIN) return { phase: "dusk", event: "sunset", at: this.clock(times.set) };
-    const [ty, tm, td] = splitDate(this.dateFmt.format(Date.UTC(y, m - 1, d + 1, 12)));
-    return { phase: "night", event: "sunrise", at: this.clock(this.sunTimes(ty, tm, td).rise) };
+  getSkyConditionsAt(timestamp: number): z.infer<typeof skySchema> {
+    const [year, month, day] = splitDate(this.dateFmt.format(timestamp));
+    const times = this.calculateSunriseAndSunset(year, month, day);
+    if (timestamp < times.rise - DAWN_BEFORE * MIN) return { phase: "night", event: "sunrise", at: this.formatLocalSunEventTime(times.rise) };
+    if (timestamp < times.rise + DAWN_AFTER * MIN) return { phase: "dawn", event: "sunrise", at: this.formatLocalSunEventTime(times.rise) };
+    if (timestamp < times.set - DUSK_BEFORE * MIN) return { phase: "day", event: "sunset", at: this.formatLocalSunEventTime(times.set) };
+    if (timestamp < times.set + DUSK_AFTER * MIN) return { phase: "dusk", event: "sunset", at: this.formatLocalSunEventTime(times.set) };
+    const [tomorrowYear, tomorrowMonth, tomorrowDay] = splitDate(this.dateFmt.format(Date.UTC(year, month - 1, day + 1, 12)));
+    return {
+      phase: "night",
+      event: "sunrise",
+      at: this.formatLocalSunEventTime(this.calculateSunriseAndSunset(tomorrowYear, tomorrowMonth, tomorrowDay).rise),
+    };
   }
 
-  now(): z.infer<typeof skySchema> {
+  getCurrentSkyConditions(): z.infer<typeof skySchema> {
     if (this.current === null) {
       const env = process.env["PROFILE_NOW"];
       const stamp = env === undefined ? Date.now() : Date.parse(env);
       if (Number.isNaN(stamp)) throw new Error(`PROFILE_NOW is not a timestamp: ${env}`);
-      this.current = this.at(stamp);
+      this.current = this.getSkyConditionsAt(stamp);
     }
     return this.current;
   }

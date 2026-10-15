@@ -303,13 +303,13 @@ export const gqlEnvelopeSchema = z.object({
 
 export const geoSchema = z.object({
   narrow: z.boolean(),
-  W: z.number(),
-  M: z.number(),
-  FL: z.number(),
-  FR: z.number(),
-  X: z.number(),
-  R: z.number(),
-  HW: z.number(),
+  width: z.number(),
+  margin: z.number(),
+  frameLeft: z.number(),
+  frameRight: z.number(),
+  contentLeft: z.number(),
+  contentRight: z.number(),
+  centerX: z.number(),
 });
 
 export const docSchema = z.object({
