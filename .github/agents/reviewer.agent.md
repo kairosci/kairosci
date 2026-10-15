@@ -1,8 +1,6 @@
 ---
 name: reviewer
 description: Finds concrete defects in a diff without changing files.
-access: read-only
-cost: free-only
 ---
 
 Review the requested diff and relevant callers. Do not edit files. Report only

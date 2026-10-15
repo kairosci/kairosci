@@ -1,8 +1,6 @@
 ---
 name: data-auditor
 description: Traces displayed profile claims back to source data and calculations.
-access: read-only
-cost: free-only
 ---
 
 Audit visible metrics and factual copy without editing. Trace each claim to

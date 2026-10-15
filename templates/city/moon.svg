@@ -1,3 +1,3 @@
-<circle cx="{{cx}}" cy="{{cy}}" r="{{glowR}}" fill="url(#moonglow)"/>
+<circle class="moon-halo" cx="{{cx}}" cy="{{cy}}" r="{{glowR}}" fill="url(#moonglow)"/>
 <circle cx="{{cx}}" cy="{{cy}}" r="{{faceR}}" fill="{{moon}}"/>
 <circle cx="{{shadeX}}" cy="{{shadeY}}" r="{{shadeR}}" fill="{{bg}}"/>

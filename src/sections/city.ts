@@ -188,18 +188,58 @@ export class CitySection {
         bottom: need(raised[2], "roof corner"),
         left: need(raised[3], "roof corner"),
       };
+      const seamsLeft: string[] = [];
+      const seamsRight: string[] = [];
+      for (let floorHeight = 12 * s; floorHeight < buildingHeight - 3 * s; floorHeight += 12 * s) {
+        seamsLeft.push(`M${formatSvgPoint(left[0], left[1] - floorHeight)}L${formatSvgPoint(bottom[0], bottom[1] - floorHeight)}`);
+        seamsRight.push(`M${formatSvgPoint(bottom[0], bottom[1] - floorHeight)}L${formatSvgPoint(right[0], right[1] - floorHeight)}`);
+      }
       shapes.push(
+        engine.render("city/city-shadow", {
+          d: [top, right, bottom, left].map(([x, y]) => formatSvgPoint(x + 4, y + 2)).join("L"),
+        }) +
         engine.render("city/city-face", {
           dl: `M${formatSvgPoint(left[0], left[1])}L${formatSvgPoint(bottom[0], bottom[1])}L${formatSvgPoint(up.bottom[0], up.bottom[1])}L${formatSvgPoint(up.left[0], up.left[1])}Z`,
           dr: `M${formatSvgPoint(bottom[0], bottom[1])}L${formatSvgPoint(right[0], right[1])}L${formatSvgPoint(up.right[0], up.right[1])}L${formatSvgPoint(up.bottom[0], up.bottom[1])}Z`,
           left: face.left,
           right: face.right,
+          edge: blendHexColors(t.bg, face.left, 0.35),
+          seamsLeft: seamsLeft.join(""),
+          seamsRight: seamsRight.join(""),
         }) +
           engine.render("city/city-roof", {
             d: `M${formatSvgPoint(up.top[0], up.top[1])}L${formatSvgPoint(up.right[0], up.right[1])}L${formatSvgPoint(up.bottom[0], up.bottom[1])}L${formatSvgPoint(up.left[0], up.left[1])}Z`,
             fill: need(city.roofs[roofLevel], "roof color"),
+            edge: blendHexColors(t.bg, need(city.roofs[roofLevel], "roof edge color"), 0.45),
           }),
       );
+      if ((cell.week * 3 + cell.weekday) % 5 === 0) {
+        const unitX = cx - 1.2 * s;
+        const unitY = cy - buildingHeight - 0.7 * s;
+        const unitWidth = 8 * s;
+        const unitDepth = 4 * s;
+        const unitHeight = 3.8 * s;
+        const leftTop: [number, number] = [unitX - unitWidth / 2, unitY - unitHeight];
+        const frontTop: [number, number] = [unitX, unitY + unitDepth / 2 - unitHeight];
+        const rightTop: [number, number] = [unitX + unitWidth / 2, unitY - unitHeight];
+        const backTop: [number, number] = [unitX, unitY - unitDepth / 2 - unitHeight];
+        shapes.push(engine.render("city/city-roof-unit", {
+          left: formatSvgPoint(unitX - unitWidth / 2, unitY),
+          front: formatSvgPoint(unitX, unitY + unitDepth / 2),
+          right: formatSvgPoint(unitX + unitWidth / 2, unitY),
+          leftTop: formatSvgPoint(...leftTop),
+          frontTop: formatSvgPoint(...frontTop),
+          rightTop: formatSvgPoint(...rightTop),
+          backTop: formatSvgPoint(...backTop),
+          leftColor: blendHexColors(t.bg, face.left, 0.72),
+          rightColor: blendHexColors(t.bg, face.right, 0.7),
+          topColor: need(city.roofs[roofLevel], "roof equipment color"),
+          beaconX: formatSvgNumber(unitX),
+          beaconY: formatSvgNumber(unitY - unitHeight),
+          beaconR: formatSvgNumber(buildingHeight > g.maxBuildingHeight * 0.65 ? 0.65 * s : 0),
+        }));
+      }
+      const windowDelay = -(((cell.week * 13 + cell.weekday * 7) % 110) / 10);
       const on: string[] = [];
       const side: string[] = [];
       const offL: string[] = [];
@@ -241,13 +281,13 @@ export class CitySection {
         }
       }
       if (face.offL === face.offR) {
-        if (offL.length + offR.length > 0) shapes.push(engine.render("city/city-win", { d: [...offL, ...offR].join(""), fill: face.offL }));
+        if (offL.length + offR.length > 0) shapes.push(engine.render("city/city-win", { d: [...offL, ...offR].join(""), fill: face.offL, delay: windowDelay }));
       } else {
-        if (offL.length > 0) shapes.push(engine.render("city/city-win", { d: offL.join(""), fill: face.offL }));
-        if (offR.length > 0) shapes.push(engine.render("city/city-win", { d: offR.join(""), fill: face.offR }));
+        if (offL.length > 0) shapes.push(engine.render("city/city-win", { d: offL.join(""), fill: face.offL, delay: windowDelay }));
+        if (offR.length > 0) shapes.push(engine.render("city/city-win", { d: offR.join(""), fill: face.offR, delay: windowDelay - 2.7 }));
       }
-      if (on.length > 0) shapes.push(engine.render("city/city-win", { d: on.join(""), fill: city.winOn }));
-      if (side.length > 0) shapes.push(engine.render("city/city-win", { d: side.join(""), fill: city.winSide }));
+      if (on.length > 0) shapes.push(engine.render("city/city-win", { d: on.join(""), fill: city.winOn, delay: windowDelay - 1.3 }));
+      if (side.length > 0) shapes.push(engine.render("city/city-win", { d: side.join(""), fill: city.winSide, delay: windowDelay - 4.1 }));
       for (const flicker of fl) {
         flickerIndex++;
         shapes.push(
@@ -320,7 +360,10 @@ export class CitySection {
     const css = [
       engine.render("css/scene", { down: frame.x - 10, up: frame.x + frame.w + 70 }),
     ];
-    const defs = [engine.render("sky/defs-frame", { x: frame.x, w: frame.w, h: frame.h })];
+    const defs = [
+      engine.render("sky/defs-frame", { x: frame.x, w: frame.w, h: frame.h }),
+      engine.render("city/city-materials", {}),
+    ];
     if (p === "night") {
       defs.push(engine.render("sky/defs-moonglow", { moon: t.moon }));
       return {

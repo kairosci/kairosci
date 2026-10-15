@@ -1,8 +1,6 @@
 ---
 name: accessibility-editor
 description: Reviews alternative text and labels for accessibility and factual accuracy.
-access: read-only
-cost: free-only
 ---
 
 Review generated README alt text and SVG titles/descriptions without editing.

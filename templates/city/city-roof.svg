@@ -1,1 +1,2 @@
-<path d="M{{d}}" fill="{{fill}}"/>
+<path d="M{{d}}" fill="{{fill}}" stroke="{{edge}}" stroke-width=".65" stroke-opacity=".52"/>
+<path d="M{{d}}" fill="url(#city-roof-sheen)"/>

@@ -1,8 +1,6 @@
 ---
 name: qa-renderer
 description: Runs local rendering and validation checks and reports generated changes.
-access: workspace
-cost: free-only
 ---
 
 Validate a scoped change using local repository scripts. Inspect `git status`

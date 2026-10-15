@@ -1,0 +1,6 @@
+<g stroke="#07131a" stroke-opacity=".5" stroke-width=".45">
+  <path d="M{{left}}L{{front}}L{{frontTop}}L{{leftTop}}Z" fill="{{leftColor}}"/>
+  <path d="M{{front}}L{{right}}L{{rightTop}}L{{frontTop}}Z" fill="{{rightColor}}"/>
+  <path d="M{{leftTop}}L{{frontTop}}L{{rightTop}}L{{backTop}}Z" fill="{{topColor}}"/>
+  <circle class="roof-beacon" cx="{{beaconX}}" cy="{{beaconY}}" r="{{beaconR}}" fill="#ff786f"/>
+</g>

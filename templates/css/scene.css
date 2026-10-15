@@ -2,6 +2,14 @@
 @keyframes fl{0%,40%,100%{opacity:1}45%,60%{opacity:.1}}
 @keyframes blink{0%,90%,100%{opacity:0}93%{opacity:1}}
 @keyframes fly{from{transform:translate({{down}}px,0)}to{transform:translate({{up}}px,-30px)}}
+@keyframes cityGlow{0%,100%{opacity:.88}48%{opacity:1}54%{opacity:.78}60%{opacity:.96}}
+@keyframes skyPulse{0%,100%{opacity:.82}50%{opacity:1}}
+@keyframes sunBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+@keyframes beaconPulse{0%,72%,100%{opacity:.22}76%,88%{opacity:1}}
 .s0{animation:tw 3s infinite}
 .f0{animation:fl 5s infinite}.f1{animation:fl 7s infinite 2s}.f2{animation:fl 9s infinite 4s}
 .plane{animation:fly 26s linear infinite}.bl{animation:blink 1.4s infinite}
+.city-glass{animation:cityGlow 11s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.sun-halo,.moon-halo{animation:skyPulse 7s ease-in-out infinite}
+.sun-core{animation:sunBreath 14s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.roof-beacon{animation:beaconPulse 4.8s steps(1,end) infinite}

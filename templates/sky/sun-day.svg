@@ -1,4 +1,4 @@
-<circle cx="{{cx}}" cy="{{cy}}" r="{{glowR}}" fill="url(#sunglow)"/>
+<circle class="sun-halo" cx="{{cx}}" cy="{{cy}}" r="{{glowR}}" fill="url(#sunglow)"/>
 <g class="rays"><path d="{{rays}}" stroke="{{sun}}" stroke-width="{{rayW}}" stroke-linecap="round" opacity=".75"/></g>
-<circle cx="{{cx}}" cy="{{cy}}" r="{{r}}" fill="{{sun}}" filter="url(#sunblur)"/>
-<circle cx="{{cx}}" cy="{{cy}}" r="{{r}}" fill="{{sunCore}}"/>
+<circle class="sun-halo" cx="{{cx}}" cy="{{cy}}" r="{{r}}" fill="{{sun}}" filter="url(#sunblur)"/>
+<circle class="sun-core" cx="{{cx}}" cy="{{cy}}" r="{{r}}" fill="{{sunCore}}"/>

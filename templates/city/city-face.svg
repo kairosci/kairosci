@@ -1,1 +1,6 @@
-<path d="M{{dl}}" fill="{{left}}"/><path d="M{{dr}}" fill="{{right}}"/>
+<path d="M{{dl}}" fill="{{left}}" stroke="{{edge}}" stroke-width=".55" stroke-opacity=".45"/>
+<path d="M{{dl}}" fill="url(#city-face-left)"/>
+<path d="M{{dr}}" fill="{{right}}" stroke="{{edge}}" stroke-width=".55" stroke-opacity=".45"/>
+<path d="M{{dr}}" fill="url(#city-face-right)"/>
+<path d="{{seamsLeft}}" fill="none" stroke="#fff" stroke-width=".38" stroke-opacity=".09"/>
+<path d="{{seamsRight}}" fill="none" stroke="#000" stroke-width=".42" stroke-opacity=".16"/>
