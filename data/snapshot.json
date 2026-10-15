@@ -50,7 +50,7 @@
 			"repo": "wwmm/easyeffects",
 			"kind": "HTML",
 			"description": "Limiter, compressor, convolver, equalizer and auto volume and many other plugins for PipeWire applications",
-			"tagline": "8 commits · 6 PRs",
+			"tagline": "8 commits · 8 PRs",
 			"install": "gh repo clone wwmm/easyeffects",
 			"stars": "10.4k",
 			"href": "https://github.com/wwmm/easyeffects",
@@ -81,23 +81,23 @@
 	],
 	"posts": [],
 	"upstreamRepos": 7,
-	"stars": 276727,
+	"stars": 276741,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
 	},
 	"prs": {
-		"count": 67,
+		"count": 69,
 		"query": "author:kairosci is:public archived:false is:open is:pr draft:false NOT \"chore: release\" in:title"
 	},
 	"github": {
 		"created_at": "2026-01-04T18:30:55Z",
 		"public_repos": 5,
-		"prs": 481,
+		"prs": 483,
 		"prs_merged": 275,
 		"year": 2026,
-		"contributions_year": 2678,
-		"contributions_all": 5138,
+		"contributions_year": 2683,
+		"contributions_all": 5143,
 		"streak_current": 15,
 		"streak_longest": 88,
 		"languages": {
