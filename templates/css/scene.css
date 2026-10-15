@@ -6,6 +6,7 @@
 @keyframes skyPulse{0%,100%{opacity:.82}50%{opacity:1}}
 @keyframes sunBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
 @keyframes beaconPulse{0%,72%,100%{opacity:.22}76%,88%{opacity:1}}
+@keyframes cityHaze{0%,100%{opacity:.52}50%{opacity:.84}}
 .s0{animation:tw 3s infinite}
 .f0{animation:fl 5s infinite}.f1{animation:fl 7s infinite 2s}.f2{animation:fl 9s infinite 4s}
 .plane{animation:fly 26s linear infinite}.bl{animation:blink 1.4s infinite}
@@ -13,3 +14,4 @@
 .sun-halo,.moon-halo{animation:skyPulse 7s ease-in-out infinite}
 .sun-core{animation:sunBreath 14s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 .roof-beacon{animation:beaconPulse 4.8s steps(1,end) infinite}
+.city-haze{animation:cityHaze 24s ease-in-out infinite}

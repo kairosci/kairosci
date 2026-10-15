@@ -86,6 +86,12 @@ function rankContributionCounts(counts: number[]): (count: number) => number {
   };
 }
 
+function atmosphericOpacityForBuilding(y: number, originY: number, tileHeight: number, dayCount: number): number {
+  const cityDepth = (Math.ceil(dayCount / 7) + 6) * tileHeight / 2;
+  const distance = Math.max(0, Math.min(1, (y - originY) / cityDepth));
+  return 0.76 + distance * 0.24;
+}
+
 function summarizeContributionYear(calendar: z.infer<typeof calendarSchema>): { total: number; active: number; busiest: [string, number] } {
   const year = calendar.slice(-365);
   const seed = first(year, "year");
@@ -179,6 +185,7 @@ export class CitySection {
         );
         continue;
       }
+      const buildingStart = shapes.length;
       const buildingHeight = 8 * s + (g.maxBuildingHeight - 8 * s) * contributionRank(cell.contributions) ** 1.3;
       const roofLevel = contributionThresholds.filter((threshold) => cell.contributions > threshold).length;
       const raised: [number, number][] = [top, right, bottom, left].map(([x, y]) => [x, y - buildingHeight]);
@@ -298,6 +305,8 @@ export class CitySection {
           }),
         );
       }
+      const distanceOpacity = formatSvgDecimal(atmosphericOpacityForBuilding(cy, g.originY, tileHeight, days.length));
+      shapes.push(`<g class="city-building" style="opacity:${distanceOpacity}">${shapes.splice(buildingStart).join("")}</g>`);
     }
     return shapes.join("");
   }
@@ -325,7 +334,7 @@ export class CitySection {
         fill: t.city.sky,
         opacity: (p === "night" ? o : o * 0.7).toFixed(2),
       };
-      if (i % 3 === 0) out.push(engine.render("city/star-tileWidth", { ...vars, cls: `s${i % 3}` }));
+      if (i % 3 === 0) out.push(engine.render("city/star-tw", { ...vars, cls: `s${i % 3}` }));
       else out.push(engine.render("city/star", vars));
     }
     return engine.render("console/fade-group", { delay: "0.00", inner: out.join("") });
@@ -362,7 +371,7 @@ export class CitySection {
     ];
     const defs = [
       engine.render("sky/defs-frame", { x: frame.x, w: frame.w, h: frame.h }),
-      engine.render("city/city-materials", {}),
+      engine.render("city/city-materials", { haze: t.accent }),
     ];
     if (p === "night") {
       defs.push(engine.render("sky/defs-moonglow", { moon: t.moon }));
@@ -458,6 +467,7 @@ export class CitySection {
       `${slices.renderSectionHeading(DESKTOP, 44, "contribution-city", counter)}\n` +
       `${slices.renderCommandPrompt(DESKTOP, "render-city --last 365d", 0.15, "# one building per day")}\n` +
       `${skyScene.under(stars)}\n` +
+      `${engine.render("city/city-haze", { cx: DESKTOP.centerX, cy: 430, rx: 405, ry: 235 })}\n` +
       `${this.renderPassingPlane(132)}\n` +
       `${infoParts.join("\n")}\n` +
       `${buildingShapes}\n` +
@@ -521,6 +531,7 @@ export class CitySection {
       `${slices.renderSectionHeading(g, 44, "contribution-city", counter)}\n` +
       `${slices.renderCommandPrompt(g, "render-city --last 365d", 0.15, "# one building per day", 90, 13)}\n` +
       `${skyScene.under(stars)}\n` +
+      `${engine.render("city/city-haze", { cx: g.centerX, cy: 258, rx: 205, ry: 112 })}\n` +
       `${this.renderPassingPlane(120)}\n` +
       `${buildingShapes}\n` +
       `${infoParts.join("\n")}\n` +

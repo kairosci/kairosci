@@ -12,3 +12,8 @@
   <stop offset="0" stop-color="#fff" stop-opacity=".18"/>
   <stop offset="1" stop-color="#000" stop-opacity=".18"/>
 </linearGradient>
+<radialGradient id="city-haze">
+  <stop offset="0" stop-color="{{haze}}" stop-opacity=".18"/>
+  <stop offset=".48" stop-color="{{haze}}" stop-opacity=".075"/>
+  <stop offset="1" stop-color="{{haze}}" stop-opacity="0"/>
+</radialGradient>
