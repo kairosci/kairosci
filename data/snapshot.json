@@ -81,23 +81,23 @@
 	],
 	"posts": [],
 	"upstreamRepos": 7,
-	"stars": 276751,
+	"stars": 276753,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
 	},
 	"prs": {
-		"count": 71,
+		"count": 68,
 		"query": "author:kairosci is:public archived:false is:open is:pr draft:false NOT \"chore: release\" in:title"
 	},
 	"github": {
 		"created_at": "2026-01-04T18:30:55Z",
 		"public_repos": 5,
-		"prs": 486,
-		"prs_merged": 276,
+		"prs": 490,
+		"prs_merged": 281,
 		"year": 2026,
-		"contributions_year": 2689,
-		"contributions_all": 5149,
+		"contributions_year": 2697,
+		"contributions_all": 5157,
 		"streak_current": 15,
 		"streak_longest": 88,
 		"languages": {
