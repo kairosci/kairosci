@@ -6,7 +6,7 @@
 			"repo": "pnpm/pnpm",
 			"kind": "Rust",
 			"description": "Fast, disk space efficient package manager",
-			"tagline": "80 commits · 88 PRs",
+			"tagline": "81 commits · 88 PRs",
 			"install": "gh repo clone pnpm/pnpm",
 			"stars": "36.8k",
 			"href": "https://github.com/pnpm/pnpm",
@@ -81,27 +81,27 @@
 	],
 	"posts": [],
 	"upstreamRepos": 7,
-	"stars": 276741,
+	"stars": 276751,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
 	},
 	"prs": {
-		"count": 69,
+		"count": 71,
 		"query": "author:kairosci is:public archived:false is:open is:pr draft:false NOT \"chore: release\" in:title"
 	},
 	"github": {
 		"created_at": "2026-01-04T18:30:55Z",
 		"public_repos": 5,
-		"prs": 483,
-		"prs_merged": 275,
+		"prs": 486,
+		"prs_merged": 276,
 		"year": 2026,
-		"contributions_year": 2683,
-		"contributions_all": 5143,
+		"contributions_year": 2689,
+		"contributions_all": 5149,
 		"streak_current": 15,
 		"streak_longest": 88,
 		"languages": {
-			"Rust": 88,
+			"Rust": 89,
 			"Kotlin": 79,
 			"Go": 26,
 			"HTML": 8
