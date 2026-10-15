@@ -1,1 +1,1 @@
-<path class="city-glass" style="animation-delay:{{delay}}s" d="{{d}}" fill="{{fill}}"/>
+<path class="{{cls}}" style="animation-delay:{{delay}}s" d="{{d}}" fill="{{fill}}"/>

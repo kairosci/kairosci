@@ -1,0 +1,1 @@
+<circle class="roof-beacon" style="animation-delay:{{delay}}s" cx="{{cx}}" cy="{{cy}}" r="{{r}}" fill="#ff786f"/>

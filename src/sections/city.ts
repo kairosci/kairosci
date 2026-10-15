@@ -38,6 +38,11 @@ function desktopCityGeometry(): { tileWidth: number; tileHeight: number; originX
 }
 
 const LIT = { night: 0.55, dawn: 0.2, day: 0.05, dusk: 0.24 };
+const ROOFTOP_EQUIPMENT_PROFILES: readonly [number, number, number][] = [
+  [8, 4, 3.8],
+  [9.5, 4.8, 4.4],
+  [7, 5.4, 3.2],
+];
 
 function buildingFaceColors(theme: z.infer<typeof themeSchema>, phase: z.infer<typeof phaseSchema>): { left: string; right: string; offL: string; offR: string } {
   const city = theme.city;
@@ -165,24 +170,58 @@ export class CitySection {
     const tileHeight = g.tileHeight;
     const s = g.s;
     const windowScale = g.windowScale;
+    const plotWidth = tileWidth * 0.88;
+    const plotHeight = tileHeight * 0.84;
+    const ground: string[] = [];
     const shapes: string[] = [];
     let flickerIndex = 0;
     for (const cell of calendarBuildingCells(calendar)) {
       const cx = g.viewportWidth - (g.originX + ((cell.week - cell.weekday) * tileWidth) / 2);
       const cy = g.originY + ((cell.week + cell.weekday) * tileHeight) / 2;
-      const left: [number, number] = [cx - tileWidth / 2, cy];
-      const right: [number, number] = [cx + tileWidth / 2, cy];
-      const top: [number, number] = [cx, cy - tileHeight / 2];
-      const bottom: [number, number] = [cx, cy + tileHeight / 2];
+      const groundTop: [number, number] = [cx, cy - tileHeight / 2];
+      const groundRight: [number, number] = [cx + tileWidth / 2, cy];
+      const groundBottom: [number, number] = [cx, cy + tileHeight / 2];
+      const groundLeft: [number, number] = [cx - tileWidth / 2, cy];
+      ground.push(engine.render("city/city-ground", {
+        d: [groundTop, groundRight, groundBottom, groundLeft].map(([x, y]) => formatSvgPoint(x, y)).join("L"),
+        fill: blendHexColors(t.bg, city.empty, 0.68),
+        stroke: blendHexColors(t.bg, city.empty, 0.82),
+        sw: formatSvgNumber(0.55 * s),
+      }));
+      const buildingStyle = (cell.week * 31 + cell.weekday * 17 + cell.contributions) % 12;
+      const buildingWidth = plotWidth * (0.82 + (buildingStyle % 4) * 0.045);
+      const buildingDepth = plotHeight * (0.84 + Math.floor(buildingStyle / 4) * 0.04);
+      const left: [number, number] = [cx - buildingWidth / 2, cy];
+      const right: [number, number] = [cx + buildingWidth / 2, cy];
+      const top: [number, number] = [cx, cy - buildingDepth / 2];
+      const bottom: [number, number] = [cx, cy + buildingDepth / 2];
       if (cell.contributions === 0) {
-        shapes.push(
+        ground.push(
           engine.render("city/city-empty", {
-            d: `M${formatSvgPoint(top[0], top[1])}L${formatSvgPoint(right[0], right[1])}L${formatSvgPoint(bottom[0], bottom[1])}L${formatSvgPoint(left[0], left[1])}Z`,
+            d: `M${formatSvgPoint(groundTop[0], groundTop[1])}L${formatSvgPoint(groundRight[0], groundRight[1])}L${formatSvgPoint(groundBottom[0], groundBottom[1])}L${formatSvgPoint(groundLeft[0], groundLeft[1])}Z`,
             fill: city.empty,
             stroke: city.emptyStroke,
             sw: String(0.6 * s).replace(/^0\./, "."),
           }),
         );
+        if ((cell.week * 3 + cell.weekday) % 5 === 0) {
+          const lampX = cx + tileWidth * 0.16;
+          const lampBaseY = cy + tileHeight * 0.08;
+          const lampY = lampBaseY - 14 * g.s;
+          const lampArm = 3.5 * g.s;
+          const streetlightOpacity = p === "night" ? 0.9 : p === "dusk" ? 0.7 : p === "dawn" ? 0.48 : 0.15;
+          ground.push(engine.render("city/city-streetlight", {
+            lampX: formatSvgNumber(lampX + lampArm),
+            lampY: formatSvgNumber(lampY),
+            glowR: formatSvgNumber(7 * g.s),
+            pole: `M${formatSvgPoint(lampX, lampBaseY)}L${formatSvgPoint(lampX, lampY)}L${formatSvgPoint(lampX + lampArm, lampY)}`,
+            metal: blendHexColors(t.bg, face.left, 0.8),
+            poleWidth: formatSvgNumber(0.8 * g.s),
+            bulb: t.accent2,
+            lampR: formatSvgNumber(1.1 * g.s),
+            opacity: streetlightOpacity,
+          }));
+        }
         continue;
       }
       const buildingStart = shapes.length;
@@ -223,9 +262,10 @@ export class CitySection {
       if ((cell.week * 3 + cell.weekday) % 5 === 0) {
         const unitX = cx - 1.2 * s;
         const unitY = cy - buildingHeight - 0.7 * s;
-        const unitWidth = 8 * s;
-        const unitDepth = 4 * s;
-        const unitHeight = 3.8 * s;
+        const [unitWidthRatio, unitDepthRatio, unitHeightRatio] = need(ROOFTOP_EQUIPMENT_PROFILES[buildingStyle % ROOFTOP_EQUIPMENT_PROFILES.length], "rooftop equipment profile");
+        const unitWidth = unitWidthRatio * s;
+        const unitDepth = unitDepthRatio * s;
+        const unitHeight = unitHeightRatio * s;
         const leftTop: [number, number] = [unitX - unitWidth / 2, unitY - unitHeight];
         const frontTop: [number, number] = [unitX, unitY + unitDepth / 2 - unitHeight];
         const rightTop: [number, number] = [unitX + unitWidth / 2, unitY - unitHeight];
@@ -241,9 +281,14 @@ export class CitySection {
           leftColor: blendHexColors(t.bg, face.left, 0.72),
           rightColor: blendHexColors(t.bg, face.right, 0.7),
           topColor: need(city.roofs[roofLevel], "roof equipment color"),
-          beaconX: formatSvgNumber(unitX),
-          beaconY: formatSvgNumber(unitY - unitHeight),
-          beaconR: formatSvgNumber(buildingHeight > g.maxBuildingHeight * 0.65 ? 0.65 * s : 0),
+          beacon: buildingHeight > g.maxBuildingHeight * 0.65
+            ? engine.render("city/city-roof-beacon", {
+              cx: formatSvgNumber(unitX),
+              cy: formatSvgNumber(unitY - unitHeight),
+              r: formatSvgNumber(0.65 * s),
+              delay: -(((cell.week * 13 + cell.weekday * 3) % 48) / 10),
+            })
+            : "",
         }));
       }
       const windowDelay = -(((cell.week * 13 + cell.weekday * 7) % 110) / 10);
@@ -256,18 +301,20 @@ export class CitySection {
         { face: "l", a: left, b: bottom },
         { face: "r", a: bottom, b: right },
       ];
+      const windowColumns = buildingStyle % 3 === 0 ? [0.14, 0.56] : buildingStyle % 3 === 1 ? [0.2, 0.62] : [0.11, 0.53];
+      const windowWidth = buildingStyle % 2 === 0 ? 0.22 : 0.26;
       for (const sideDef of sides) {
         for (let row = 0; row < Math.floor((buildingHeight - 6 * windowScale) / (7 * windowScale)); row++) {
           const v0 = (5 + row * 7) * windowScale;
-          for (const u0 of [0.18, 0.58]) {
+          for (const u0 of windowColumns) {
             const u = next();
             const litAtNight = u < LIT.night;
             if (!litAtNight && next() < 0.5) continue;
             const flickers = litAtNight && next() < 0.03;
             const corners: [number, number][] = [
               [u0, v0],
-              [u0 + 0.26, v0],
-              [u0 + 0.26, v0 + 3.2 * windowScale],
+              [u0 + windowWidth, v0],
+              [u0 + windowWidth, v0 + 3.2 * windowScale],
               [u0, v0 + 3.2 * windowScale],
             ];
             const pts = corners.map(([uu, vv]) =>
@@ -288,13 +335,13 @@ export class CitySection {
         }
       }
       if (face.offL === face.offR) {
-        if (offL.length + offR.length > 0) shapes.push(engine.render("city/city-win", { d: [...offL, ...offR].join(""), fill: face.offL, delay: windowDelay }));
+        if (offL.length + offR.length > 0) shapes.push(engine.render("city/city-win", { d: [...offL, ...offR].join(""), fill: face.offL, delay: windowDelay, cls: "city-dark-glass" }));
       } else {
-        if (offL.length > 0) shapes.push(engine.render("city/city-win", { d: offL.join(""), fill: face.offL, delay: windowDelay }));
-        if (offR.length > 0) shapes.push(engine.render("city/city-win", { d: offR.join(""), fill: face.offR, delay: windowDelay - 2.7 }));
+        if (offL.length > 0) shapes.push(engine.render("city/city-win", { d: offL.join(""), fill: face.offL, delay: windowDelay, cls: "city-dark-glass" }));
+        if (offR.length > 0) shapes.push(engine.render("city/city-win", { d: offR.join(""), fill: face.offR, delay: windowDelay - 2.7, cls: "city-dark-glass" }));
       }
-      if (on.length > 0) shapes.push(engine.render("city/city-win", { d: on.join(""), fill: city.winOn, delay: windowDelay - 1.3 }));
-      if (side.length > 0) shapes.push(engine.render("city/city-win", { d: side.join(""), fill: city.winSide, delay: windowDelay - 4.1 }));
+      if (on.length > 0) shapes.push(engine.render("city/city-win", { d: on.join(""), fill: city.winOn, delay: windowDelay - 1.3, cls: "city-glass" }));
+      if (side.length > 0) shapes.push(engine.render("city/city-win", { d: side.join(""), fill: city.winSide, delay: windowDelay - 4.1, cls: "city-glass" }));
       for (const flicker of fl) {
         flickerIndex++;
         shapes.push(
@@ -308,7 +355,7 @@ export class CitySection {
       const distanceOpacity = formatSvgDecimal(atmosphericOpacityForBuilding(cy, g.originY, tileHeight, days.length));
       shapes.push(`<g class="city-building" style="opacity:${distanceOpacity}">${shapes.splice(buildingStart).join("")}</g>`);
     }
-    return shapes.join("");
+    return ground.join("") + shapes.join("");
   }
 
   private renderSkyStars(
@@ -371,7 +418,7 @@ export class CitySection {
     ];
     const defs = [
       engine.render("sky/defs-frame", { x: frame.x, w: frame.w, h: frame.h }),
-      engine.render("city/city-materials", { haze: t.accent }),
+      engine.render("city/city-materials", { haze: t.accent2 }),
     ];
     if (p === "night") {
       defs.push(engine.render("sky/defs-moonglow", { moon: t.moon }));

@@ -1,0 +1,5 @@
+<g class="city-streetlight" opacity="{{opacity}}">
+  <circle class="streetlight-glow" cx="{{lampX}}" cy="{{lampY}}" r="{{glowR}}" fill="url(#city-lamp-glow)"/>
+  <path d="{{pole}}" fill="none" stroke="{{metal}}" stroke-width="{{poleWidth}}" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="{{lampX}}" cy="{{lampY}}" r="{{lampR}}" fill="{{bulb}}"/>
+</g>
