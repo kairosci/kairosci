@@ -46,6 +46,17 @@
 			"logo": ""
 		},
 		{
+			"name": "easyeffects",
+			"repo": "wwmm/easyeffects",
+			"kind": "HTML",
+			"description": "Limiter, compressor, convolver, equalizer and auto volume and many other plugins for PipeWire applications",
+			"tagline": "8 commits · 8 PRs",
+			"install": "gh repo clone wwmm/easyeffects",
+			"stars": "10.4k",
+			"href": "https://github.com/wwmm/easyeffects",
+			"logo": ""
+		},
+		{
 			"name": "etcd",
 			"repo": "etcd-io/etcd",
 			"kind": "Go",
@@ -54,17 +65,6 @@
 			"install": "gh repo clone etcd-io/etcd",
 			"stars": "52.4k",
 			"href": "https://github.com/etcd-io/etcd",
-			"logo": ""
-		},
-		{
-			"name": "easyeffects",
-			"repo": "wwmm/easyeffects",
-			"kind": "HTML",
-			"description": "Limiter, compressor, convolver, equalizer and auto volume and many other plugins for PipeWire applications",
-			"tagline": "5 commits · 6 PRs",
-			"install": "gh repo clone wwmm/easyeffects",
-			"stars": "10.4k",
-			"href": "https://github.com/wwmm/easyeffects",
 			"logo": ""
 		},
 		{
@@ -81,30 +81,30 @@
 	],
 	"posts": [],
 	"upstreamRepos": 7,
-	"stars": 276703,
+	"stars": 276741,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
 	},
 	"prs": {
-		"count": 68,
+		"count": 69,
 		"query": "author:kairosci is:public archived:false is:open is:pr draft:false NOT \"chore: release\" in:title"
 	},
 	"github": {
 		"created_at": "2026-01-04T18:30:55Z",
 		"public_repos": 5,
-		"prs": 480,
-		"prs_merged": 273,
+		"prs": 483,
+		"prs_merged": 275,
 		"year": 2026,
-		"contributions_year": 2672,
-		"contributions_all": 5132,
-		"streak_current": 14,
+		"contributions_year": 2683,
+		"contributions_all": 5143,
+		"streak_current": 15,
 		"streak_longest": 88,
 		"languages": {
 			"Rust": 88,
 			"Kotlin": 79,
 			"Go": 26,
-			"HTML": 5
+			"HTML": 8
 		}
 	}
 }
