@@ -1,6 +1,6 @@
 import { siGithub } from "simple-icons";
 import { z } from "zod";
-import { DESKTOP, FL, FR, M, PHONE, X, escapeMarkup, formatSvgNumber } from "../console.ts";
+import { DESKTOP, FR, PHONE, X, escapeMarkup } from "../console.ts";
 import { RenderContext } from "../ctx.ts";
 import { need } from "../defined.ts";
 import { buttonSchema, geoSchema } from "../schemas.ts";
@@ -28,11 +28,9 @@ export class HeaderSection {
   async header(): Promise<string> {
     const { engine, theme, profile } = this.ctx;
     const slices = this.ctx.slices;
-    const barLeft = `sys://${profile.siteHost} // node:${profile.login}`;
-    const barRight = "ONLINE · ALL SYSTEMS NOMINAL";
     const bio = this.ctx.snapshot.intro === "" ? profile.displayName : this.ctx.snapshot.intro;
     const name = profile.headerName.toUpperCase();
-    const nameTop = 102 + 15 * fontMetrics.ascent;
+    const nameTop = 68 + 15 * fontMetrics.ascent;
     const nameWidthSize = (DESKTOP.contentRight - X - 2 * DESKTOP.margin * fontMetrics.advance) /
       (Array.from(name).length * (fontMetrics.advance + fontMetrics.advance / 25));
     const nameBox = profileNameLayout(name, DESKTOP.contentRight - X, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), DESKTOP.margin * fontMetrics.advance);
@@ -43,27 +41,12 @@ export class HeaderSection {
     const bioTop = Math.ceil(nameBox.baseline + nameBox.size * fontMetrics.descent + 15 * fontMetrics.ascent);
     const bioLineHeight = 15 * fontMetrics.ascent;
     const h = Math.ceil((bioTop + (bioRows.length - 1) * bioLineHeight + 15 * fontMetrics.descent + DESKTOP.margin * fontMetrics.advance) / 40) * 40;
-    const defs = engine.render("frame/defs-header", { x: X, clipY: 80 });
-    const barLX = FL + DESKTOP.margin;
-    const barRX = FR - DESKTOP.margin;
-    const dotx = barRX - textWidth(barRight, 12, 1) - DESKTOP.margin;
+    const defs = engine.render("frame/defs-header", { x: X, clipY: 46 });
     const descLines = need(slices.renderStaggeredRows(bioRows, bioTop, bioLineHeight, 1.75, 0.12)[0], "GitHub description lines");
     const body = engine.render("frame/header-top", {
       ...createThemeSvgVariables(theme),
-      fl: FL,
-      fr: FR,
-      m: M,
-      barW: FR - FL,
-      barY: M + 34,
-      barLX,
-      barLY: M + 22,
-      barRX,
-      barLeft: escapeMarkup(fitText(barLeft, dotx - barLX - (barLX - FL), 12, 1)),
-      barRight: escapeMarkup(barRight),
-      dotx: formatSvgNumber(dotx),
-      dotY: M + 18,
       x: X,
-      whoY: 102,
+      whoY: 68,
       nameSize: nameBox.size,
       nameSpacing: nameBox.spacing,
       nameY: nameBox.baseline,
@@ -71,13 +54,11 @@ export class HeaderSection {
       gcX: X - DESKTOP.margin * fontMetrics.advance / 2,
       name: escapeMarkup(name),
       descLines,
-      scanY: M + 35,
-      scanH: h - M - 35,
     });
     return slices.createSvgSlice(DESKTOP, h, body, {
         title: profile.displayName,
         desc: this.alt(),
-        text: barLeft + barRight + name + "$ whoami>>" + bio,
+        text: name + "$ whoami>>" + bio,
         top: true,
         css: this.ctx.engine.render("css/header", {}),
         defs,
@@ -89,15 +70,10 @@ export class HeaderSection {
     const { engine, theme, snapshot, profile } = this.ctx;
     const slices = this.ctx.slices;
     const g = PHONE;
-    const barLeft = `sys://${profile.siteHost} // ${profile.login}`;
-    const barRight = "ONLINE · NOMINAL";
     const bio = snapshot.intro === "" ? profile.displayName : snapshot.intro;
     const name = profile.headerName.toUpperCase();
-    const defs = engine.render("frame/defs-header", { x: g.contentLeft, clipY: 64 });
-    const barLX = g.frameLeft + g.margin;
-    const barRX = g.frameRight - g.margin;
-    const dotx = barRX - textWidth(barRight, 12, 1) - g.margin;
-    const nameTop = 86 + 15 * fontMetrics.ascent;
+    const defs = engine.render("frame/defs-header", { x: g.contentLeft, clipY: 30 });
+    const nameTop = 52 + 15 * fontMetrics.ascent;
     const nameWidthSize = (g.contentRight - g.contentLeft - 2 * g.margin * fontMetrics.advance) /
       (Array.from(name).length * (fontMetrics.advance + fontMetrics.advance / 25));
     const nameBox = profileNameLayout(name, g.contentRight - g.contentLeft, nameTop, nameTop + nameWidthSize * (fontMetrics.capitals + fontMetrics.descent), g.margin * fontMetrics.advance);
@@ -112,20 +88,8 @@ export class HeaderSection {
     const descLines = slices.renderStaggeredRows(bioRows, bioTop, bioLineHeight, 1.75, step)[0];
     const body = engine.render("frame/header-top", {
       ...createThemeSvgVariables(theme),
-      fl: g.frameLeft,
-      fr: g.frameRight,
-      m: g.margin,
-      barW: g.frameRight - g.frameLeft,
-      barY: g.margin + 34,
-      barLX,
-      barLY: g.margin + 22,
-      barRX,
-      barLeft: escapeMarkup(fitText(barLeft, dotx - barLX - g.margin, 12, 1)),
-      barRight: escapeMarkup(barRight),
-      dotx: formatSvgNumber(dotx),
-      dotY: g.margin + 18,
       x: g.contentLeft,
-      whoY: 86,
+      whoY: 52,
       nameSize: nameBox.size,
       nameSpacing: nameBox.spacing,
       nameY: nameBox.baseline,
@@ -133,13 +97,11 @@ export class HeaderSection {
       gcX: g.contentLeft - g.margin * fontMetrics.advance / 2,
       name: escapeMarkup(name),
       descLines: need(descLines, "phone GitHub description lines"),
-      scanY: g.margin + 35,
-      scanH: h - g.margin - 35,
     });
     return slices.createSvgSlice(g, h, body, {
         title: profile.displayName,
         desc: this.alt(),
-        text: barLeft + barRight + name + "$ whoami>>" + bio,
+        text: name + "$ whoami>>" + bio,
         top: true,
         css: this.ctx.engine.render("css/header", {}),
         defs,
