@@ -1,3 +1,3 @@
-<g transform="translate({{iconX}} {{iconY}})"><g filter="url(#g)" opacity=".5">{{icon}}</g>{{icon}}</g>
+<g transform="translate({{iconX}} {{iconY}})">{{icon}}</g>
 <text x="{{labelX}}" y="{{labelY}}" text-anchor="{{anchor}}" font-weight="700" class="cy" style="font-size:{{labelSize}}px">{{label}}</text>
 {{handle}}

@@ -1,3 +1,2 @@
-<path d="{{glow}}" fill="none" stroke="{{accent}}" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="{{fl}}" y="{{y0}}" width="{{rw}}" height="{{rh}}" fill="{{bg}}"/>
 <rect x="{{fl}}" y="{{y0}}" width="{{rw}}" height="{{rh}}" fill="url(#grid)"/>

@@ -14,17 +14,12 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 .bar{transform-box:fill-box;transform-origin:0 50%;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
 @keyframes grow{from{transform:scaleX(0)}}
 .lbl{animation:fadein .3s ease-out both}
-.chip{animation:pulse 1s ease-in-out 3}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 <defs>
 <pattern id="grid" x="0" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#5eead4" stroke-opacity=".06"/></pattern>
-<filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="6"/></filter>
-<filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
-<filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
-<linearGradient id="bar" x1="0" x2="1"><stop offset="0" stop-color="#5eead4" stop-opacity=".35"/><stop offset="1" stop-color="#5eead4"/></linearGradient>
+
 </defs>
-<path d="M16 -40V80M864 -40V80" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="16" y="0" width="848" height="40" fill="#06121b"/>
 <rect x="16" y="0" width="848" height="40" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.56s">
@@ -34,8 +29,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="52" y="33" class="dim" style="font-size:10.5px">3 commits · 6 PRs</text>
 <rect x="270" y="14" width="330" height="12" fill="#0b1c26"/>
 <g class="bar" style="animation-delay:0.71s">
-<rect x="270" y="14" width="66.0" height="12" fill="#5eead4" filter="url(#g)" opacity=".55"/>
-<rect x="270" y="14" width="66.0" height="12" fill="url(#bar)"/>
+<rect x="270" y="14" width="66.0" height="12" fill="#5eead4"/>
 </g>
 <text class="lbl" x="344.0" y="25" font-weight="700" fill="#5eead4" style="font-size:13px;animation-delay:1.16s">+5</text>
 <g fill="#5eead4" opacity=".75"><rect x="747" y="8.0" width="2" height="24.0"/></g>

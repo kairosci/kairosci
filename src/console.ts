@@ -130,12 +130,6 @@ export class Slices {
     let rails = `M${g.frameLeft} ${y0}V${y1}M${g.frameRight} ${y0}V${y1}`;
     if (o.top === true) rails += `M${g.frameLeft} ${y0}H${g.frameRight}`;
     if (o.bottom === true) rails += `M${g.frameLeft} ${y1}H${g.frameRight}`;
-    const gy0 = o.top === true ? y0 : -40;
-    const gy1 = o.bottom === true ? y1 : h + 40;
-    const glow =
-      `M${g.frameLeft} ${gy0}V${gy1}M${g.frameRight} ${gy0}V${gy1}` +
-      (o.top === true ? `M${g.frameLeft} ${y0}H${g.frameRight}` : "") +
-      (o.bottom === true ? `M${g.frameLeft} ${y1}H${g.frameRight}` : "");
     let corners = "";
     if (o.top === true) {
       corners += this.engine.render("console/corners-top", {
@@ -161,7 +155,6 @@ export class Slices {
     return this.document({ ...o, w: g.width, h, body, defs }, {
       under: this.engine.render("console/slice-under", {
         ...createThemeSvgVariables(this.theme),
-        glow,
         fl: g.frameLeft,
         y0,
         rw: g.frameRight - g.frameLeft,
@@ -185,7 +178,6 @@ export class Slices {
     return this.document({ ...o, w: g.centerX, h, body }, {
       under: this.engine.render("console/half-under", {
         ...createThemeSvgVariables(this.theme),
-        glow: `M${rx} -40V${h + 40}`,
         rx,
         bx0,
         bw: bx1 - bx0,
@@ -213,11 +205,9 @@ export class Slices {
     const lx = first ? g.frameLeft - x0 : 0;
     const rx = last ? g.frameRight - x0 : seg;
     const rails = ((first || framed) ? `M${lx} 0V${h}` : "") + ((last || framed) ? `M${rx} 0V${h}` : "");
-    const glow = ((first || framed) ? `M${lx} -40V${h + 40}` : "") + ((last || framed) ? `M${rx} -40V${h + 40}` : "");
     return this.document({ ...o, w: seg, h, body, defs: this.baseDefs(((-x0 % 40) + 40) % 40) }, {
       under: this.engine.render("console/segment-under", {
         ...createThemeSvgVariables(this.theme),
-        glow,
         bg0,
         bw: bg1 - bg0,
         h,

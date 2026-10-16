@@ -1,5 +1,4 @@
 <g transform="translate({{logoX}} {{logoY}})">{{logoImg}}</g>
-<text x="{{nx}}" y="{{nameY}}" font-weight="700" fill="{{accent}}" filter="url(#g)" opacity=".6" style="font-size:{{nameSize}}px">{{name}}</text>
 <text x="{{nx}}" y="{{nameY}}" font-weight="700" class="cy" style="font-size:{{nameSize}}px">{{name}}</text>
 <path d="M{{arrowX}} {{arrowY}}l7-7M{{arrowX2}} {{arrowY2}}h5v5" fill="none" stroke="{{accent}}" stroke-width="1.5"/>
 <rect x="{{tx}}" y="{{tagY}}" width="{{tagW}}" height="16" fill="none" stroke="{{tagc}}" stroke-opacity=".8"/>

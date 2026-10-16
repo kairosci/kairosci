@@ -1,6 +1,4 @@
-<text x="{{x}}" y="{{y}}" font-weight="700" fill="{{accent}}" filter="url(#g)" opacity=".8" style="font-size:20px">~/</text>
 <text x="{{x}}" y="{{y}}" font-weight="700" style="font-size:20px"><tspan class="cy">~/</tspan><tspan class="wh">{{name}}</tspan></text>
 <text x="{{r}}" y="{{y}}" text-anchor="end" letter-spacing="2" fill="{{faint}}" style="font-size:12px">{{counter}}</text>
-<line x1="{{x}}" y1="{{yLine}}" x2="{{r}}" y2="{{yLine}}" stroke="{{accent}}" stroke-opacity=".4"/>
+<line x1="{{x}}" y1="{{yLine}}" x2="{{r}}" y2="{{yLine}}" stroke="{{accent}}" stroke-opacity=".35"/>
 <line x1="{{x}}" y1="{{yLine}}" x2="{{xEdge}}" y2="{{yLine}}" stroke="{{accent}}" stroke-width="2"/>
-<line x1="{{x}}" y1="{{yLine}}" x2="{{xEdge}}" y2="{{yLine}}" stroke="{{accent}}" stroke-width="3" filter="url(#gl)"/>

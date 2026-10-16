@@ -5,8 +5,7 @@
 <text x="{{x}}" y="{{pitchY}}" class="dim" style="font-size:{{pitchSize}}px">{{pitch}}</text>
 <rect x="{{bx}}" y="{{trackY}}" width="{{bw}}" height="{{barH}}" fill="{{well}}"/>
 <g class="bar" style="animation-delay:{{barDelay}}s">
-<rect x="{{bx}}" y="{{trackY}}" width="{{w}}" height="{{barH}}" fill="{{color}}" filter="url(#g)" opacity=".55"/>
-<rect x="{{bx}}" y="{{trackY}}" width="{{w}}" height="{{barH}}" fill="url(#bar)"/>
+<rect x="{{bx}}" y="{{trackY}}" width="{{w}}" height="{{barH}}" fill="{{color}}"/>
 </g>
 <text class="lbl" x="{{lblX}}" y="{{lblY}}" font-weight="700" fill="{{color}}" style="font-size:13px;animation-delay:{{lblDelay}}s">+{{gain}}</text>
 <g fill="{{color}}" opacity=".75">{{hist}}</g>

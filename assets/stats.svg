@@ -16,59 +16,49 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 </style>
 <defs>
 <pattern id="grid" x="0" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#5eead4" stroke-opacity=".06"/></pattern>
-<filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="6"/></filter>
-<filter id="g" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
-<filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="4"/></filter>
 </defs>
-<path d="M16 -40V480M864 -40V480" fill="none" stroke="#5eead4" stroke-width="3" opacity=".55" filter="url(#glow)"/>
 <rect x="16" y="0" width="848" height="440" fill="#06121b"/>
 <rect x="16" y="0" width="848" height="440" fill="url(#grid)"/>
-<text x="52" y="44" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".8" style="font-size:20px">~/</text>
 <text x="52" y="44" font-weight="700" style="font-size:20px"><tspan class="cy">~/</tspan><tspan class="wh">stats</tspan></text>
 <text x="828" y="44" text-anchor="end" letter-spacing="2" fill="#647884" style="font-size:12px">// 03</text>
-<line x1="52" y1="58" x2="828" y2="58" stroke="#5eead4" stroke-opacity=".4"/>
+<line x1="52" y1="58" x2="828" y2="58" stroke="#5eead4" stroke-opacity=".35"/>
 <line x1="52" y1="58" x2="172" y2="58" stroke="#5eead4" stroke-width="2"/>
-<line x1="52" y1="58" x2="172" y2="58" stroke="#5eead4" stroke-width="3" filter="url(#gl)"/>
 <g class="ln" style="animation-delay:0.15s"><text x="52" y="96" class="dim"><tspan class="gr">$</tspan> gh api graphql -F login=kairosci -f query=@profile.graphql <tspan class="fainter"></tspan></text></g>
 <g class="ln" style="animation-delay:0.25s">
-<rect x="52.0" y="118" width="182.0" height="92" fill="#5eead4" fill-opacity=".035" stroke="#5eead4" stroke-opacity=".35"/>
+<rect x="52.0" y="118" width="182.0" height="92" fill="#0b1c26" stroke="#3d4c56" stroke-opacity=".6"/>
 <path d="M52.0 130V118H64.0" fill="none" stroke="#5eead4" stroke-width="2"/>
 <text x="68.0" y="140" letter-spacing="1.5" class="dim" style="font-size:10.5px">UPSTREAM STARS</text>
-<text x="68.0" y="168" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".55" style="font-size:30px">276,755</text>
 <text x="68.0" y="168" font-weight="700" fill="#5eead4" style="font-size:30px">276,755</text>
 <text x="68.0" y="198" fill="#647884" style="font-size:12px">across 7 repos</text>
 </g>
 <g class="ln" style="animation-delay:0.33s">
-<rect x="250.0" y="118" width="182.0" height="92" fill="#5eead4" fill-opacity=".035" stroke="#5eead4" stroke-opacity=".35"/>
+<rect x="250.0" y="118" width="182.0" height="92" fill="#0b1c26" stroke="#3d4c56" stroke-opacity=".6"/>
 <path d="M250.0 130V118H262.0" fill="none" stroke="#5eead4" stroke-width="2"/>
 <text x="266.0" y="140" letter-spacing="1.5" class="dim" style="font-size:10.5px">CONTRIBUTIONS 2026</text>
-<text x="266.0" y="168" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".55" style="font-size:30px">2,706</text>
 <text x="266.0" y="168" font-weight="700" fill="#5eead4" style="font-size:30px">2,706</text>
 <text x="266.0" y="198" fill="#647884" style="font-size:12px">5,166 all time</text>
 </g>
 <g class="ln" style="animation-delay:0.41s">
-<rect x="448.0" y="118" width="182.0" height="92" fill="#5eead4" fill-opacity=".035" stroke="#5eead4" stroke-opacity=".35"/>
+<rect x="448.0" y="118" width="182.0" height="92" fill="#0b1c26" stroke="#3d4c56" stroke-opacity=".6"/>
 <path d="M448.0 130V118H460.0" fill="none" stroke="#5eead4" stroke-width="2"/>
 <text x="464.0" y="140" letter-spacing="1.5" class="dim" style="font-size:10.5px">PULL REQUESTS</text>
-<text x="464.0" y="168" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".55" style="font-size:30px">495</text>
 <text x="464.0" y="168" font-weight="700" fill="#5eead4" style="font-size:30px">495</text>
 <text x="464.0" y="198" fill="#647884" style="font-size:12px">286 merged</text>
 </g>
 <g class="ln" style="animation-delay:0.49s">
-<rect x="646.0" y="118" width="182.0" height="92" fill="#5eead4" fill-opacity=".035" stroke="#5eead4" stroke-opacity=".35"/>
+<rect x="646.0" y="118" width="182.0" height="92" fill="#0b1c26" stroke="#3d4c56" stroke-opacity=".6"/>
 <path d="M646.0 130V118H658.0" fill="none" stroke="#5eead4" stroke-width="2"/>
 <text x="662.0" y="140" letter-spacing="1.5" class="dim" style="font-size:10.5px">CURRENT STREAK</text>
-<text x="662.0" y="168" font-weight="700" fill="#5eead4" filter="url(#g)" opacity=".55" style="font-size:30px">15d</text>
 <text x="662.0" y="168" font-weight="700" fill="#5eead4" style="font-size:30px">15d</text>
 <text x="662.0" y="198" fill="#647884" style="font-size:12px">longest: 88 days</text>
 </g>
-<g class="ln" style="animation-delay:0.60s"><rect x="52" y="226" width="320" height="150" fill="#5eead4" fill-opacity=".035" stroke="#5eead4" stroke-opacity=".35"/>
+<g class="ln" style="animation-delay:0.60s"><rect x="52" y="226" width="320" height="150" fill="#0b1c26" stroke="#3d4c56" stroke-opacity=".6"/>
 <path d="M52 238V226H64" fill="none" stroke="#5eead4" stroke-width="2"/><text x="68" y="264" xml:space="preserve"><tspan class="cy">public repos</tspan><tspan class="dim">....</tspan> <tspan class="fg">5</tspan></text>
 <text x="68" y="292" xml:space="preserve"><tspan class="cy">member since</tspan><tspan class="dim">....</tspan> <tspan class="fg">Jan 2023 (3y)</tspan></text>
 <text x="68" y="320" xml:space="preserve"><tspan class="cy">open issues</tspan><tspan class="dim">.....</tspan> <tspan class="fg">7</tspan></text>
 <text x="68" y="348" xml:space="preserve"><tspan class="cy">open PRs</tspan><tspan class="dim">........</tspan> <tspan class="fg">69</tspan></text></g>
-<g class="ln" style="animation-delay:0.70s"><rect x="388" y="226" width="440" height="150" fill="#5eead4" fill-opacity=".035" stroke="#5eead4" stroke-opacity=".35"/>
-<path d="M388 238V226H400" fill="none" stroke="#5eead4" stroke-width="2"/><text x="404" y="250" letter-spacing="1" class="dim" style="font-size:10.5px">TOP LANGUAGES</text><rect x="404" y="268" width="408" height="8" fill="#0b1c26"/><rect x="404.0" y="268" width="177.8" height="8" fill="#5eead4"/><rect x="404.0" y="268" width="177.8" height="8" fill="#5eead4" filter="url(#g)" opacity=".6"/><rect x="583.8" y="268" width="157.6" height="8" fill="#fb7185"/><rect x="583.8" y="268" width="157.6" height="8" fill="#fb7185" filter="url(#g)" opacity=".6"/><rect x="743.3" y="268" width="50.5" height="8" fill="#a3e635"/><rect x="743.3" y="268" width="50.5" height="8" fill="#a3e635" filter="url(#g)" opacity=".6"/><rect x="795.8" y="268" width="14.2" height="8" fill="#7dd3fc"/><rect x="795.8" y="268" width="14.2" height="8" fill="#7dd3fc" filter="url(#g)" opacity=".6"/><rect x="404.0" y="295" width="9" height="9" fill="#5eead4"/><text x="422.0" y="304" class="fg" style="font-size:13px">Rust</text><text x="584.0" y="304" text-anchor="end" class="dim" style="font-size:13px">44.1%</text><rect x="608.0" y="295" width="9" height="9" fill="#fb7185"/><text x="626.0" y="304" class="fg" style="font-size:13px">Kotlin</text><text x="788.0" y="304" text-anchor="end" class="dim" style="font-size:13px">39.1%</text><rect x="404.0" y="321" width="9" height="9" fill="#a3e635"/><text x="422.0" y="330" class="fg" style="font-size:13px">Go</text><text x="584.0" y="330" text-anchor="end" class="dim" style="font-size:13px">12.9%</text><rect x="608.0" y="321" width="9" height="9" fill="#7dd3fc"/><text x="626.0" y="330" class="fg" style="font-size:13px">HTML</text><text x="788.0" y="330" text-anchor="end" class="dim" style="font-size:13px">4.0%</text></g>
+<g class="ln" style="animation-delay:0.70s"><rect x="388" y="226" width="440" height="150" fill="#0b1c26" stroke="#3d4c56" stroke-opacity=".6"/>
+<path d="M388 238V226H400" fill="none" stroke="#5eead4" stroke-width="2"/><text x="404" y="250" letter-spacing="1" class="dim" style="font-size:10.5px">TOP LANGUAGES</text><rect x="404" y="268" width="408" height="8" fill="#0b1c26"/><rect x="404.0" y="268" width="177.8" height="8" fill="#5eead4"/><rect x="583.8" y="268" width="157.6" height="8" fill="#fb7185"/><rect x="743.3" y="268" width="50.5" height="8" fill="#a3e635"/><rect x="795.8" y="268" width="14.2" height="8" fill="#7dd3fc"/><rect x="404.0" y="295" width="9" height="9" fill="#5eead4"/><text x="422.0" y="304" class="fg" style="font-size:13px">Rust</text><text x="584.0" y="304" text-anchor="end" class="dim" style="font-size:13px">44.1%</text><rect x="608.0" y="295" width="9" height="9" fill="#fb7185"/><text x="626.0" y="304" class="fg" style="font-size:13px">Kotlin</text><text x="788.0" y="304" text-anchor="end" class="dim" style="font-size:13px">39.1%</text><rect x="404.0" y="321" width="9" height="9" fill="#a3e635"/><text x="422.0" y="330" class="fg" style="font-size:13px">Go</text><text x="584.0" y="330" text-anchor="end" class="dim" style="font-size:13px">12.9%</text><rect x="608.0" y="321" width="9" height="9" fill="#7dd3fc"/><text x="626.0" y="330" class="fg" style="font-size:13px">HTML</text><text x="788.0" y="330" text-anchor="end" class="dim" style="font-size:13px">4.0%</text></g>
 <g class="ln" style="animation-delay:1.00s"><text x="828" y="406" text-anchor="end" class="fainter" style="font-size:11px">// last sync 2026-10-15</text></g>
 <path d="M16 0V440M864 0V440" fill="none" stroke="#5eead4" stroke-width="1.2"/>
 <g fill="none" stroke="#5eead4" stroke-width="2"></g>

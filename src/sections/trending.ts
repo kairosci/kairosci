@@ -85,8 +85,8 @@ export class TrendingSection {
     throw new Error("unreachable");
   }
 
-  private createBarGradientDefinitions(c: string): string {
-    return this.ctx.engine.render("trending/def-bar", { color: c });
+  private createBarGradientDefinitions(_c: string): string {
+    return "";
   }
 
   private renderTrendChip(r: z.infer<typeof trendSchema>, cx: number, y: number, ty: number, size: number): string {
