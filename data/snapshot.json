@@ -19,7 +19,7 @@
 			"description": "YouTube Music client for Android",
 			"tagline": "79 commits · 109 PRs",
 			"install": "gh repo clone MetrolistGroup/Metrolist",
-			"stars": "13.5k",
+			"stars": "13.6k",
 			"href": "https://github.com/MetrolistGroup/Metrolist",
 			"logo": ""
 		},
@@ -81,23 +81,23 @@
 	],
 	"posts": [],
 	"upstreamRepos": 7,
-	"stars": 276891,
+	"stars": 276884,
 	"issues": {
 		"count": 7,
 		"query": "author:kairosci is:public archived:false is:open is:issue"
 	},
 	"prs": {
-		"count": 71,
+		"count": 70,
 		"query": "author:kairosci is:public archived:false is:open is:pr draft:false NOT \"chore: release\" in:title"
 	},
 	"github": {
 		"created_at": "2026-01-04T18:30:55Z",
 		"public_repos": 5,
-		"prs": 527,
-		"prs_merged": 311,
+		"prs": 528,
+		"prs_merged": 312,
 		"year": 2026,
-		"contributions_year": 2768,
-		"contributions_all": 5228,
+		"contributions_year": 2770,
+		"contributions_all": 5230,
 		"streak_current": 16,
 		"streak_longest": 88,
 		"languages": {

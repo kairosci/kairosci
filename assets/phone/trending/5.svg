@@ -29,9 +29,9 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="28" y="32" class="dim" style="font-size:11px">8 commits · 0 PRs</text>
 <rect x="180" y="7" width="170.0" height="11" fill="#0b1c26"/>
 <g class="bar" style="animation-delay:0.71s">
-<rect x="180" y="7" width="13.3" height="11" fill="#fbbf24"/>
+<rect x="180" y="7" width="13.7" height="11" fill="#fbbf24"/>
 </g>
-<text class="lbl" x="199.3" y="17.5" font-weight="700" fill="#fbbf24" style="font-size:13px;animation-delay:1.16s">+8</text>
+<text class="lbl" x="199.7" y="17.5" font-weight="700" fill="#fbbf24" style="font-size:13px;animation-delay:1.16s">+8</text>
 <g fill="#fbbf24" opacity=".75"><rect x="408" y="22.0" width="1.5" height="11.0"/></g>
 
 </g>
