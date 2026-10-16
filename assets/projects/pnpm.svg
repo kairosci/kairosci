@@ -27,7 +27,7 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="70" y="40.010000000000005" font-weight="700" class="cy" style="font-size:17px">pnpm</text>
 <path d="M116.8 38.010000000000005l7-7M118.8 31.010000000000005h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>
 <rect x="70" y="58.010000000000005" width="215.6" height="16" fill="none" stroke="#fb7185" stroke-opacity=".8"/>
-<text x="79" y="70.01" letter-spacing="1" fill="#fb7185" style="font-size:11px">Rust · 81 commits · 88 PRs</text>
+<text x="79" y="70.01" letter-spacing="1" fill="#fb7185" style="font-size:11px">Rust · 81 commits · 89 PRs</text>
 <path transform="translate(357.2 59.010000000000005) scale(.5)" d="M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7L10 15.2 3.8 18.9l1.6-7L0 7.2l7.1-.6z" fill="#fbbf24"/>
 <text x="411.2" y="70.01" text-anchor="end" class="dim" style="font-size:12px">36.8k</text>
 <text x="70" y="100.77000000000001" class="fg" style="font-size:12px">Fast, disk space efficient package manager</text>
