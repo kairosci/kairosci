@@ -29,10 +29,10 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <text x="28" y="32" class="dim" style="font-size:11px">8 commits · 0 PRs</text>
 <rect x="180" y="7" width="170.0" height="11" fill="#0b1c26"/>
 <g class="bar" style="animation-delay:0.71s">
-<rect x="180" y="7" width="14.7" height="11" fill="#fbbf24"/>
+<rect x="180" y="7" width="14.6" height="11" fill="#fbbf24"/>
 </g>
-<text class="lbl" x="200.7" y="17.5" font-weight="700" fill="#fbbf24" style="font-size:13px;animation-delay:1.16s">+9</text>
-<g fill="#fbbf24" opacity=".75"><rect x="408" y="22.0" width="1.5" height="11.0"/><rect x="410" y="31.5" width="1.5" height="1.5"/></g>
+<text class="lbl" x="200.6" y="17.5" font-weight="700" fill="#fbbf24" style="font-size:13px;animation-delay:1.16s">+9</text>
+<g fill="#fbbf24" opacity=".75"><rect x="406" y="22.0" width="1.5" height="11.0"/><rect x="408" y="31.5" width="1.5" height="1.5"/></g>
 
 </g>
 <path d="M10 0V40M430 0V40" fill="none" stroke="#5eead4" stroke-width="1.2"/>
