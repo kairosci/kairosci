@@ -20,9 +20,8 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="16" y="0" width="424" height="200" fill="#06121b"/>
 <rect x="16" y="0" width="424" height="200" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.54s">
-<path d="M52 9.6H411.2L429.2 27.6V190.4H70L52 172.4Z" fill="#5eead4" fill-opacity=".04"/>
-<path d="M52 9.6H411.2L429.2 27.6V190.4H70L52 172.4Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
-<path d="M411.2 9.6L429.2 27.6" stroke="#5eead4" stroke-width="2"/>
+<path d="M52 9.6H429.2V190.4H52Z" fill="none" stroke="#3d4c56" stroke-opacity=".8"/>
+<path d="M52 21.6V9.6H64" stroke="#5eead4" stroke-width="2"/>
 <g transform="translate(70 27.6)"></g>
 <text x="70" y="40.010000000000005" font-weight="700" class="cy" style="font-size:17px">kubernetes</text>
 <path d="M178 38.010000000000005l7-7M180 31.010000000000005h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>

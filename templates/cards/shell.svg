@@ -1,6 +1,5 @@
 <g class="ln" style="animation-delay:{{delay}}s">
-<path d="{{box}}" fill="{{accent}}" fill-opacity=".04"/>
-<path d="{{box}}" fill="none" stroke="{{accent}}" stroke-opacity=".45"/>
+<path d="{{box}}" fill="none" stroke="{{fainter}}" stroke-opacity=".8"/>
 <path d="{{cutLine}}" stroke="{{accent}}" stroke-width="2"/>
 {{content}}
 </g>

@@ -20,9 +20,8 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="0" y="0" width="424" height="200" fill="#06121b"/>
 <rect x="0" y="0" width="424" height="200" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.6599999999999999s">
-<path d="M28.80000000000001 9.6H388V172.4L370 190.4H10.800000000000011V27.6Z" fill="#5eead4" fill-opacity=".04"/>
-<path d="M28.80000000000001 9.6H388V172.4L370 190.4H10.800000000000011V27.6Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
-<path d="M10.800000000000011 27.6L28.80000000000001 9.6" stroke="#5eead4" stroke-width="2"/>
+<path d="M10.800000000000011 9.6H388V190.4H10.800000000000011Z" fill="none" stroke="#3d4c56" stroke-opacity=".8"/>
+<path d="M10.800000000000011 21.6V9.6H22.80000000000001" stroke="#5eead4" stroke-width="2"/>
 <g transform="translate(28.80000000000001 27.6)"></g>
 <text x="28.80000000000001" y="40.010000000000005" font-weight="700" class="cy" style="font-size:17px">RustPython</text>
 <path d="M136.8 38.010000000000005l7-7M138.8 31.010000000000005h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>

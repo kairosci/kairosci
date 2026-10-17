@@ -20,9 +20,8 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="10" y="0" width="210" height="80" fill="#06121b"/>
 <rect x="10" y="0" width="210" height="80" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.25s">
-<path d="M28 6H205.6L214.6 15V74H37L28 65Z" fill="#5eead4" fill-opacity=".04"/>
-<path d="M28 6H205.6L214.6 15V74H37L28 65Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
-<path d="M205.6 6L214.6 15" stroke="#5eead4" stroke-width="2"/>
+<path d="M28 6H214.6V74H28Z" fill="none" stroke="#3d4c56" stroke-opacity=".8"/>
+<path d="M28 18V6H40" stroke="#5eead4" stroke-width="2"/>
 <g transform="translate(112.3 15)"><rect x="0" y="0" width="18" height="18" rx="3" fill="#5eead4"/><text x="9" y="13" text-anchor="middle" font-weight="700" fill="#06121b" style="font-size:10px">&gt;_</text></g>
 <text x="121.3" y="61.4" text-anchor="middle" font-weight="700" class="cy" style="font-size:12px">Website</text>
 </g>

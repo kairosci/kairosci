@@ -20,9 +20,8 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="16" y="0" width="424" height="80" fill="#06121b"/>
 <rect x="16" y="0" width="424" height="80" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.25s">
-<path d="M52 9.6H414L429.2 24.799999999999997V70.39999999999999H67.2L52 55.19999999999999Z" fill="#5eead4" fill-opacity=".04"/>
-<path d="M52 9.6H414L429.2 24.799999999999997V70.39999999999999H67.2L52 55.19999999999999Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
-<path d="M414 9.6L429.2 24.799999999999997" stroke="#5eead4" stroke-width="2"/>
+<path d="M52 9.6H429.2V70.39999999999999H52Z" fill="none" stroke="#3d4c56" stroke-opacity=".8"/>
+<path d="M52 21.6V9.6H64" stroke="#5eead4" stroke-width="2"/>
 <g transform="translate(70 27.6)"><rect x="0" y="0" width="18" height="18" rx="3" fill="#5eead4"/><text x="9" y="13" text-anchor="middle" font-weight="700" fill="#06121b" style="font-size:10px">&gt;_</text></g>
 <text x="97" y="37.09" text-anchor="start" font-weight="700" class="cy" style="font-size:13px">Website</text>
 <text x="97" y="49.39999999999999" class="dim" style="font-size:10px">web.kairosci.dev</text>

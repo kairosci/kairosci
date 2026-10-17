@@ -20,9 +20,8 @@ text{font-family:'JBM',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font
 <rect x="0" y="0" width="210" height="200" fill="#06121b"/>
 <rect x="0" y="0" width="210" height="200" fill="url(#grid)"/>
 <g class="ln" style="animation-delay:0.8999999999999999s">
-<path d="M14.400000000000006 6H192V185L183 194H5.400000000000006V15Z" fill="#5eead4" fill-opacity=".04"/>
-<path d="M14.400000000000006 6H192V185L183 194H5.400000000000006V15Z" fill="none" stroke="#5eead4" stroke-opacity=".45"/>
-<path d="M5.400000000000006 15L14.400000000000006 6" stroke="#5eead4" stroke-width="2"/>
+<path d="M5.400000000000006 6H192V194H5.400000000000006Z" fill="none" stroke="#3d4c56" stroke-opacity=".8"/>
+<path d="M5.400000000000006 18V6H17.400000000000006" stroke="#5eead4" stroke-width="2"/>
 <g transform="translate(14.400000000000006 15)"></g>
 <text x="14.400000000000006" y="25.95" font-weight="700" class="cy" style="font-size:15px">etcd</text>
 <path d="M56.400000000000006 23.95l7-7M58.400000000000006 16.95h5v5" fill="none" stroke="#5eead4" stroke-width="1.5"/>

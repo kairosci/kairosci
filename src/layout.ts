@@ -85,11 +85,7 @@ export function projectCardGeometry(g: z.infer<typeof geoSchema>, index: number,
   const y = g.margin * fontMetrics.advance;
   const padding = Math.min(g.contentLeft - g.frameLeft, width / 8) / 2;
   const h = height - y * 2;
-  const cut = Math.min(padding, h / 4);
-  const right = index % 2 === 1;
-  const box = right
-    ? `M${x + cut} ${y}H${x + width}V${y + h - cut}L${x + width - cut} ${y + h}H${x}V${y + cut}Z`
-    : `M${x} ${y}H${x + width - cut}L${x + width} ${y + cut}V${y + h}H${x + cut}L${x} ${y + h - cut}Z`;
-  const cutLine = right ? `M${x} ${y + cut}L${x + cut} ${y}` : `M${x + width - cut} ${y}L${x + width} ${y + cut}`;
+  const box = `M${x} ${y}H${x + width}V${y + h}H${x}Z`;
+  const cutLine = `M${x} ${y + 12}V${y}H${x + 12}`;
   return { x, y, width, height: h, padding, box, cutLine, left: x + padding, right: x + width - padding, top: y + padding, bottom: y + h - padding };
 }
