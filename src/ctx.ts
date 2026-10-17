@@ -20,7 +20,11 @@ export class RenderContext {
   ) {
     this.engine = engine;
     this.theme = theme;
-    this.snapshot = snapshot;
+    const excludedRepos = new Set(profile.excludedRepos.map((repo) => repo.toLowerCase()));
+    this.snapshot = {
+      ...snapshot,
+      projects: snapshot.projects.filter((project) => !excludedRepos.has(project.repo.toLowerCase())),
+    };
     this.profile = profile;
     this.slices = new Slices(engine, theme);
     this.sun = new SunCalc(profile.lat, profile.lon, profile.tz);

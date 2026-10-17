@@ -38,6 +38,7 @@ export const profileSchema = z.object({
   extraLogins: z.array(z.string().min(1)),
   extraEmails: z.array(z.string().min(1)),
   extraRepos: z.array(z.string().trim().regex(/^[a-z0-9_.-]+(?:\/[a-z0-9_.-]+)?$/i)).default([]),
+  excludedRepos: z.array(z.string().trim().regex(/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i)).default([]),
   tuning: tuningSchema,
   links: z.array(linkSchema).min(1),
 });
